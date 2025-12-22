@@ -47,6 +47,7 @@
 | 2024-12-22 | Zod para validação | Schemas runtime com tipos TypeScript |
 | 2024-12-22 | date-fns-tz | Timezone handling robusto |
 | 2024-12-22 | Team "raccoons" para TSAs | Roteamento padrão no Linear |
+| 2024-12-22 | Output em inglês natural | Tom intermediário, direto, sem jargão técnico |
 
 ## Configuração de Routing
 

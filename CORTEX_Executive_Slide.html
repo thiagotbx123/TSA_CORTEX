@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX - Executive Overview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 30px;
+            color: white;
+        }
+        .slide {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .header p {
+            font-size: 20px;
+            color: #a0aec0;
+        }
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .source-box {
+            background: linear-gradient(145deg, #2d3748, #1a202c);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            border: 2px solid #4a5568;
+            min-width: 130px;
+        }
+        .source-box .icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .source-box h3 {
+            font-size: 16px;
+            color: #e2e8f0;
+            margin-bottom: 5px;
+        }
+        .source-box p {
+            font-size: 12px;
+            color: #718096;
+        }
+        .arrow {
+            font-size: 40px;
+            color: #00d4ff;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .cortex-center {
+            background: linear-gradient(145deg, #7c3aed, #5b21b6);
+            border-radius: 20px;
+            padding: 25px 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
+            min-width: 200px;
+        }
+        .cortex-center .icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        .cortex-center h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .cortex-center p {
+            font-size: 14px;
+            color: #e9d5ff;
+        }
+        .process-steps {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .step {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 15px 25px;
+            text-align: center;
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00d4ff;
+            color: #1a1a2e;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 24px;
+        }
+        .step h4 {
+            font-size: 16px;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+        .step p {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        .output-section {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .output-box {
+            background: linear-gradient(145deg, #065f46, #047857);
+            border-radius: 15px;
+            padding: 20px 30px;
+            text-align: center;
+            min-width: 180px;
+        }
+        .output-box .icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .output-box h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .output-box p {
+            font-size: 12px;
+            color: #a7f3d0;
+        }
+        .benefits {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .benefit {
+            text-align: center;
+        }
+        .benefit .icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .benefit p {
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #4a5568;
+        }
+        .footer p {
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <!-- Header -->
+        <div class="header">
+            <h1>CORTEX</h1>
+            <p>Weekly Worklog Automation System</p>
+        </div>
+
+        <!-- Main Flow -->
+        <div class="flow-container">
+            <!-- Data Sources -->
+            <div class="source-box">
+                <div class="icon">💬</div>
+                <h3>Slack</h3>
+                <p>Messages & Threads</p>
+            </div>
+            <div class="source-box">
+                <div class="icon">📋</div>
+                <h3>Linear</h3>
+                <p>Issues & Tasks</p>
+            </div>
+            <div class="source-box">
+                <div class="icon">📁</div>
+                <h3>Drive</h3>
+                <p>Files & Docs</p>
+            </div>
+            <div class="source-box">
+                <div class="icon">💻</div>
+                <h3>Local</h3>
+                <p>Local Files</p>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- CORTEX Center -->
+            <div class="cortex-center">
+                <div class="icon">🧠</div>
+                <h2>CORTEX</h2>
+                <p>Smart Processor</p>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- Outputs -->
+            <div class="output-box">
+                <div class="icon">📄</div>
+                <h3>Worklog</h3>
+                <p>Weekly Report</p>
+            </div>
+            <div class="output-box">
+                <div class="icon">🎫</div>
+                <h3>Linear</h3>
+                <p>Auto Tickets</p>
+            </div>
+        </div>
+
+        <!-- Process Steps -->
+        <div class="process-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>COLLECT</h4>
+                <p>Get data from<br>all sources</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>NORMALIZE</h4>
+                <p>Clean & format<br>all events</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>GROUP</h4>
+                <p>Organize by<br>topics</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h4>GENERATE</h4>
+                <p>Create worklog<br>with links</p>
+            </div>
+            <div class="step">
+                <div class="step-number">5</div>
+                <h4>POST</h4>
+                <p>Send to<br>Linear</p>
+            </div>
+        </div>
+
+        <!-- Key Benefits -->
+        <div class="benefits">
+            <div class="benefit">
+                <div class="icon">⚡</div>
+                <p><strong>Automatic</strong><br>No manual work</p>
+            </div>
+            <div class="benefit">
+                <div class="icon">🔗</div>
+                <p><strong>Traceable</strong><br>Links to sources</p>
+            </div>
+            <div class="benefit">
+                <div class="icon">🔒</div>
+                <p><strong>Private</strong><br>Removes personal data</p>
+            </div>
+            <div class="benefit">
+                <div class="icon">📊</div>
+                <p><strong>Organized</strong><br>Groups by topic</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>How it works:</strong> CORTEX reads your Slack, Linear, Drive → Groups events by topic → Creates weekly worklog → Posts to Linear automatically</p>
+        </div>
+    </div>
+</body>
+</html>

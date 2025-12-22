@@ -1,0 +1,56 @@
+# === TSA_CORTEX Pre-commit Hooks ===
+# Instalar: npm install -g pre-commit && pre-commit install
+# Ou usar husky: npx husky install
+
+repos:
+  # Hooks padrão de qualidade
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Remove trailing whitespace
+      - id: end-of-file-fixer
+        name: Fix end of files
+      - id: check-yaml
+        name: Validate YAML syntax
+      - id: check-json
+        name: Validate JSON syntax
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+        name: Block large files (>1MB)
+      - id: detect-private-key
+        name: Detect private keys
+      - id: check-merge-conflict
+        name: Check merge conflicts
+
+  # TypeScript/JavaScript: ESLint
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        entry: npx eslint --fix
+        language: system
+        files: \.(ts|tsx|js|jsx)$
+        pass_filenames: true
+
+      - id: typescript
+        name: TypeScript Check
+        entry: npx tsc --noEmit
+        language: system
+        files: \.tsx?$
+        pass_filenames: false
+
+      - id: prettier
+        name: Prettier
+        entry: npx prettier --write
+        language: system
+        files: \.(ts|tsx|js|jsx|json|md|yaml|yml)$
+        pass_filenames: true
+
+# Configuração
+default_language_version:
+  node: system
+
+# Executar em todos os arquivos no commit
+files: ''
+exclude: '^(node_modules|dist|coverage)/'

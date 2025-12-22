@@ -1,0 +1,62 @@
+{
+  "name": "tsa-cortex",
+  "version": "1.0.0",
+  "description": "Weekly Worklog Automation - Collect evidence from Slack, Linear, Drive, Local files and generate traceable worklogs",
+  "main": "dist/index.js",
+  "bin": {
+    "tsa-cortex": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli/index.js",
+    "dev": "ts-node src/cli/index.ts",
+    "collect": "ts-node src/cli/index.ts collect",
+    "generate": "ts-node src/cli/index.ts generate",
+    "post": "ts-node src/cli/index.ts post",
+    "dry-run": "ts-node src/cli/index.ts generate --dry-run",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "worklog",
+    "automation",
+    "slack",
+    "linear",
+    "google-drive",
+    "productivity"
+  ],
+  "author": "TSA Team",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/web-api": "^7.0.0",
+    "@linear/sdk": "^17.0.0",
+    "googleapis": "^130.0.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "date-fns": "^3.0.0",
+    "date-fns-tz": "^2.0.0",
+    "crypto-js": "^4.2.0",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1",
+    "inquirer": "^9.2.0",
+    "zod": "^3.22.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/crypto-js": "^4.2.0",
+    "@types/uuid": "^9.0.7",
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

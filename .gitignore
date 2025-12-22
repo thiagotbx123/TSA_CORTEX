@@ -1,0 +1,99 @@
+# === TSA_CORTEX .gitignore (ESPINHA_DORSAL) ===
+
+# ============================================
+# Credenciais e Segredos
+# ============================================
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+secrets.json
+*_secret*
+*_token*
+
+# ============================================
+# Dados Sensíveis
+# ============================================
+output/
+raw_exports/
+data/exports/
+data/pii/
+evidence/prints/
+evidence/screenshots/
+
+# ============================================
+# Node.js / TypeScript
+# ============================================
+node_modules/
+dist/
+build/
+*.js.map
+*.d.ts.map
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# ============================================
+# Python (se aplicável)
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+env/
+.pytest_cache/
+*.egg-info/
+
+# ============================================
+# IDEs
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+
+# ============================================
+# Temporários
+# ============================================
+*.tmp
+*.temp
+temp/
+tmp/
+.cache/
+*.cache
+
+# ============================================
+# Test Coverage
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+
+# ============================================
+# Jupyter (se aplicável)
+# ============================================
+.ipynb_checkpoints/

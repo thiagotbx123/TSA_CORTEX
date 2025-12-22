@@ -1,0 +1,56 @@
+{
+  "default_timezone": "America/Sao_Paulo",
+  "default_range_days": 7,
+  "role_routing": {
+    "tsa": {
+      "linear_team": "raccoons",
+      "labels": ["worklog", "weekly"]
+    },
+    "default": {
+      "linear_team": "ops",
+      "labels": ["worklog", "weekly"]
+    }
+  },
+  "collectors": {
+    "slack": {
+      "enabled": true,
+      "include_threads": true,
+      "include_mentions": true,
+      "include_file_shares": true
+    },
+    "linear": {
+      "enabled": true,
+      "include_comments": true,
+      "include_status_changes": true,
+      "include_mentions": true
+    },
+    "drive": {
+      "enabled": true,
+      "allowlist_folders": [],
+      "denylist_folders": ["Trash"],
+      "denylist_extensions": [".tmp", ".log"],
+      "include_referenced_files": true
+    },
+    "local": {
+      "enabled": true,
+      "scan_paths": ["~/Downloads", "~/Documents"],
+      "denylist_patterns": ["node_modules/**", ".git/**", "*.log", "*.tmp"],
+      "max_file_size_mb": 50
+    },
+    "claude": {
+      "enabled": false,
+      "export_path": null
+    }
+  },
+  "privacy": {
+    "redact_emails": true,
+    "redact_phone_numbers": true,
+    "redact_patterns": [],
+    "encrypt_raw_exports": true
+  },
+  "retention": {
+    "raw_exports_days": 14,
+    "normalized_exports_days": 90,
+    "worklog_outputs_days": 365
+  }
+}

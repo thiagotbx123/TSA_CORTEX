@@ -4,11 +4,17 @@
   "role_routing": {
     "tsa": {
       "linear_team": "raccoons",
-      "labels": ["worklog", "weekly"]
+      "labels": [
+        "worklog",
+        "weekly"
+      ]
     },
     "default": {
       "linear_team": "ops",
-      "labels": ["worklog", "weekly"]
+      "labels": [
+        "worklog",
+        "weekly"
+      ]
     }
   },
   "collectors": {
@@ -16,7 +22,15 @@
       "enabled": true,
       "include_threads": true,
       "include_mentions": true,
-      "include_file_shares": true
+      "include_file_shares": true,
+      "search_keywords": [
+        "intuit",
+        "quickbooks",
+        "WFS",
+        "GEM",
+        "testbox"
+      ],
+      "search_from_me": true
     },
     "linear": {
       "enabled": true,
@@ -27,14 +41,25 @@
     "drive": {
       "enabled": true,
       "allowlist_folders": [],
-      "denylist_folders": ["Trash"],
-      "denylist_extensions": [".tmp", ".log"],
+      "denylist_folders": [],
+      "denylist_extensions": [
+        ".tmp",
+        ".log"
+      ],
       "include_referenced_files": true
     },
     "local": {
       "enabled": true,
-      "scan_paths": ["~/Downloads", "~/Documents"],
-      "denylist_patterns": ["node_modules/**", ".git/**", "*.log", "*.tmp"],
+      "scan_paths": [
+        "~/Downloads",
+        "~/Documents"
+      ],
+      "denylist_patterns": [
+        "node_modules/**",
+        ".git/**",
+        "*.log",
+        "*.tmp"
+      ],
       "max_file_size_mb": 50
     },
     "claude": {

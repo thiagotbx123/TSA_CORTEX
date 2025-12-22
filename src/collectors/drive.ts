@@ -126,8 +126,8 @@ export class DriveCollector extends BaseCollector {
                 displayName: o.displayName!,
                 emailAddress: o.emailAddress!,
               })),
-              parents: file.parents,
-              size: file.size,
+              parents: file.parents ?? undefined,
+              size: file.size ?? undefined,
             };
 
             // Check allowlist if specified
@@ -177,8 +177,8 @@ export class DriveCollector extends BaseCollector {
           displayName: o.displayName!,
           emailAddress: o.emailAddress!,
         })),
-        parents: file.parents,
-        size: file.size,
+        parents: file.parents ?? undefined,
+        size: file.size ?? undefined,
       };
     } catch (error: any) {
       this.logWarn(`Failed to get file ${fileId}: ${error.message}`);
@@ -229,7 +229,7 @@ export class DriveCollector extends BaseCollector {
       ],
       pii_redaction_applied: false,
       confidence: isOwner ? 'high' : 'medium',
-      raw_data: file,
+      raw_data: file as unknown as Record<string, unknown>,
     };
   }
 

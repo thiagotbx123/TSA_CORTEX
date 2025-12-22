@@ -3,7 +3,7 @@
  */
 
 import { format, subDays, parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
-import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { utcToZonedTime, zonedTimeToUtc, formatInTimeZone } from 'date-fns-tz';
 
 export interface DateRange {
   start: Date;
@@ -17,8 +17,8 @@ export function getDefaultDateRange(timezone: string, days: number = 7): DateRan
   const start = subDays(now, days);
 
   return {
-    start: startOfDay(toZonedTime(start, timezone)),
-    end: endOfDay(toZonedTime(end, timezone)),
+    start: startOfDay(utcToZonedTime(start, timezone)),
+    end: endOfDay(utcToZonedTime(end, timezone)),
     timezone,
   };
 }
@@ -36,14 +36,14 @@ export function parseDateRange(
 
   if (endStr) {
     end = parseISO(endStr);
-    end = endOfDay(toZonedTime(end, timezone));
+    end = endOfDay(utcToZonedTime(end, timezone));
   } else {
-    end = endOfDay(toZonedTime(now, timezone));
+    end = endOfDay(utcToZonedTime(now, timezone));
   }
 
   if (startStr) {
     start = parseISO(startStr);
-    start = startOfDay(toZonedTime(start, timezone));
+    start = startOfDay(utcToZonedTime(start, timezone));
   } else {
     start = startOfDay(subDays(end, defaultDays));
   }

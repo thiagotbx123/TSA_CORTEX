@@ -215,7 +215,7 @@ export class LocalCollector extends BaseCollector {
       ],
       pii_redaction_applied: false,
       confidence: 'high',
-      raw_data: file,
+      raw_data: file as unknown as Record<string, unknown>,
     };
   }
 

@@ -291,7 +291,7 @@ export class LinearCollector extends BaseCollector {
       ],
       pii_redaction_applied: redacted.redactedCount > 0,
       confidence: 'high',
-      raw_data: issue,
+      raw_data: issue as unknown as Record<string, unknown>,
     };
   }
 

@@ -69,16 +69,12 @@ export class LinearPoster {
         };
       }
 
-      // Generate title
-      const startDate = formatDisplay(
-        worklog.run_metadata.start_datetime,
-        worklog.run_metadata.timezone
-      ).split(' ')[0];
+      // Generate title - clean format
       const endDate = formatDisplay(
         worklog.run_metadata.end_datetime,
         worklog.run_metadata.timezone
       ).split(' ')[0];
-      const title = `Worklog: ${worklog.run_metadata.person_display_name} (${startDate} - ${endDate})`;
+      const title = `Weekly update - ${worklog.run_metadata.person_display_name} - ${endDate}`;
 
       // Generate body
       const body = renderLinearBody(worklog);

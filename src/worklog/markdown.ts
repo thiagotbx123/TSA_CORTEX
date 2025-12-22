@@ -146,41 +146,107 @@ export function renderLinearBody(worklog: WorklogOutput): string {
   const lines: string[] = [];
   const pointerMap = new Map(worklog.source_index.map((p) => [p.pointer_id, p]));
 
-  // Compact format for Linear
-  lines.push('## Summary');
-  lines.push('');
-  for (const bullet of worklog.executive_summary.slice(0, 7)) {
-    lines.push(`- ${bullet.text}`);
-  }
+  // Get date range for intro
+  const startDate = worklog.run_metadata.start_datetime.split('T')[0];
+  const endDate = worklog.run_metadata.end_datetime.split('T')[0];
+
+  // Natural intro
+  lines.push('## What I worked on this week');
   lines.push('');
 
-  // Workstreams (compact)
-  lines.push('## Workstreams');
-  lines.push('');
-  for (const ws of worklog.workstreams.slice(0, 5)) {
-    lines.push(`### ${ws.name} (${ws.status_now})`);
-    for (const item of ws.what_happened.slice(0, 3)) {
+  // Executive summary in natural language
+  if (worklog.executive_summary.length > 0) {
+    lines.push('Here\'s a quick overview of what got done:');
+    lines.push('');
+    for (const bullet of worklog.executive_summary.slice(0, 5)) {
+      lines.push(`- ${bullet.text}`);
+    }
+    lines.push('');
+  }
+
+  // Workstreams with better formatting
+  if (worklog.workstreams.length > 0) {
+    lines.push('## Details by area');
+    lines.push('');
+
+    for (const ws of worklog.workstreams.slice(0, 5)) {
+      const statusLabel = getStatusLabel(ws.status_now);
+      lines.push(`### ${ws.name}`);
+      lines.push('');
+      lines.push(`**Status:** ${statusLabel}`);
+      lines.push('');
+
+      if (ws.what_happened.length > 0) {
+        lines.push('What happened:');
+        for (const item of ws.what_happened.slice(0, 4)) {
+          lines.push(`- ${item.text}`);
+        }
+        lines.push('');
+      }
+
+      if (ws.why_it_matters) {
+        lines.push(`**Context:** ${ws.why_it_matters}`);
+        lines.push('');
+      }
+
+      if (ws.next_actions.length > 0) {
+        lines.push('Next steps:');
+        for (const action of ws.next_actions.slice(0, 3)) {
+          lines.push(`- ${action.text}`);
+        }
+        lines.push('');
+      }
+    }
+  }
+
+  // Blockers and decisions
+  if (worklog.decisions_and_blockers.length > 0) {
+    lines.push('## Blockers & decisions');
+    lines.push('');
+    for (const item of worklog.decisions_and_blockers.slice(0, 5)) {
       lines.push(`- ${item.text}`);
     }
     lines.push('');
   }
 
-  // Key sources
-  lines.push('## Key Sources');
-  lines.push('');
-  const keyPointers = worklog.source_index.filter((p) => p.url).slice(0, 10);
-  for (const p of keyPointers) {
-    lines.push(`- [${p.display_text}](${p.url})`);
+  // Key sources - more compact
+  const keyPointers = worklog.source_index.filter((p) => p.url).slice(0, 8);
+  if (keyPointers.length > 0) {
+    lines.push('## References');
+    lines.push('');
+    for (const p of keyPointers) {
+      lines.push(`- [${p.display_text}](${p.url})`);
+    }
+    lines.push('');
   }
-  lines.push('');
 
-  // Gaps
-  if (worklog.gaps_and_data_quality.length > 0) {
-    lines.push('## Gaps');
-    for (const gap of worklog.gaps_and_data_quality.slice(0, 5)) {
+  // Gaps - only if relevant
+  const relevantGaps = worklog.gaps_and_data_quality.filter(
+    (g) => !g.includes('low confidence')
+  );
+  if (relevantGaps.length > 0) {
+    lines.push('## Notes');
+    lines.push('');
+    for (const gap of relevantGaps.slice(0, 3)) {
       lines.push(`- ${gap}`);
     }
+    lines.push('');
   }
 
   return lines.join('\n');
+}
+
+function getStatusLabel(status: string): string {
+  switch (status) {
+    case 'completed':
+      return 'Done';
+    case 'active':
+      return 'In progress';
+    case 'blocked':
+      return 'Blocked';
+    case 'pending':
+      return 'Not started';
+    default:
+      return status;
+  }
 }

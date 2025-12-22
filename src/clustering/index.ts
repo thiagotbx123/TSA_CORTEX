@@ -239,10 +239,31 @@ export class TopicClusterer {
   }
 
   private generateSummary(events: ActivityEvent[]): string {
-    const eventTypes = new Set(events.map((e) => e.event_type));
+    const count = events.length;
     const sources = new Set(events.map((e) => e.source_system));
+    const sourceList = Array.from(sources);
 
-    return `${events.length} events across ${sources.size} source(s): ${Array.from(eventTypes).join(', ')}`;
+    // Generate natural summary based on event types
+    const hasComments = events.some((e) => e.event_type === 'comment');
+    const hasIssues = events.some((e) => e.event_type === 'issue_created' || e.event_type === 'issue_updated');
+    const hasMessages = events.some((e) => e.event_type === 'message' || e.event_type === 'thread_reply');
+    const hasFiles = events.some((e) => e.event_type === 'file_created' || e.event_type === 'file_modified');
+
+    const activities: string[] = [];
+    if (hasIssues) activities.push('issue updates');
+    if (hasComments) activities.push('comments');
+    if (hasMessages) activities.push('discussions');
+    if (hasFiles) activities.push('file changes');
+
+    if (activities.length === 0) {
+      return `${count} activities tracked from ${sourceList.join(' and ')}`;
+    }
+
+    const activityText = activities.slice(0, 2).join(' and ');
+    if (sourceList.length === 1) {
+      return `Includes ${activityText} from ${sourceList[0]}`;
+    }
+    return `Includes ${activityText} across ${sourceList.length} sources`;
   }
 
   private extractActions(events: ActivityEvent[]): string[] {

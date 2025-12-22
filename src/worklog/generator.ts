@@ -120,18 +120,24 @@ export class WorklogGenerator {
   private generateExecutiveSummary(): WorklogBullet[] {
     const summary: WorklogBullet[] = [];
 
-    // Summary by cluster
+    // Summary by cluster with natural language
     for (const cluster of this.clusters.slice(0, 5)) {
+      const statusText = this.getStatusText(cluster.status);
+      const countText = cluster.events.length === 1 ? '1 item' : `${cluster.events.length} items`;
+
       summary.push({
-        text: `${cluster.cluster_name}: ${cluster.events.length} activities (${cluster.status})`,
+        text: `${cluster.cluster_name} - ${countText}${statusText}`,
         source_pointer_ids: cluster.source_pointer_ids.slice(0, 3),
       });
     }
 
     // Add unclustered count if any
     if (this.unclustered.length > 0) {
+      const otherText = this.unclustered.length === 1
+        ? '1 other activity'
+        : `${this.unclustered.length} other activities`;
       summary.push({
-        text: `${this.unclustered.length} other activities`,
+        text: otherText,
         source_pointer_ids: this.unclustered
           .slice(0, 3)
           .flatMap((e) => e.source_pointers.map((p) => p.pointer_id)),
@@ -141,19 +147,33 @@ export class WorklogGenerator {
     return summary;
   }
 
+  private getStatusText(status: string): string {
+    switch (status) {
+      case 'completed':
+        return ' (done)';
+      case 'blocked':
+        return ' (blocked)';
+      case 'pending':
+        return ' (not started)';
+      case 'active':
+      default:
+        return '';
+    }
+  }
+
   private generateDecisionsAndBlockers(): WorklogBullet[] {
     const items: WorklogBullet[] = [];
 
     for (const cluster of this.clusters) {
       if (cluster.status === 'blocked') {
         items.push({
-          text: `BLOCKED: ${cluster.cluster_name}`,
+          text: `Waiting on: ${cluster.cluster_name}`,
           source_pointer_ids: cluster.source_pointer_ids.slice(0, 2),
         });
       }
       if (cluster.status === 'completed') {
         items.push({
-          text: `COMPLETED: ${cluster.cluster_name}`,
+          text: `Wrapped up: ${cluster.cluster_name}`,
           source_pointer_ids: cluster.source_pointer_ids.slice(0, 2),
         });
       }
@@ -167,13 +187,13 @@ export class WorklogGenerator {
 
     // Check for missing sources
     for (const source of this.run.sources_missing) {
-      gaps.push(`Data unavailable from ${source}`);
+      gaps.push(`Could not pull data from ${source}`);
     }
 
     // Check for low confidence events
     const lowConfidenceCount = this.events.filter((e) => e.confidence === 'low').length;
     if (lowConfidenceCount > 0) {
-      gaps.push(`${lowConfidenceCount} events have low confidence`);
+      gaps.push(`${lowConfidenceCount} events may need manual review`);
     }
 
     // Add warnings

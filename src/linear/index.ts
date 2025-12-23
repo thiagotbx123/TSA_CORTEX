@@ -2,4 +2,4 @@
  * Linear module barrel export
  */
 
-export { LinearPoster, postToLinear } from './poster';
+export { LinearPoster, postToLinear, NarrativeOptions } from './poster';

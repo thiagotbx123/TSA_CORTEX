@@ -18,4 +18,4 @@ Esta pasta contém o registro de todas as sessões de trabalho no projeto.
 | Data | Resumo | Destaques |
 |------|--------|-----------|
 | 2024-12-22 09:30 | Criação inicial do projeto | Estrutura completa, todos os módulos |
-| 2024-12-22 10:00 | ESPINHA_DORSAL + Output inglês | Persistência de contexto, tom natural |
+| 2024-12-22 10:00 | SpineHUB + Output ingles | Persistencia de contexto, tom natural |

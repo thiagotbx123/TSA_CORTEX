@@ -14,6 +14,14 @@ import {
 import { getLinearCredentials } from '../utils/config';
 import { formatDisplay } from '../utils/datetime';
 import { renderLinearBody } from '../worklog/markdown';
+import { renderNarrativeWorklog } from '../worklog/narrative';
+import { SpineHubData } from '../spinehub';
+
+export interface NarrativeOptions {
+  generationTimeMs: number;
+  version: string;
+  spineHub?: SpineHubData;
+}
 
 export class LinearPoster {
   private client: LinearClient | null = null;
@@ -35,7 +43,8 @@ export class LinearPoster {
   async postWorklog(
     worklog: WorklogOutput,
     role: string = 'default',
-    dryRun: boolean = false
+    dryRun: boolean = false,
+    narrativeOpts?: NarrativeOptions
   ): Promise<LinearPostResult> {
     if (!this.client) {
       const initialized = await this.initialize();
@@ -69,15 +78,28 @@ export class LinearPoster {
         };
       }
 
-      // Generate title - clean format
-      const endDate = formatDisplay(
-        worklog.run_metadata.end_datetime,
-        worklog.run_metadata.timezone
-      ).split(' ')[0];
-      const title = `Weekly update - ${worklog.run_metadata.person_display_name} - ${endDate}`;
+      // Generate title - [Worklog]YY_MM_DD TSA Name format
+      const endDateObj = new Date(worklog.run_metadata.end_datetime);
+      const yy = endDateObj.getFullYear().toString().slice(2);
+      const mm = (endDateObj.getMonth() + 1).toString().padStart(2, '0');
+      const dd = endDateObj.getDate().toString().padStart(2, '0');
+      const title = `[Worklog]${yy}_${mm}_${dd} TSA ${worklog.run_metadata.person_display_name}`;
 
-      // Generate body
-      const body = renderLinearBody(worklog);
+      // Generate body - use narrative format if options provided
+      let body: string;
+      if (narrativeOpts) {
+        body = renderNarrativeWorklog(worklog, {
+          ownerName: worklog.run_metadata.person_display_name,
+          startDate: new Date(worklog.run_metadata.start_datetime),
+          endDate: endDateObj,
+          generatedAt: new Date(),
+          generationTimeMs: narrativeOpts.generationTimeMs,
+          version: narrativeOpts.version,
+          spineHub: narrativeOpts.spineHub,
+        });
+      } else {
+        body = renderLinearBody(worklog);
+      }
 
       // Find labels
       const labelIds = await this.findLabels(team.id, routing.labels);
@@ -191,8 +213,9 @@ export async function postToLinear(
   worklog: WorklogOutput,
   config: Config,
   role: string = 'default',
-  dryRun: boolean = false
+  dryRun: boolean = false,
+  narrativeOpts?: NarrativeOptions
 ): Promise<LinearPostResult> {
   const poster = new LinearPoster(config);
-  return poster.postWorklog(worklog, role, dryRun);
+  return poster.postWorklog(worklog, role, dryRun, narrativeOpts);
 }

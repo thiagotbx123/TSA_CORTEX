@@ -117,3 +117,4 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
     errors,
   };
 }
+export * from "./spinehub";

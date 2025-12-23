@@ -23,14 +23,22 @@
       "include_threads": true,
       "include_mentions": true,
       "include_file_shares": true,
-      "search_keywords": [
-        "intuit",
-        "quickbooks",
-        "WFS",
-        "GEM",
-        "testbox"
+      "search_keywords": [],
+      "search_from_me": true,
+      "target_channels": [
+        "intuit-internal",
+        "testbox-intuit-wfs-external20251027",
+        "testbox-intuit-mailchimp-external",
+        "external-testbox-apollo",
+        "dev-on-call",
+        "product",
+        "go-to-market",
+        "tsa-data-engineers",
+        "team-koala",
+        "brevo-internal",
+        "archer-internal"
       ],
-      "search_from_me": true
+      "collect_dms": true
     },
     "linear": {
       "enabled": true,
@@ -63,8 +71,11 @@
       "max_file_size_mb": 50
     },
     "claude": {
-      "enabled": false,
-      "export_path": null
+      "enabled": true,
+      "include_prompts": true,
+      "include_responses": false,
+      "include_memory": true,
+      "data_path": null
     }
   },
   "privacy": {

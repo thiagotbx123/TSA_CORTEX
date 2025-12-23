@@ -144,94 +144,199 @@ export function renderWorklogMarkdown(worklog: WorklogOutput): string {
 
 export function renderLinearBody(worklog: WorklogOutput): string {
   const lines: string[] = [];
-  const pointerMap = new Map(worklog.source_index.map((p) => [p.pointer_id, p]));
-
-  // Get date range for intro
   const startDate = worklog.run_metadata.start_datetime.split('T')[0];
   const endDate = worklog.run_metadata.end_datetime.split('T')[0];
 
-  // Natural intro
-  lines.push('## What I worked on this week');
+  const driveFiles = worklog.source_index.filter((p) => p.type.includes('drive'));
+  const localFiles = worklog.source_index.filter((p) => p.type.includes('local'));
+  const linearItems = worklog.source_index.filter((p) => p.type.includes('linear'));
+  const slackItems = worklog.source_index.filter((p) => p.type.includes('slack'));
+  const claudeItems = worklog.source_index.filter((p) => p.type.includes('claude'));
+
+  lines.push('# Worklog - Weekly Update');
+  lines.push('');
+  lines.push('**Owner:** ' + worklog.run_metadata.person_display_name);
+  lines.push('**Period:** ' + startDate + ' to ' + endDate);
+  lines.push('');
+  lines.push('---');
   lines.push('');
 
-  // Executive summary in natural language
-  if (worklog.executive_summary.length > 0) {
-    lines.push('Here\'s a quick overview of what got done:');
+  lines.push('## Objective');
+  lines.push('');
+  lines.push('Document activities and deliverables from ' + startDate + ' to ' + endDate + ', consolidating work across customer projects, internal coordination, and technical development.');
+  lines.push('');
+
+  lines.push('## Scope and Deliverables');
+  lines.push('');
+
+  const spreadsheets = driveFiles.filter((f) => /\.(xlsx|xls|csv)/i.test(f.display_text));
+  if (spreadsheets.length > 0) {
+    lines.push('### Spreadsheets and Data Files');
     lines.push('');
-    for (const bullet of worklog.executive_summary.slice(0, 5)) {
-      lines.push(`- ${bullet.text}`);
+    for (const f of spreadsheets.slice(0, 15)) {
+      const name = f.display_text.replace(/^Drive:\s*/, '');
+      lines.push('- ' + (f.url ? '[' + name + '](' + f.url + ')' : name));
+    }
+    if (spreadsheets.length > 15) {
+      lines.push('- _... and ' + (spreadsheets.length - 15) + ' more spreadsheets_');
     }
     lines.push('');
   }
 
-  // Workstreams with better formatting
+  const documents = driveFiles.filter((f) => /\.(docx|doc|pptx|ppt|pdf|txt|md)/i.test(f.display_text));
+  if (documents.length > 0) {
+    lines.push('### Documents and Presentations');
+    lines.push('');
+    for (const f of documents.slice(0, 15)) {
+      const name = f.display_text.replace(/^Drive:\s*/, '');
+      lines.push('- ' + (f.url ? '[' + name + '](' + f.url + ')' : name));
+    }
+    if (documents.length > 15) {
+      lines.push('- _... and ' + (documents.length - 15) + ' more documents_');
+    }
+    lines.push('');
+  }
+
+  const recordings = driveFiles.filter((f) =>
+    f.display_text.includes('Recording') ||
+    f.display_text.includes('Notes by Gemini') ||
+    f.display_text.includes('Transcript')
+  );
+  if (recordings.length > 0) {
+    lines.push('### Meetings and Recordings');
+    lines.push('');
+    for (const f of recordings.slice(0, 10)) {
+      const name = f.display_text.replace(/^Drive:\s*/, '');
+      lines.push('- ' + (f.url ? '[' + name + '](' + f.url + ')' : name));
+    }
+    if (recordings.length > 10) {
+      lines.push('- _... and ' + (recordings.length - 10) + ' more recordings_');
+    }
+    lines.push('');
+  }
+
+  if (localFiles.length > 0) {
+    lines.push('### Local Files Modified');
+    lines.push('');
+    for (const f of localFiles.slice(0, 15)) {
+      const filePath = f.path || f.display_text;
+      lines.push('- `' + filePath + '`');
+    }
+    if (localFiles.length > 15) {
+      lines.push('- _... and ' + (localFiles.length - 15) + ' more local files_');
+    }
+    lines.push('');
+  }
+
+  if (linearItems.length > 0) {
+    lines.push('### Linear Issues and Activity');
+    lines.push('');
+    for (const item of linearItems.slice(0, 10)) {
+      const name = item.display_text;
+      lines.push('- ' + (item.url ? '[' + name + '](' + item.url + ')' : name));
+    }
+    lines.push('');
+  }
+
+  if (claudeItems.length > 0) {
+    lines.push('### Claude Code Activity');
+    lines.push('');
+    const prompts = claudeItems.filter((c) => c.type === 'claude_prompt');
+    const responses = claudeItems.filter((c) => c.type === 'claude_response');
+    lines.push('Worked with Claude Code across ' + prompts.length + ' prompts and ' + responses.length + ' responses.');
+    lines.push('');
+
+    // Show sample prompts grouped by project
+    const projectPrompts = new Map();
+    for (const p of prompts) {
+      const match = p.display_text.match(/in (.+)$/);
+      const project = match ? match[1] : 'Unknown';
+      if (!projectPrompts.has(project)) projectPrompts.set(project, []);
+      projectPrompts.get(project).push(p);
+    }
+
+    for (const [project, pList] of Array.from(projectPrompts.entries()).slice(0, 5)) {
+      lines.push('**' + project + '** (' + pList.length + ' prompts)');
+      lines.push('');
+    }
+  }
+
+  lines.push('## Collaboration and Process');
+  lines.push('');
+
+  const channelMentions = new Set<string>();
+  for (const item of slackItems) {
+    const match = item.display_text.match(/#([\w-]+)/);
+    if (match) channelMentions.add(match[1]);
+  }
+
+  if (channelMentions.size > 0) {
+    lines.push('Engaged across ' + slackItems.length + ' Slack interactions in channels:');
+    lines.push('');
+    for (const ch of Array.from(channelMentions).slice(0, 12)) {
+      lines.push('- #' + ch);
+    }
+    lines.push('');
+  } else {
+    lines.push('Engaged in ' + slackItems.length + ' Slack interactions including DMs and channel discussions.');
+    lines.push('');
+  }
+
   if (worklog.workstreams.length > 0) {
-    lines.push('## Details by area');
+    lines.push('## Key Work Areas');
     lines.push('');
-
-    for (const ws of worklog.workstreams.slice(0, 5)) {
+    for (const ws of worklog.workstreams.slice(0, 8)) {
       const statusLabel = getStatusLabel(ws.status_now);
-      lines.push(`### ${ws.name}`);
+      lines.push('### ' + ws.name + ' (' + statusLabel + ')');
       lines.push('');
-      lines.push(`**Status:** ${statusLabel}`);
-      lines.push('');
-
       if (ws.what_happened.length > 0) {
-        lines.push('What happened:');
-        for (const item of ws.what_happened.slice(0, 4)) {
-          lines.push(`- ${item.text}`);
+        for (const item of ws.what_happened.slice(0, 5)) {
+          lines.push('- ' + item.text);
         }
         lines.push('');
       }
-
-      if (ws.why_it_matters) {
-        lines.push(`**Context:** ${ws.why_it_matters}`);
-        lines.push('');
-      }
-
       if (ws.next_actions.length > 0) {
-        lines.push('Next steps:');
-        for (const action of ws.next_actions.slice(0, 3)) {
-          lines.push(`- ${action.text}`);
-        }
+        lines.push('**Next:** ' + ws.next_actions[0].text);
         lines.push('');
       }
     }
   }
 
-  // Blockers and decisions
+  lines.push('## Validation Summary');
+  lines.push('');
+  lines.push('| Source | Items Collected | Status |');
+  lines.push('|--------|----------------|--------|');
+  lines.push('| Slack | ' + slackItems.length + ' | Collected |');
+  lines.push('| Google Drive | ' + driveFiles.length + ' | Collected |');
+  lines.push('| Local Files | ' + localFiles.length + ' | Collected |');
+  lines.push('| Linear | ' + linearItems.length + ' | Collected |');
+  lines.push('| Claude Code | ' + claudeItems.length + ' | Collected |');
+  lines.push('| **Total** | **' + worklog.source_index.length + '** | |');
+  lines.push('');
+
   if (worklog.decisions_and_blockers.length > 0) {
-    lines.push('## Blockers & decisions');
+    lines.push('## Blockers and Decisions');
     lines.push('');
-    for (const item of worklog.decisions_and_blockers.slice(0, 5)) {
-      lines.push(`- ${item.text}`);
+    for (const item of worklog.decisions_and_blockers.slice(0, 8)) {
+      lines.push('- ' + item.text);
     }
     lines.push('');
   }
 
-  // Key sources - more compact
-  const keyPointers = worklog.source_index.filter((p) => p.url).slice(0, 8);
-  if (keyPointers.length > 0) {
-    lines.push('## References');
-    lines.push('');
-    for (const p of keyPointers) {
-      lines.push(`- [${p.display_text}](${p.url})`);
-    }
-    lines.push('');
-  }
-
-  // Gaps - only if relevant
   const relevantGaps = worklog.gaps_and_data_quality.filter(
     (g) => !g.includes('low confidence')
   );
   if (relevantGaps.length > 0) {
     lines.push('## Notes');
     lines.push('');
-    for (const gap of relevantGaps.slice(0, 3)) {
-      lines.push(`- ${gap}`);
+    for (const gap of relevantGaps.slice(0, 5)) {
+      lines.push('- ' + gap);
     }
     lines.push('');
   }
+
+  lines.push('---');
+  lines.push('_Generated by TSA_CORTEX_');
 
   return lines.join('\n');
 }

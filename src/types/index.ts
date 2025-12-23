@@ -154,10 +154,12 @@ export type EventType =
   | 'issue_updated'
   | 'thread_reply'
   | 'reaction'
-  | 'link_shared';
+  | 'link_shared'
+  | 'prompt'
+  | 'response';
 
 export interface EventReference {
-  type: 'url' | 'file_id' | 'issue_id' | 'user_id' | 'channel_id' | 'project_id';
+  type: 'url' | 'file_id' | 'issue_id' | 'user_id' | 'channel_id' | 'project_id' | 'session_id' | 'project' | 'git_branch' | 'file';
   value: string;
   display_text?: string;
 }
@@ -184,7 +186,10 @@ export type SourcePointerType =
   | 'drive_file_url'
   | 'local_file_path'
   | 'claude_conversation_url'
-  | 'claude_project_artifact_id';
+  | 'claude_project_artifact_id'
+  | 'claude_prompt'
+  | 'claude_response'
+  | 'claude_memory';
 
 // ============================================================================
 // TOPIC CLUSTERING

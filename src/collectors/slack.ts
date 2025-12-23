@@ -1,6 +1,6 @@
 /**
- * Slack Collector - Search-based
- * Uses Slack Search API to find messages by keywords and date range
+ * Slack Collector - Channel and Search-based
+ * Collects ALL messages from target channels and DMs
  */
 
 import { WebClient } from "@slack/web-api";
@@ -15,7 +15,7 @@ import {
 import { formatUTC, formatLocalTime } from "../utils/datetime";
 import { generateEventId, generatePointerId } from "../utils/hash";
 import { getSlackCredentials } from "../utils/config";
-import { redactPII, truncateText } from "../utils/privacy";
+import { redactPII } from "../utils/privacy";
 
 export class SlackCollector extends BaseCollector {
   private client: WebClient | null = null;
@@ -45,25 +45,51 @@ export class SlackCollector extends BaseCollector {
 
     try {
       const slackConfig = this.config.collectors.slack as any;
-      const keywords: string[] = slackConfig.search_keywords || [];
+      const targetChannels: string[] = slackConfig.target_channels || [];
+      const collectDMs = slackConfig.collect_dms !== false;
       const searchFromMe = slackConfig.search_from_me !== false;
+      const keywords: string[] = slackConfig.search_keywords || [];
 
       const startDate = this.formatDateForSearch(this.dateRange.start);
       const endDate = this.formatDateForSearch(this.dateRange.end);
 
+      // 1. Collect ALL messages from target channels
+      for (const channel of targetChannels) {
+        this.logInfo("Collecting all messages from #" + channel + "...");
+        const query = "in:#" + channel + " after:" + startDate + " before:" + endDate;
+        const channelMessages = await this.searchMessages(query);
+        this.logInfo("Found " + channelMessages.length + " messages in #" + channel);
+
+        for (const msg of channelMessages) {
+          this.addMessageIfNotExists(result, msg);
+        }
+      }
+
+      // 2. Collect ALL DMs
+      if (collectDMs) {
+        this.logInfo("Collecting all DMs...");
+        const dmQuery = "is:dm after:" + startDate + " before:" + endDate;
+        const dmMessages = await this.searchMessages(dmQuery);
+        this.logInfo("Found " + dmMessages.length + " DM messages");
+
+        for (const msg of dmMessages) {
+          this.addMessageIfNotExists(result, msg);
+        }
+      }
+
+      // 3. Collect messages from user (safety net)
       if (searchFromMe) {
-        this.logInfo("Searching for messages from user...");
+        this.logInfo("Collecting messages from user...");
         const query = "from:me after:" + startDate + " before:" + endDate;
         const fromMeMessages = await this.searchMessages(query);
         this.logInfo("Found " + fromMeMessages.length + " messages from user");
 
         for (const msg of fromMeMessages) {
-          result.rawData.push(msg);
-          const event = this.transformMessage(msg);
-          if (event) result.events.push(event);
+          this.addMessageIfNotExists(result, msg);
         }
       }
 
+      // 4. Optional: keyword search (backward compatible)
       for (const keyword of keywords) {
         this.logInfo("Searching for keyword: " + keyword);
         const query = keyword + " after:" + startDate + " before:" + endDate;
@@ -71,12 +97,7 @@ export class SlackCollector extends BaseCollector {
         this.logInfo("Found " + keywordMessages.length + " messages for " + keyword);
 
         for (const msg of keywordMessages) {
-          const exists = result.rawData.some((m: any) => m.ts === msg.ts && m.channel === msg.channel);
-          if (!exists) {
-            result.rawData.push(msg);
-            const event = this.transformMessage(msg);
-            if (event) result.events.push(event);
-          }
+          this.addMessageIfNotExists(result, msg);
         }
       }
 
@@ -87,6 +108,15 @@ export class SlackCollector extends BaseCollector {
     }
 
     return result;
+  }
+
+  private addMessageIfNotExists(result: CollectorResult, msg: RawSlackMessage): void {
+    const exists = result.rawData.some((m: any) => m.ts === msg.ts && m.channel === msg.channel);
+    if (!exists) {
+      result.rawData.push(msg);
+      const event = this.transformMessage(msg);
+      if (event) result.events.push(event);
+    }
   }
 
   private formatDateForSearch(date: Date): string {
@@ -165,6 +195,9 @@ export class SlackCollector extends BaseCollector {
 
     const redacted = redactPII(raw.text, this.config.privacy);
 
+    // Create descriptive title from message content
+    const title = this.createMessageTitle(redacted.text, raw.channel_name || "unknown");
+
     return {
       event_id: generateEventId("slack", raw.ts, raw.channel),
       source_system: "slack",
@@ -174,13 +207,41 @@ export class SlackCollector extends BaseCollector {
       event_timestamp_utc: formatUTC(timestamp),
       event_timestamp_local: formatLocalTime(timestamp, this.dateRange.timezone),
       event_type: eventType,
-      title: "Message in #" + raw.channel_name,
-      body_text_excerpt: truncateText(redacted.text),
+      title: title,
+      body_text_excerpt: redacted.text, // Store FULL text, not truncated
       references,
       source_pointers: sourcePointers,
       pii_redaction_applied: redacted.redactedCount > 0,
       confidence: "high",
       raw_data: raw as unknown as Record<string, unknown>,
     };
+  }
+
+  private createMessageTitle(text: string, channelName: string): string {
+    // Clean up the text
+    const cleaned = text
+      .replace(/<[^>]+>/g, '') // Remove Slack formatting
+      .replace(/\n+/g, ' ')    // Replace newlines with spaces
+      .replace(/\s+/g, ' ')    // Collapse whitespace
+      .trim();
+
+    if (!cleaned) {
+      return "[#" + channelName + "] (attachment/file)";
+    }
+
+    // Get first 120 chars as title
+    const maxLen = 120;
+    if (cleaned.length <= maxLen) {
+      return "[#" + channelName + "] " + cleaned;
+    }
+
+    // Try to cut at word boundary
+    const truncated = cleaned.substring(0, maxLen);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > maxLen * 0.7) {
+      return "[#" + channelName + "] " + truncated.substring(0, lastSpace) + "...";
+    }
+
+    return "[#" + channelName + "] " + truncated + "...";
   }
 }

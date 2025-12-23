@@ -14,8 +14,9 @@ import { parseDateRange, getDefaultDateRange } from '../utils/datetime';
 import { runAllCollectors, CollectorResult } from '../collectors';
 import { normalizeEvents } from '../normalizer';
 import { clusterEvents } from '../clustering';
-import { generateWorklog, renderWorklogMarkdown } from '../worklog';
-import { postToLinear } from '../linear';
+import { generateWorklog, renderWorklogMarkdown, renderNarrativeWorklog } from '../worklog';
+import { postToLinear, NarrativeOptions } from '../linear';
+import { buildSpineHub, SpineHubData } from '../spinehub';
 import { Config, SourceSystem, WorklogOutput } from '../types';
 
 // Load environment variables
@@ -42,6 +43,7 @@ program
   .action(async (options) => {
     try {
       console.log('🚀 TSA_CORTEX - Weekly Worklog Automation\n');
+      const startTime = Date.now();
 
       // Load config
       const config = loadConfig(options.config);
@@ -86,6 +88,24 @@ program
       console.log(`  Clusters created: ${clustering.clusters.length}`);
       console.log(`  Unclustered events: ${clustering.unclustered.length}`);
 
+      // Step 3.5: Build SpineHub (Content Hub)
+      console.log('\n🌐 Step 3.5: Building SpineHub (Content Hub)...');
+      const rawExportsDir = getOutputPaths().rawExports;
+      let spineHub: SpineHubData | undefined;
+      try {
+        spineHub = await buildSpineHub(
+          rawExportsDir,
+          userId,
+          userDisplayName,
+          dateRange.start,
+          dateRange.end
+        );
+        console.log(`  Narrative blocks: ${spineHub.narrativeBlocks.length}`);
+        console.log(`  Owner messages: ${spineHub.slack.ownerMessages.length}`);
+      } catch (e) {
+        console.log('  SpineHub skipped (no raw exports or error)');
+      }
+
       // Step 4: Generate worklog
       console.log('\n📝 Step 4: Generating worklog...');
       const worklog = generateWorklog(
@@ -99,9 +119,15 @@ program
       await saveOutputs(worklog, normalization.manifest, outputDir);
 
       // Step 5: Post to Linear (unless dry-run)
+      const generationTimeMs = Date.now() - startTime;
+      const narrativeOpts: NarrativeOptions = {
+        generationTimeMs,
+        version: '1.0.0',
+        spineHub,
+      };
       if (!options.dryRun) {
         console.log('\n📤 Step 5: Posting to Linear...');
-        const result = await postToLinear(worklog, config, role, false);
+        const result = await postToLinear(worklog, config, role, false, narrativeOpts);
 
         if (result.success) {
           console.log(`  ✅ Ticket created: ${result.issue_url}`);
@@ -110,7 +136,7 @@ program
         }
       } else {
         console.log('\n📤 Step 5: Dry run - skipping Linear post');
-        await postToLinear(worklog, config, role, true);
+        await postToLinear(worklog, config, role, true, narrativeOpts);
       }
 
       console.log('\n✅ Worklog generation complete!');

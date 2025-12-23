@@ -4,105 +4,75 @@
 
 ## Estado Atual
 
-**Fase:** Produção (MVP Completo)
-**Última Atualização:** 2025-12-22
-**Status:** ✅ Todos os coletores funcionando
+**Fase:** Produção (MVP Completo + SpineHub Layer)
+**Última Atualização:** 2025-12-23
+**Status:** ✅ Todos os coletores funcionando + SpineHub Layer 3.5 implementado
 
-## Métricas de Coleta (última execução)
+## Métricas de Coleta (última execução: 10-18 Dez 2025)
 
 | Fonte | Eventos | Status |
 |-------|---------|--------|
-| Slack | 1854 | ✅ Search API |
-| Linear | 6 | ✅ SDK |
-| Drive | 145 | ✅ OAuth2 |
-| Local | 50 | ✅ File scan |
-| **Total** | **2055** | |
+| Slack | 2240 | ✅ Search API |
+| Linear | 5 | ✅ SDK |
+| Drive | 342 | ✅ OAuth2 |
+| Local | 93 | ✅ File scan |
+| **Total** | **2680** | |
+
+**Ticket criado:** https://linear.app/testbox/issue/RAC-2/weekly-update-thiago-rodrigues-2025-12-18
 
 ## Arquitetura Implementada
 
 | Módulo | Status | Descrição |
 |--------|--------|-----------|
-| `types/` | ✅ Completo | Tipos TypeScript (ActivityEvent, WorklogOutput, etc.) |
+| `types/` | ✅ Completo | Tipos TypeScript |
 | `utils/` | ✅ Completo | Config, datetime, hash, privacy |
-| `collectors/slack` | ✅ Refatorado | **Search API** (não mais channel listing) |
-| `collectors/linear` | ✅ Completo | Linear SDK com paginação |
+| `collectors/slack` | ✅ Refatorado | **Search API** |
+| `collectors/linear` | ✅ Completo | Linear SDK |
 | `collectors/drive` | ✅ Completo | Google Drive API v3 |
-| `collectors/local` | ✅ Completo | Scan de arquivos locais |
-| `normalizer/` | ✅ Completo | Normalização e deduplicação |
-| `clustering/` | ✅ Completo | Agrupamento por tópicos |
-| `worklog/` | ✅ Completo | Gerador Markdown + JSON |
+| `collectors/local` | ✅ Completo | Scan de arquivos |
+| `normalizer/` | ✅ Completo | Normalização |
+| `clustering/` | ✅ Completo | Agrupamento |
+| `spinehub/` | ✅ **NOVO** | **Layer 3.5: Content Hub** |
+| `worklog/` | ✅ Atualizado | Markdown + JSON + **Narrative Renderer** |
 | `linear/poster` | ✅ Completo | Criação de tickets |
-| `cli/` | ✅ Completo | Interface de linha de comando |
+| `cli/` | ✅ Completo | Interface CLI |
 
 ## Credenciais Configuradas
 
 | Serviço | Variáveis | Status |
 |---------|-----------|--------|
-| Slack | `SLACK_USER_TOKEN`, `SLACK_USER_ID` | ✅ Configurado |
-| Linear | `LINEAR_API_KEY` | ✅ Configurado |
-| Google | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` | ✅ Configurado |
-
-## Últimas Ações
-
-| Data | Ação | Resultado |
-|------|------|-----------|
-| 2024-12-22 | Criação do projeto | Estrutura completa implementada |
-| 2024-12-22 | Aplicação ESPINHA_DORSAL | Estrutura de documentação |
-| 2025-12-22 | Instalação dependências | Corrigido conflito date-fns v2/v3 |
-| 2025-12-22 | Correção TypeScript | raw_data casting, null coalescing |
-| 2025-12-22 | **Refatoração Slack** | Migrado de channel listing para Search API |
-| 2025-12-22 | Configuração completa | Slack, Linear, Drive funcionando |
+| Slack | SLACK_USER_TOKEN, SLACK_USER_ID | ✅ |
+| Linear | LINEAR_API_KEY | ✅ |
+| Google | GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN | ✅ |
+| User | USER_DISPLAY_NAME | ✅ "Thiago Rodrigues" |
 
 ## Decisões Importantes
 
 | Data | Decisão | Contexto |
 |------|---------|----------|
-| 2024-12-22 | TypeScript + Node.js | Stack ideal para APIs REST e CLI |
-| 2024-12-22 | date-fns v2 + date-fns-tz v2 | Compatibilidade de versões |
-| 2024-12-22 | Team "raccoons" para TSAs | Roteamento padrão no Linear |
-| 2024-12-22 | Output em inglês natural | Tom intermediário, direto |
-| 2025-12-22 | **Slack Search API** | User token (xoxp-) com search:read, não bot token |
-| 2025-12-22 | Keywords configuráveis | `search_keywords` em config/default.json |
+| 2025-12-22 | Slack Search API | User token (xoxp-) com search:read |
+| 2025-12-22 | Keywords configuráveis | search_keywords em config |
+| 2025-12-22 | USER_DISPLAY_NAME | Nome no título do ticket |
+| 2025-12-23 | SpineHub Layer 3.5 | Consolidação de conteúdo antes da narrativa |
+| 2025-12-23 | Narrative Renderer | Gera história baseada em conteúdo, não metadata |
 
-## Configuração de Routing
+## Documentação
 
-```json
-{
-  "tsa": { "linear_team": "raccoons", "labels": ["worklog", "weekly"] },
-  "default": { "linear_team": "ops", "labels": ["worklog", "weekly"] }
-}
-```
-
-## Slack Search Keywords
-
-```json
-{
-  "search_keywords": ["intuit", "quickbooks", "WFS", "GEM", "testbox"],
-  "search_from_me": true
-}
-```
-
-## Problemas Resolvidos
-
-| Problema | Solução | Arquivo |
-|----------|---------|---------|
-| date-fns v3 incompatível com date-fns-tz v2 | Downgrade para date-fns ^2.30.0 | package.json |
-| `toZonedTime` não existe | Usar `utcToZonedTime` (v2 naming) | utils/datetime.ts |
-| raw_data type mismatch | Cast via `as unknown as Record<string, unknown>` | collectors/*.ts |
-| Slack `missing_scope` | Usar Search API com user token (xoxp-) | collectors/slack.ts |
-| Slack 0 channels | Não depender de bot membership | collectors/slack.ts |
-| Drive `denylist_folders` erro | Remover "Trash" (precisa ser folder ID) | config/default.json |
+| Arquivo | Descrição |
+|---------|-----------|
+| docs/ONBOARDING.md | Guia para novos usuários |
+| knowledge-base/troubleshooting/ | Problemas comuns |
 
 ## Próximos Passos
 
-1. ✅ ~~npm install~~ - Concluído
-2. ✅ ~~Configurar .env~~ - Concluído
-3. ✅ ~~Testar dry-run~~ - Concluído
-4. [ ] Testar post real no Linear
-5. [ ] Implementar testes unitários
-6. [ ] Adicionar coletor Claude (se API disponível)
-7. [ ] Melhorar clustering com ML
+1. ✅ Configuração completa - Concluído
+2. ✅ Primeiro ticket criado - RAC-2
+3. ✅ Guia de onboarding criado
+4. [ ] Implementar testes unitários
+5. [x] SpineHub Layer 3.5 implementado
+6. [ ] Adicionar coletor Claude
+7. [ ] Testar SpineHub com dados reais
 
 ---
 
-**Instruções:** Sempre leia este arquivo no início de cada sessão para recuperar contexto.
+**Instruções:** Sempre leia este arquivo no início de cada sessão.

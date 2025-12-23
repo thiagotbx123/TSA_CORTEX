@@ -9,12 +9,14 @@ import { SlackCollector } from './slack';
 import { LinearCollector } from './linear';
 import { DriveCollector } from './drive';
 import { LocalCollector } from './local';
+import { ClaudeCollector } from './claude';
 
 export { BaseCollector, CollectorResult } from './base';
 export { SlackCollector } from './slack';
 export { LinearCollector } from './linear';
 export { DriveCollector } from './drive';
 export { LocalCollector } from './local';
+export { ClaudeCollector } from './claude';
 
 export function createCollector(
   source: SourceSystem,
@@ -32,8 +34,7 @@ export function createCollector(
     case 'local':
       return new LocalCollector(config, dateRange, userId);
     case 'claude':
-      // Claude collector is optional and not yet implemented
-      return null;
+      return new ClaudeCollector(config, dateRange, userId);
     default:
       return null;
   }

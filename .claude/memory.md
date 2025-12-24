@@ -5,25 +5,26 @@
 ## Estado Atual
 
 **Fase:** Produção (v1.0 Completo)
-**Última Atualização:** 2025-12-23
+**Última Atualização:** 2025-12-24
 **Status:** ✅ Pipeline completo + SpineHub + Repo público no GitHub
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
 
-## Métricas de Coleta (última execução: 10-17 Dez 2025)
+## Métricas de Coleta (última execução: 22-23 Dez 2025)
 
-| Fonte | Eventos | Status |
-|-------|---------|--------|
-| Slack | 1,919 | ✅ Search API |
-| Linear | 4 | ✅ SDK |
-| Drive | 317 | ✅ OAuth2 |
-| Local | 87 | ✅ File scan |
-| Claude | 359 | ✅ Session collector |
-| **Total** | **2,686** | |
+| Fonte | Eventos | MY_WORK | Status |
+|-------|---------|---------|--------|
+| Slack | 245 | 103 | ✅ Search API (ownership) |
+| Linear | 12 | - | ✅ SDK |
+| Drive | 101 | - | ✅ OAuth2 |
+| Local | 58 | - | ✅ File scan |
+| Claude | 69 | - | ✅ Filtered (was 816) |
+| **Total** | **485** | | |
 
 **Tickets criados:**
 - RAC-2: https://linear.app/testbox/issue/RAC-2/weekly-update-thiago-rodrigues-2025-12-18
 - RAC-11: Teste com narrative format
 - RAC-12: https://linear.app/testbox/issue/RAC-12/worklog25-12-17-tsa-thiago-rodrigues (10-17 Dez)
+- RAC-14: https://linear.app/testbox/issue/RAC-14/worklog25-12-23-tsa-thiago-rodrigues (22-23 Dez) **NARRATIVA COMPLETA**
 
 ## Pipeline de Execução (6 Steps)
 
@@ -111,6 +112,39 @@ Solução: Usar variáveis de ambiente (.env) sempre.
 ### 4. Narrative vs Metadata
 - **Errado:** "SOW_WFS_v2.docx modificado em 10/12"
 - **Certo:** "Às 14:00, finalizei a versão 2 do SOW após feedback da Katherine"
+
+## Aprendizados Chave (Session 2025-12-24)
+
+### 5. CRÍTICO: Varrer TODOS os canais antes de gerar narrativa
+
+**Problema detectado:** Narrativa gerada manualmente perdeu temas importantes:
+- Gabrielle (67 msgs, 23 my_work) - GEM/Mailchimp - PERDIDO
+- Diego (10 msgs, 9 my_work) - PERDIDO
+- Lucas Soranzo (13 msgs, 5 my_work) - PERDIDO
+- Kat + Alexandra (WFS onboarding) - PERDIDO inicialmente
+
+**Root Cause:** Geração de narrativa baseada em primeiros matches, sem varrer dataset completo.
+
+**CHECKLIST OBRIGATÓRIO antes de gerar narrativa:**
+1. Listar TODOS os canais únicos no Slack
+2. Ordenar por volume de my_work (desc)
+3. Ignorar apenas bots (heytaco, google drive)
+4. Gerar seção narrativa para CADA canal com my_work > 0
+5. Validar: "Tem algum canal com my_work > 3 que não está na narrativa?"
+
+**Script de validação:** `analyze-channels.js`
+
+### 6. Slack Collector - Ownership Classification
+- DMs: `is:dm` → my_work se user enviou, context se recebeu
+- Channels: `from:me -is:dm` → my_work
+- Mentions: `<@userId> -is:dm` → mentioned
+- Resultado: 245 eventos (103 my_work, 13 mentioned, 129 context)
+
+### 7. Claude Collector - Noise Reduction
+- Filtrar apenas `type: user` (não assistant, tool_use, snapshot)
+- Ignorar projetos genéricos (system32, windows)
+- Ignorar prompts curtos (c, y, n, ok)
+- Resultado: 816 → 69 eventos (-92% ruído)
 
 ## Documentação
 

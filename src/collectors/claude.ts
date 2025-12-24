@@ -1,6 +1,12 @@
 /**
  * Claude Code Collector
- * Collects prompts and conversations from Claude Code local data
+ * Collects ONLY user prompts from Claude Code local data
+ *
+ * FILTROS APLICADOS:
+ * - Apenas prompts do usuário (type: user)
+ * - Apenas projetos relevantes (não system32, não home genérico)
+ * - Respeita range de datas
+ * - Ignora: assistant responses, tool_use, snapshots
  */
 
 import * as fs from 'fs';
@@ -26,7 +32,7 @@ interface ClaudeHistoryEntry {
 }
 
 interface ClaudeSessionMessage {
-  type: 'user' | 'assistant' | 'queue-operation';
+  type: 'user' | 'assistant' | 'queue-operation' | 'file-history-snapshot';
   message?: {
     role: string;
     content: string | Array<{ type: string; text?: string }>;
@@ -37,6 +43,16 @@ interface ClaudeSessionMessage {
   gitBranch?: string;
   uuid?: string;
 }
+
+// Projetos genéricos que devem ser ignorados
+const IGNORED_PROJECT_PATTERNS = [
+  'system32',
+  'C--windows',
+  'windows-system32',
+];
+
+// Prompts curtos demais para serem relevantes
+const MIN_PROMPT_LENGTH = 5;
 
 export class ClaudeCollector extends BaseCollector {
   private claudeDataPath: string;
@@ -59,6 +75,43 @@ export class ClaudeCollector extends BaseCollector {
     return fs.existsSync(this.claudeDataPath);
   }
 
+  /**
+   * Verifica se um projeto deve ser coletado
+   */
+  private isRelevantProject(projectPath: string): boolean {
+    if (!projectPath) return false;
+
+    const lowerPath = projectPath.toLowerCase();
+
+    // Ignorar projetos genéricos
+    for (const pattern of IGNORED_PROJECT_PATTERNS) {
+      if (lowerPath.includes(pattern.toLowerCase())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Verifica se um prompt é relevante (não é ruído)
+   */
+  private isRelevantPrompt(text: string): boolean {
+    if (!text || text.trim().length < MIN_PROMPT_LENGTH) {
+      return false;
+    }
+
+    const trimmed = text.trim().toLowerCase();
+
+    // Ignorar comandos muito curtos/genéricos
+    const ignoredCommands = ['c', 'y', 'n', 'yes', 'no', 'ok', 'b', 's'];
+    if (ignoredCommands.includes(trimmed)) {
+      return false;
+    }
+
+    return true;
+  }
+
   async collect(): Promise<CollectorResult> {
     const result = this.createEmptyResult();
 
@@ -68,33 +121,60 @@ export class ClaudeCollector extends BaseCollector {
     }
 
     try {
-      // 1. Collect from history.jsonl (user prompts)
+      // ============================================
+      // FONTE PRINCIPAL: history.jsonl (prompts do usuário)
+      // ============================================
       const historyPath = path.join(this.claudeDataPath, 'history.jsonl');
       if (fs.existsSync(historyPath)) {
         const historyEvents = await this.collectHistory(historyPath);
-        this.logInfo(`Found ${historyEvents.length} prompts in history`);
+        this.logInfo(`Found ${historyEvents.length} user prompts in history`);
         result.events.push(...historyEvents);
+
+        // Salvar raw data para debug
+        result.rawData = historyEvents.map(e => e.raw_data);
       }
 
-      // 2. Collect from project sessions
-      const projectsPath = path.join(this.claudeDataPath, 'projects');
-      if (fs.existsSync(projectsPath)) {
-        const sessionEvents = await this.collectProjectSessions(projectsPath);
-        this.logInfo(`Found ${sessionEvents.length} session messages`);
-        result.events.push(...sessionEvents);
-      }
+      // ============================================
+      // OPCIONAL: Sessões de projetos relevantes
+      // Apenas se configurado para incluir contexto de sessão
+      // ============================================
+      const claudeConfig = this.config.collectors.claude as any;
+      const includeSessionContext = claudeConfig?.include_session_context === true;
 
-      // 3. Collect memory.md if exists
-      const memoryPath = path.join(this.claudeDataPath, 'memory.md');
-      if (fs.existsSync(memoryPath)) {
-        const memoryEvent = await this.collectMemory(memoryPath);
-        if (memoryEvent) {
-          result.events.push(memoryEvent);
+      if (includeSessionContext) {
+        const projectsPath = path.join(this.claudeDataPath, 'projects');
+        if (fs.existsSync(projectsPath)) {
+          const sessionEvents = await this.collectProjectSessions(projectsPath);
+          this.logInfo(`Found ${sessionEvents.length} session prompts (context)`);
+          result.events.push(...sessionEvents);
         }
+      }
+
+      // ============================================
+      // OPCIONAL: memory.md (se modificado no período)
+      // ============================================
+      const includeMemory = claudeConfig?.include_memory !== false;
+      if (includeMemory) {
+        const memoryPath = path.join(this.claudeDataPath, 'memory.md');
+        if (fs.existsSync(memoryPath)) {
+          const memoryEvent = await this.collectMemory(memoryPath);
+          if (memoryEvent) {
+            result.events.push(memoryEvent);
+          }
+        }
+      }
+
+      // Estatísticas
+      const byProject = new Map<string, number>();
+      for (const event of result.events) {
+        const proj = (event.raw_data as any)?.project || 'unknown';
+        const projName = this.extractProjectName(proj);
+        byProject.set(projName, (byProject.get(projName) || 0) + 1);
       }
 
       result.recordCount = result.events.length;
       this.logInfo(`Collected ${result.recordCount} events from Claude Code`);
+      this.logInfo(`  By project: ${Array.from(byProject.entries()).map(([k, v]) => `${k}(${v})`).join(', ')}`);
     } catch (error: any) {
       result.errors.push(`Claude collection failed: ${error.message}`);
     }
@@ -107,6 +187,10 @@ export class ClaudeCollector extends BaseCollector {
     const content = fs.readFileSync(historyPath, 'utf-8');
     const lines = content.split('\n').filter((l) => l.trim());
 
+    let skippedByDate = 0;
+    let skippedByProject = 0;
+    let skippedByContent = 0;
+
     for (const line of lines) {
       try {
         const entry: ClaudeHistoryEntry = JSON.parse(line);
@@ -114,11 +198,19 @@ export class ClaudeCollector extends BaseCollector {
 
         // Filter by date range
         if (timestamp < this.dateRange.start || timestamp > this.dateRange.end) {
+          skippedByDate++;
           continue;
         }
 
-        // Skip empty prompts
-        if (!entry.display || entry.display.trim().length === 0) {
+        // Filter by project relevance (skip system32, etc)
+        if (!this.isRelevantProject(entry.project)) {
+          skippedByProject++;
+          continue;
+        }
+
+        // Filter by prompt content (skip empty, single chars, etc)
+        if (!this.isRelevantPrompt(entry.display)) {
+          skippedByContent++;
           continue;
         }
 
@@ -167,6 +259,7 @@ export class ClaudeCollector extends BaseCollector {
       }
     }
 
+    this.logInfo(`  Filtered: ${skippedByDate} by date, ${skippedByProject} by project, ${skippedByContent} by content`);
     return events;
   }
 
@@ -175,6 +268,11 @@ export class ClaudeCollector extends BaseCollector {
     const projectDirs = fs.readdirSync(projectsPath);
 
     for (const projectDir of projectDirs) {
+      // Skip generic/system projects
+      if (!this.isRelevantProject(projectDir)) {
+        continue;
+      }
+
       const projectPath = path.join(projectsPath, projectDir);
       if (!fs.statSync(projectPath).isDirectory()) continue;
 
@@ -199,8 +297,10 @@ export class ClaudeCollector extends BaseCollector {
       try {
         const msg: ClaudeSessionMessage = JSON.parse(line);
 
-        // Only collect user and assistant messages
-        if (msg.type !== 'user' && msg.type !== 'assistant') continue;
+        // ============================================
+        // APENAS mensagens do USUÁRIO (não assistant, não tool_use, não snapshot)
+        // ============================================
+        if (msg.type !== 'user') continue;
         if (!msg.message || !msg.timestamp) continue;
 
         const timestamp = new Date(msg.timestamp);
@@ -211,15 +311,18 @@ export class ClaudeCollector extends BaseCollector {
         }
 
         const messageText = this.extractMessageText(msg.message);
-        if (!messageText || messageText.trim().length === 0) continue;
+
+        // Filter by content relevance
+        if (!this.isRelevantPrompt(messageText)) {
+          continue;
+        }
 
         const projectName = this.extractProjectName(projectDir);
-        const isUser = msg.type === 'user';
 
         const sourcePointers: SourcePointer[] = [{
           pointer_id: generatePointerId('claude_session', msg.uuid || msg.sessionId + msg.timestamp),
-          type: isUser ? 'claude_prompt' : 'claude_response',
-          display_text: `Claude ${isUser ? 'prompt' : 'response'} in ${projectName}`,
+          type: 'claude_prompt',
+          display_text: `Claude prompt in ${projectName}`,
         }];
 
         const references: EventReference[] = [{
@@ -244,26 +347,24 @@ export class ClaudeCollector extends BaseCollector {
           });
         }
 
-        const title = isUser
-          ? this.createPromptTitle(messageText, projectName)
-          : `[Claude Response] ${messageText.slice(0, 80)}...`;
+        const title = this.createPromptTitle(messageText, projectName);
 
         events.push({
           event_id: generateEventId('claude', msg.sessionId, msg.uuid || msg.timestamp),
           source_system: 'claude',
           source_record_id: msg.uuid || `${msg.sessionId}-${msg.timestamp}`,
-          actor_user_id: isUser ? this.userId : 'claude',
-          actor_display_name: isUser ? 'User' : 'Claude',
+          actor_user_id: this.userId,
+          actor_display_name: 'User',
           event_timestamp_utc: formatUTC(timestamp),
           event_timestamp_local: formatLocalTime(timestamp, this.dateRange.timezone),
-          event_type: isUser ? 'prompt' : 'response',
+          event_type: 'prompt',
           title: title,
           body_text_excerpt: messageText.slice(0, 500),
           references,
           source_pointers: sourcePointers,
           pii_redaction_applied: false,
           confidence: 'high',
-          raw_data: { type: msg.type, cwd: msg.cwd, gitBranch: msg.gitBranch },
+          raw_data: { type: msg.type, cwd: msg.cwd, gitBranch: msg.gitBranch, project: projectDir },
         });
       } catch (e) {
         // Skip malformed lines

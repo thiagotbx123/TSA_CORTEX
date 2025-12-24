@@ -291,6 +291,8 @@ export interface RawSlackMessage {
   reactions?: Array<{ name: string; count: number }>;
   files?: Array<{ id: string; name: string; url_private: string }>;
   permalink?: string;
+  // Ownership classification (added by collector)
+  ownership?: 'my_work' | 'mentioned' | 'context' | 'keyword_match';
 }
 
 export interface RawLinearIssue {

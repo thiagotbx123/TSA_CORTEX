@@ -134,6 +134,24 @@ Solução: Usar variáveis de ambiente (.env) sempre.
 
 **Script de validação:** `analyze-channels.js`
 
+### 8. CRÍTICO: Slack = CONTEXTO, nunca citar diretamente
+
+**REGRA ABSOLUTA:** Dados do Slack servem APENAS para:
+- Interpretar CONTEXTO
+- Identificar TEMAS de trabalho
+- Analisar COM QUEM se trabalhou
+- Inferir OUTCOMES
+
+**NUNCA fazer:**
+- ❌ Citar mensagens: "Thiago disse: 'posso te chamar?'"
+- ❌ Reproduzir conversas
+- ❌ Incluir quotes diretos do Slack
+
+**SEMPRE fazer:**
+- ✅ "Thiago coordenou com Gabrielle detalhes técnicos do projeto GEM"
+- ✅ "Houve alinhamento pré-reunião com Alexandra sobre WFS"
+- ✅ Descrever OUTCOMES, não conversas
+
 ### 6. Slack Collector - Ownership Classification
 - DMs: `is:dm` → my_work se user enviou, context se recebeu
 - Channels: `from:me -is:dm` → my_work

@@ -147,10 +147,10 @@ program
     }
   });
 
-// Collect only command
+// Collect only command - Now exports context_for_narrative.json for Claude to generate narrative
 program
   .command('collect')
-  .description('Only collect data from sources (no worklog generation)')
+  .description('Collect data from sources and export context for Claude narrative generation')
   .option('-s, --start <date>', 'Start date (ISO format)')
   .option('-e, --end <date>', 'End date (ISO format)')
   .option('-t, --timezone <tz>', 'Timezone')
@@ -162,6 +162,7 @@ program
       const timezone = options.timezone || config.default_timezone;
       const dateRange = parseDateRange(options.start, options.end, timezone, config.default_range_days);
       const userId = getEnvVar('SLACK_USER_ID') || 'unknown';
+      const userDisplayName = getEnvVar('USER_DISPLAY_NAME') || userId;
 
       console.log('📥 Collecting data from sources...\n');
       const results = await runAllCollectors(config, dateRange, userId);
@@ -170,13 +171,121 @@ program
       const outputDir = options.output || getOutputPaths().rawExports;
       ensureDir(outputDir);
 
+      const counts: Record<string, number> = {};
       for (const [source, result] of results) {
         const filename = path.join(outputDir, `raw_events_${source}.json`);
         fs.writeFileSync(filename, JSON.stringify(result.rawData, null, 2));
         console.log(`  Saved ${result.recordCount} events to ${filename}`);
+        counts[source] = result.recordCount;
       }
 
+      // Build SpineHub for artifact resolution and context
+      console.log('\n🧠 Building SpineHub for context...');
+      const spineHub = await buildSpineHub(
+        outputDir,
+        userId,
+        userDisplayName,
+        dateRange.start,
+        dateRange.end
+      );
+
+      // Generate context_for_narrative.json - This is what Claude reads to generate the narrative
+      console.log('\n📋 Generating context for Claude narrative generation...');
+      const contextForNarrative = {
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          period: {
+            start: dateRange.start.toISOString(),
+            end: dateRange.end.toISOString(),
+            startDisplay: dateRange.start.toISOString().split('T')[0],
+            endDisplay: dateRange.end.toISOString().split('T')[0],
+            daysSpan: Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)),
+          },
+          owner: {
+            id: userId,
+            name: userDisplayName,
+          },
+          counts: {
+            ...counts,
+            total: Object.values(counts).reduce((a, b) => a + b, 0),
+          },
+        },
+        // Slack: Owner messages + context summary (never quote directly per RAC-14)
+        slack: {
+          ownerMessages: spineHub.slack.ownerMessages.slice(0, 100).map(m => ({
+            timestamp: m.timestamp,
+            channel: m.channelName,
+            text: m.text.slice(0, 500),
+            permalink: m.permalink,
+          })),
+          contextSummary: {
+            totalContextMessages: spineHub.slack.contextMessages.length,
+            channelsActive: Array.from(spineHub.slack.channelsSummary.keys()),
+          },
+        },
+        // Drive: Files with URLs for linking
+        drive: {
+          files: spineHub.drive.files.slice(0, 50).map(f => ({
+            name: f.name,
+            mimeType: f.mimeType,
+            modifiedTime: f.modifiedTime,
+            url: f.webViewLink,
+            owners: f.owners,
+          })),
+        },
+        // Linear: Issues with URLs
+        linear: {
+          issues: spineHub.linear.issues.map(i => ({
+            identifier: i.identifier,
+            title: i.title,
+            state: i.state,
+            url: i.url,
+            description: i.description?.slice(0, 500),
+          })),
+        },
+        // Local: Files modified
+        local: {
+          files: spineHub.local.files.slice(0, 50).map(f => ({
+            name: f.name,
+            path: f.path,
+            extension: f.extension,
+            modifiedAt: f.modifiedAt,
+          })),
+        },
+        // Claude: Interactions (prompts only)
+        claude: {
+          interactions: spineHub.claude.interactions
+            .filter(i => i.type === 'prompt')
+            .slice(0, 50)
+            .map(i => ({
+              timestamp: i.timestamp,
+              project: i.project,
+              text: i.text.slice(0, 300),
+            })),
+        },
+        // Pre-computed narrative blocks from SpineHub
+        narrativeBlocks: spineHub.narrativeBlocks,
+        // RAC-14 Quality Rules Reminder
+        qualityRules: {
+          language: 'English 100%',
+          person: 'Third person ("Thiago worked on...")',
+          slackRule: 'NEVER quote Slack messages directly. Use for CONTEXT ONLY.',
+          titleRule: 'Use "Worklog" for periods < 7 days, "Weekly Worklog" for >= 7 days',
+          artifactRule: 'Always include clickable links [Artifact Name](URL)',
+          outcomeRule: 'Each theme must have a concrete outcome',
+          signatureRule: 'End with markdown signature table',
+        },
+      };
+
+      // Save context file to output directory
+      const contextPath = path.join(getOutputPaths().output, 'context_for_narrative.json');
+      ensureDir(getOutputPaths().output);
+      fs.writeFileSync(contextPath, JSON.stringify(contextForNarrative, null, 2));
+      console.log(`  Saved context to: ${contextPath}`);
+
       console.log('\n✅ Collection complete!');
+      console.log('\n📝 NEXT STEP: Claude will read context_for_narrative.json to generate the worklog narrative.');
+      console.log(`   File: ${contextPath}`);
     } catch (error: any) {
       console.error(`\n❌ Error: ${error.message}`);
       process.exit(1);

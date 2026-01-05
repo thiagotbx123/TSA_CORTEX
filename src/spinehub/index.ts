@@ -1,13 +1,26 @@
 /**
- * SpineHub - Layer 3.5: Content Consolidation Hub
+ * SpineHub - The Central Knowledge Graph of TSA_CORTEX
  *
- * Reads raw content from all sources and consolidates into a navigable structure
- * This is the missing layer between collection and narrative generation
+ * SpineHub is the BACKBONE of the system, not just a layer.
+ * It provides:
+ * - Persistent storage of entities, relations, and artifacts
+ * - Cross-execution memory and learning
+ * - Single source of truth for all data
+ * - Artifact resolution with full URLs
+ *
+ * This file maintains backward compatibility with existing code
+ * while integrating the new SpineHub core.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { getOutputPaths } from '../utils/config';
+
+// Re-export new SpineHub core
+export { SpineHub, createSpineHub, NarrativeContext } from './core';
+export { Entity, Relation, Pattern, Artifact, EntityType, RelationType } from './entities';
+export { SpineHubStorage } from './storage';
+export { validateWorklogQuality, QUALITY_RULES, RAC_14_TEMPLATE, generateWorklogTitle } from './benchmark';
 
 // Types for consolidated content
 export interface SlackMessage {
@@ -529,4 +542,85 @@ export function saveSpineHub(hub: SpineHubData, outputPath: string): void {
 
   fs.writeFileSync(filePath, JSON.stringify(serializable, null, 2));
   console.log(`   Saved SpineHub to: ${filePath}`);
+}
+
+// ============================================
+// INTEGRATION WITH NEW SPINEHUB CORE
+// ============================================
+
+import { SpineHub as SpineHubCore, createSpineHub as createCore } from './core';
+import { Artifact } from './entities';
+
+/**
+ * Build SpineHub with persistent knowledge graph integration
+ * This combines the legacy buildSpineHub with the new core
+ */
+export async function buildSpineHubWithCore(
+  rawExportsPath: string,
+  ownerId: string,
+  ownerName: string,
+  startDate: Date,
+  endDate: Date,
+  projectPath: string
+): Promise<{ legacy: SpineHubData; core: SpineHubCore }> {
+  // Build legacy SpineHub for backward compatibility
+  const legacy = await buildSpineHub(rawExportsPath, ownerId, ownerName, startDate, endDate);
+
+  // Initialize new SpineHub core
+  const core = createCore(projectPath, ownerName, ownerId);
+  await core.initialize();
+
+  // Ingest data into core for persistent storage
+  const slackPath = path.join(rawExportsPath, 'raw_events_slack.json');
+  const drivePath = path.join(rawExportsPath, 'raw_events_drive.json');
+  const linearPath = path.join(rawExportsPath, 'raw_events_linear.json');
+  const localPath = path.join(rawExportsPath, 'raw_events_local.json');
+  const claudePath = path.join(rawExportsPath, 'raw_events_claude.json');
+
+  if (fs.existsSync(slackPath)) {
+    await core.ingest('slack', JSON.parse(fs.readFileSync(slackPath, 'utf-8')));
+  }
+  if (fs.existsSync(drivePath)) {
+    await core.ingest('drive', JSON.parse(fs.readFileSync(drivePath, 'utf-8')));
+  }
+  if (fs.existsSync(linearPath)) {
+    await core.ingest('linear', JSON.parse(fs.readFileSync(linearPath, 'utf-8')));
+  }
+  if (fs.existsSync(localPath)) {
+    await core.ingest('local', JSON.parse(fs.readFileSync(localPath, 'utf-8')));
+  }
+  if (fs.existsSync(claudePath)) {
+    await core.ingest('claude', JSON.parse(fs.readFileSync(claudePath, 'utf-8')));
+  }
+
+  console.log('\n📊 SpineHub Core Stats:');
+  const stats = core.getStats();
+  console.log(`   Entities: ${stats.entities}`);
+  console.log(`   Relations: ${stats.relations}`);
+  console.log(`   Artifacts: ${stats.artifacts}`);
+  console.log(`   Patterns: ${stats.patterns}`);
+
+  return { legacy, core };
+}
+
+/**
+ * Resolve artifact link by name using SpineHub core
+ */
+export function resolveArtifactLink(core: SpineHubCore, name: string): string | null {
+  const artifact = core.resolveArtifact(name);
+  return artifact?.url || null;
+}
+
+/**
+ * Get all Drive artifacts with their links
+ */
+export function getDriveArtifactsWithLinks(core: SpineHubCore): Array<{ name: string; url: string; mimeType: string }> {
+  const artifacts = core.findArtifacts('.*');
+  return artifacts
+    .filter(a => a.source === 'drive')
+    .map(a => ({
+      name: a.name,
+      url: a.url,
+      mimeType: a.mimeType,
+    }));
 }

@@ -1,0 +1,632 @@
+[
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS\\Coments.docx",
+    "name": "Coments.docx",
+    "extension": ".docx",
+    "size_bytes": 38830,
+    "created_at": "2025-12-23T17:38:30.490Z",
+    "modified_at": "2025-12-23T17:38:27.281Z",
+    "file_hash_sha256": "5888a433098f24e16b732c9551bb3e486e5e81420107c1d85400a1e355c16ab7"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS\\sketch_SOW_WFS.docx",
+    "name": "sketch_SOW_WFS.docx",
+    "extension": ".docx",
+    "size_bytes": 219483,
+    "created_at": "2025-12-23T17:38:30.501Z",
+    "modified_at": "2025-12-23T17:38:27.274Z",
+    "file_hash_sha256": "22f1616e7cc467ab495ae6fd39ae1533f710d100bd9ad7870db10cb9303c1aff"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS\\WFS_TSA_SCOPE_PLAN.xlsx",
+    "name": "WFS_TSA_SCOPE_PLAN.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 63222,
+    "created_at": "2025-12-23T17:38:30.507Z",
+    "modified_at": "2025-12-23T17:38:27.266Z",
+    "file_hash_sha256": "012a9fd56019194d0b0e9edd5fd6d516098e6af6d7292175579edc6d0794c6b3"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS-20251223T173652Z-3-001\\02. WFS\\Coments.docx",
+    "name": "Coments.docx",
+    "extension": ".docx",
+    "size_bytes": 38830,
+    "created_at": "2025-12-08T17:32:34.000Z",
+    "modified_at": "2025-12-23T17:38:27.281Z",
+    "file_hash_sha256": "5888a433098f24e16b732c9551bb3e486e5e81420107c1d85400a1e355c16ab7"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS-20251223T173652Z-3-001\\02. WFS\\sketch_SOW_WFS.docx",
+    "name": "sketch_SOW_WFS.docx",
+    "extension": ".docx",
+    "size_bytes": 219483,
+    "created_at": "2025-12-18T09:40:00.000Z",
+    "modified_at": "2025-12-23T17:38:27.274Z",
+    "file_hash_sha256": "22f1616e7cc467ab495ae6fd39ae1533f710d100bd9ad7870db10cb9303c1aff"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS-20251223T173652Z-3-001\\02. WFS\\WFS_TSA_SCOPE_PLAN.xlsx",
+    "name": "WFS_TSA_SCOPE_PLAN.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 63222,
+    "created_at": "2025-12-18T14:07:30.000Z",
+    "modified_at": "2025-12-23T17:38:27.266Z",
+    "file_hash_sha256": "012a9fd56019194d0b0e9edd5fd6d516098e6af6d7292175579edc6d0794c6b3"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\02. WFS-20251223T173652Z-3-001.zip",
+    "name": "02. WFS-20251223T173652Z-3-001.zip",
+    "extension": ".zip",
+    "size_bytes": 279299,
+    "created_at": "2025-12-23T17:37:07.493Z",
+    "modified_at": "2025-12-23T17:37:08.578Z",
+    "file_hash_sha256": "983990cd2089d4d4c86d6ab273bd42d6705559dd7c856886201577dec789c80f"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\10. Fall release Expenses.docx",
+    "name": "10. Fall release Expenses.docx",
+    "extension": ".docx",
+    "size_bytes": 1129164,
+    "created_at": "2025-12-22T20:27:08.042Z",
+    "modified_at": "2025-12-22T20:27:09.721Z",
+    "file_hash_sha256": "be151ab0e7a9caac07e3d37fe42bb7fecf0abd335d3da9b0f18552036d900fc3"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\client_secret_486245165530-b1svh3pe6m9k1oghaapknkd2kk4ladv2.apps.googleusercontent.com.json",
+    "name": "client_secret_486245165530-b1svh3pe6m9k1oghaapknkd2kk4ladv2.apps.googleusercontent.com.json",
+    "extension": ".json",
+    "size_bytes": 402,
+    "created_at": "2025-12-22T16:33:09.856Z",
+    "modified_at": "2025-12-22T16:33:10.657Z",
+    "file_hash_sha256": "4898c539c52716a81c1789599b5099f2488fba2cbdcb96bb52a5e021a972880f"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\cortex.pptx",
+    "name": "cortex.pptx",
+    "extension": ".pptx",
+    "size_bytes": 643724,
+    "created_at": "2025-12-22T13:39:02.989Z",
+    "modified_at": "2025-12-23T13:49:38.757Z",
+    "file_hash_sha256": "335669c178747b9f0e614a67a930f4a22797e0613ffe342f3200326bc2c8e624"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\edit.htm",
+    "name": "edit.htm",
+    "extension": ".htm",
+    "size_bytes": 25594,
+    "created_at": "2025-12-22T17:36:44.485Z",
+    "modified_at": "2025-12-22T17:36:50.628Z",
+    "file_hash_sha256": "0fcec38ba9aac45863efc8c1eac1b54f81277cfb4cbf4fe5ef69e7bdb06d62e8"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\four-ls-sm.webp",
+    "name": "four-ls-sm.webp",
+    "extension": ".webp",
+    "size_bytes": 17114,
+    "created_at": "2025-12-23T12:47:09.163Z",
+    "modified_at": "2025-12-23T12:47:13.429Z",
+    "file_hash_sha256": "5a1c20e5cf06ee528734ea33403bf38606c8bc4f745adcea4e8b6f2e748f8d55"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Build Guide\\Gem_Data_Eng_BuildGuide_Workbook_v1_WIP.xlsx",
+    "name": "Gem_Data_Eng_BuildGuide_Workbook_v1_WIP.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 49733,
+    "created_at": "2025-08-16T02:27:54.000Z",
+    "modified_at": "2025-12-23T16:52:02.203Z",
+    "file_hash_sha256": "96930cfd43c0b69ffe3b992e1e1f928e015871ef0a15286b1369391171626f3d"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Build Guide\\Gem_ERD_CRM_ATS_JobBoard.xlsx",
+    "name": "Gem_ERD_CRM_ATS_JobBoard.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 124893,
+    "created_at": "2025-08-15T23:55:20.000Z",
+    "modified_at": "2025-12-23T16:52:02.212Z",
+    "file_hash_sha256": "f36f1016fbe5b1cbc3e2b26c158c224a1b689f43fb22b45fb507abe88c11277d"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Build Guide\\Gem_Solution_Design_v1_WIP.docx",
+    "name": "Gem_Solution_Design_v1_WIP.docx",
+    "extension": ".docx",
+    "size_bytes": 33004,
+    "created_at": "2025-09-12T13:53:36.000Z",
+    "modified_at": "2025-12-23T16:52:02.203Z",
+    "file_hash_sha256": "5b9066d3df86ac0da548a8f01fafbd010f137a2ed446329db7d5b3d29e37894a"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Build Guide\\gem_tenant_factory_skeleton.zip",
+    "name": "gem_tenant_factory_skeleton.zip",
+    "extension": ".zip",
+    "size_bytes": 5869,
+    "created_at": "2025-08-15T14:36:00.000Z",
+    "modified_at": "2025-12-23T16:52:02.203Z",
+    "file_hash_sha256": "547cbeac8946d01e6760ec4ed016f7cab734f4cc16cf22646be9225f3ee5d7f4"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Build Guide\\gem_tenant_factory_skeleton_v2_20250816_060747.zip",
+    "name": "gem_tenant_factory_skeleton_v2_20250816_060747.zip",
+    "extension": ".zip",
+    "size_bytes": 6972,
+    "created_at": "2025-08-16T02:09:04.000Z",
+    "modified_at": "2025-12-23T16:52:02.203Z",
+    "file_hash_sha256": "f07cf769130d82dfaa5cff5831eb1aa18496e6074945dc998dbf1ea9bba20f5b"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Files for Customer\\Gem ERD - Data Diagram.xlsx",
+    "name": "Gem ERD - Data Diagram.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 157395,
+    "created_at": "2025-08-14T21:44:40.000Z",
+    "modified_at": "2025-12-23T16:52:02.196Z",
+    "file_hash_sha256": "e80200acdc1fc75e65d6939ef7e9f45668661183a8b01149e90b09f74322cb17"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\Files for Customer\\Gem_Data_Model_Readers_Guide.docx",
+    "name": "Gem_Data_Model_Readers_Guide.docx",
+    "extension": ".docx",
+    "size_bytes": 37387,
+    "created_at": "2025-08-14T21:31:02.000Z",
+    "modified_at": "2025-12-23T16:52:02.194Z",
+    "file_hash_sha256": "93af3c4803a18ddfe367dfdabb33fc85a1130bfd8d635d2487497565aef5d20d"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\gem_unified_openapi.json",
+    "name": "gem_unified_openapi.json",
+    "extension": ".json",
+    "size_bytes": 221236,
+    "created_at": "2025-08-14T18:53:56.000Z",
+    "modified_at": "2025-12-23T16:52:02.180Z",
+    "file_hash_sha256": "6d88c02d7fab0d26303c8a7ca8d8205bc7a7115b9a80c10609d885d444918636"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Dev Docs\\helpcenter_docs.json",
+    "name": "helpcenter_docs.json",
+    "extension": ".json",
+    "size_bytes": 1554526,
+    "created_at": "2025-08-14T18:47:06.000Z",
+    "modified_at": "2025-12-23T16:52:02.186Z",
+    "file_hash_sha256": "cbdbda955f1153fe8c087b37443cc1a2b392a87d67d4aff5e42d6614ea2c3db6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Gem - TestBox Exec Presentation - 11.18.25.pptx",
+    "name": "Gem - TestBox Exec Presentation - 11.18.25.pptx",
+    "extension": ".pptx",
+    "size_bytes": 19212651,
+    "created_at": "2025-12-18T01:56:10.000Z",
+    "modified_at": "2025-12-23T16:52:01.721Z",
+    "file_hash_sha256": "9f646a0ececec39b8bd54cfeb2b48af4bb07598d63e180651a4034341cd6f968"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Gem ATS ERD.docx",
+    "name": "Gem ATS ERD.docx",
+    "extension": ".docx",
+    "size_bytes": 964983,
+    "created_at": "2025-12-15T19:26:06.000Z",
+    "modified_at": "2025-12-23T16:52:01.612Z",
+    "file_hash_sha256": "5992eecf9fb9c2c2283dd377b241a8c502852da466e98bff158e2424310b8e50"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Gem ATS ERD.xlsx",
+    "name": "Gem ATS ERD.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 342450,
+    "created_at": "2025-12-18T07:25:04.000Z",
+    "modified_at": "2025-12-23T16:52:01.612Z",
+    "file_hash_sha256": "9a15ecea4b4c2a69c0ec527578937959000b44f9f264642f48cf809122dce29b"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Gem Demo Scenarios - v1.xlsx",
+    "name": "Gem Demo Scenarios - v1.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 61398,
+    "created_at": "2025-11-14T15:17:14.000Z",
+    "modified_at": "2025-12-23T16:52:01.625Z",
+    "file_hash_sha256": "8fcce1d3204000e247e5df329df5c6df3a1ebd59b3af5cb6f59823cd1dd607c4"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Gem SOW 12.15.25.docx",
+    "name": "Gem SOW 12.15.25.docx",
+    "extension": ".docx",
+    "size_bytes": 306569,
+    "created_at": "2025-12-16T18:22:02.000Z",
+    "modified_at": "2025-12-23T16:52:01.594Z",
+    "file_hash_sha256": "86162b37301073ee37e6ae6f7c993f255232029a412abfaae362675bd55dd9c2"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\gem_demo_value_stories.xlsx",
+    "name": "gem_demo_value_stories.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 21356,
+    "created_at": "2025-08-16T01:52:08.000Z",
+    "modified_at": "2025-12-23T16:52:01.602Z",
+    "file_hash_sha256": "be76dab9152e4408c5f7e3ca2edac7dbe2d00063f9279fe7d03b537c18a29719"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\Solution Design Plan_ Gem.docx",
+    "name": "Solution Design Plan_ Gem.docx",
+    "extension": ".docx",
+    "size_bytes": 223307,
+    "created_at": "2025-07-22T10:59:26.000Z",
+    "modified_at": "2025-12-23T16:52:01.622Z",
+    "file_hash_sha256": "315c34cb3d2f154ae8c007ce8b66697a22e82c95505d478d796f69780deb6b19"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\synthetic_demo_difficulty_matrix_with_rationale.xlsx",
+    "name": "synthetic_demo_difficulty_matrix_with_rationale.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 10033,
+    "created_at": "2025-08-14T19:43:36.000Z",
+    "modified_at": "2025-12-23T16:52:01.602Z",
+    "file_hash_sha256": "669f45eeb4dcd056c6af812e9ec1c731c966fb9fb54d4cb5666923c22524f47b"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Gem\\[EXT] Gem Demo Scenarios - v1.xlsx",
+    "name": "[EXT] Gem Demo Scenarios - v1.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 56173,
+    "created_at": "2025-12-23T16:50:37.724Z",
+    "modified_at": "2025-12-23T16:50:38.612Z",
+    "file_hash_sha256": "19307af4784ddb0bbb8bd9fcc3ece08ed7c64c9fc4179df1c153d2c730e7c52a"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\GoCo + WFS Teams and Deliverables - Track Delivery Pipeline (1).csv",
+    "name": "GoCo + WFS Teams and Deliverables - Track Delivery Pipeline (1).csv",
+    "extension": ".csv",
+    "size_bytes": 38653,
+    "created_at": "2025-12-22T13:49:39.245Z",
+    "modified_at": "2025-12-22T13:49:39.452Z",
+    "file_hash_sha256": "49ee28f575cbad98460b3a1a6951a2047fb2967287a5d81205d3fb51fc724ca6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\GoCo Platform Comprehensive Feature List - Feature List (1).csv",
+    "name": "GoCo Platform Comprehensive Feature List - Feature List (1).csv",
+    "extension": ".csv",
+    "size_bytes": 32674,
+    "created_at": "2025-12-22T13:49:57.611Z",
+    "modified_at": "2025-12-22T13:49:57.716Z",
+    "file_hash_sha256": "a3319108c60262dda68222bba8af55dd69aa361d6cc78f12a8e0c55f108c78a6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\HeyTaco_Guia_Produtividade.md",
+    "name": "HeyTaco_Guia_Produtividade.md",
+    "extension": ".md",
+    "size_bytes": 8171,
+    "created_at": "2025-12-29T11:13:40.756Z",
+    "modified_at": "2025-12-29T11:13:40.756Z",
+    "file_hash_sha256": "cbf9097ef28f59694f2f50e0288ae17e435e725d0feb8b4aeea7e055180e2b5d"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come - Deliverance II [FitGirl Repack]\\fg-06.bin",
+    "name": "fg-06.bin",
+    "extension": ".bin",
+    "size_bytes": 267418,
+    "created_at": "2025-12-26T10:29:41.742Z",
+    "modified_at": "2025-12-26T10:29:43.058Z",
+    "file_hash_sha256": "3cfe430924da0ea4680060686eda7cd4e7cc307486e70ee5a4a8039205f178ad"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come - Deliverance II [FitGirl Repack]\\MD5\\fitgirl-bins.md5",
+    "name": "fitgirl-bins.md5",
+    "extension": ".md5",
+    "size_bytes": 804,
+    "created_at": "2025-12-26T04:36:57.346Z",
+    "modified_at": "2025-12-26T04:36:57.346Z",
+    "file_hash_sha256": "7293fcb3ff1535536b06cc0628d8bbbbbf7115a4a97497f8911fc33f228af293"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come - Deliverance II [FitGirl Repack]\\MD5\\QuickSFV.EXE",
+    "name": "QuickSFV.EXE",
+    "extension": ".exe",
+    "size_bytes": 103424,
+    "created_at": "2025-12-26T04:36:57.346Z",
+    "modified_at": "2025-12-26T04:36:57.346Z",
+    "file_hash_sha256": "a6371461da7439f4ef7008ed53331209747cba960b85c70a902d46451247a29c"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come - Deliverance II [FitGirl Repack]\\MD5\\QuickSFV.ini",
+    "name": "QuickSFV.ini",
+    "extension": ".ini",
+    "size_bytes": 155,
+    "created_at": "2025-12-26T04:36:57.346Z",
+    "modified_at": "2025-12-26T04:36:57.346Z",
+    "file_hash_sha256": "74ca5a42469197eded04f5a0bf34ca251c72f7cc06a3416ac035230cb8e81629"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come - Deliverance II [FitGirl Repack]\\setup.exe",
+    "name": "setup.exe",
+    "extension": ".exe",
+    "size_bytes": 5783961,
+    "created_at": "2025-12-26T04:36:57.346Z",
+    "modified_at": "2025-12-26T10:39:19.723Z",
+    "file_hash_sha256": "2c2bb23d28da26e6db5adcca265159c00d3dbd7a6b53031b4990c7a91bcd80e7"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come - Deliverance II [FitGirl Repack]\\Verify BIN files before installation.bat",
+    "name": "Verify BIN files before installation.bat",
+    "extension": ".bat",
+    "size_bytes": 69,
+    "created_at": "2025-12-26T10:39:19.723Z",
+    "modified_at": "2025-12-26T10:39:19.723Z",
+    "file_hash_sha256": "95ff8038ebfcdbdbf8fbfd047447b0418e960c2a2dcb20515ee3c5e8349a5540"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Kingdom Come Deliverance II Trainer - FLiNG.exe",
+    "name": "Kingdom Come Deliverance II Trainer - FLiNG.exe",
+    "extension": ".exe",
+    "size_bytes": 159576,
+    "created_at": "2025-12-26T15:34:23.398Z",
+    "modified_at": "2025-12-26T15:34:25.156Z",
+    "file_hash_sha256": "c6fae9c9033862b6788b5ebf54161031bd0d4bc81ffc39e63c24469062f2782e"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\NF_135.pdf",
+    "name": "NF_135.pdf",
+    "extension": ".pdf",
+    "size_bytes": 63350,
+    "created_at": "2025-12-24T19:34:59.642Z",
+    "modified_at": "2025-12-24T19:35:02.906Z",
+    "file_hash_sha256": "b26e1a6d38c1a3ed7a6dc96260eb5ded91f92d33dfb7e41f66b2dafec9e430c9"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\pedidos_amazon_2025-12-26.xlsx",
+    "name": "pedidos_amazon_2025-12-26.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 6177,
+    "created_at": "2025-12-26T13:52:13.177Z",
+    "modified_at": "2025-12-26T13:52:14.205Z",
+    "file_hash_sha256": "6c2a8611eec56aa49a00736e3d00d4a28915318d4b7b80ad947872415990527c"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\PLANO_CARREIRA_THIAGO_TSA.md",
+    "name": "PLANO_CARREIRA_THIAGO_TSA.md",
+    "extension": ".md",
+    "size_bytes": 14336,
+    "created_at": "2025-12-27T04:52:00.504Z",
+    "modified_at": "2025-12-27T04:52:00.504Z",
+    "file_hash_sha256": "8b0828d4444039c33b166729dfdd632e40541cc640295617ccf846ee68f473e8"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\QBO_DATABASE_COMPLETO.xlsb",
+    "name": "QBO_DATABASE_COMPLETO.xlsb",
+    "extension": ".xlsb",
+    "size_bytes": 14417422,
+    "created_at": "2025-12-27T04:12:37.061Z",
+    "modified_at": "2025-12-27T04:12:38.344Z",
+    "file_hash_sha256": "9c653d2d91ab2ce5c0cec8e4e28b0f1024b5cc55f5cb99fd62e8f4e10834da47"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\SKETCH_GEM_IMPLEMENTATION_PLAN_v2.xlsx",
+    "name": "SKETCH_GEM_IMPLEMENTATION_PLAN_v2.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 16777,
+    "created_at": "2025-12-23T17:57:19.961Z",
+    "modified_at": "2025-12-23T17:57:19.971Z",
+    "file_hash_sha256": "9cce2c25498aa2cdbf4e41a1a9569e6efe74b164a049b8327613223229a867a1"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\sketch_SOW_WFS (1).docx",
+    "name": "sketch_SOW_WFS (1).docx",
+    "extension": ".docx",
+    "size_bytes": 219483,
+    "created_at": "2025-12-22T14:33:14.826Z",
+    "modified_at": "2025-12-22T14:33:15.750Z",
+    "file_hash_sha256": "22f1616e7cc467ab495ae6fd39ae1533f710d100bd9ad7870db10cb9303c1aff"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\sketch_SOW_WFS.docx",
+    "name": "sketch_SOW_WFS.docx",
+    "extension": ".docx",
+    "size_bytes": 219483,
+    "created_at": "2025-12-22T14:19:44.537Z",
+    "modified_at": "2025-12-22T14:19:45.650Z",
+    "file_hash_sha256": "22f1616e7cc467ab495ae6fd39ae1533f710d100bd9ad7870db10cb9303c1aff"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\Testbox - SOW - Intuit Workforce Solutions v1.1.docx",
+    "name": "Testbox - SOW - Intuit Workforce Solutions v1.1.docx",
+    "extension": ".docx",
+    "size_bytes": 78527,
+    "created_at": "2025-12-22T14:18:24.847Z",
+    "modified_at": "2025-12-22T14:18:25.744Z",
+    "file_hash_sha256": "3ee566b4c5d882399d7f7017666937f1c5ed4c5c551e6a07609c7a8848d659ae"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\TOOLKIT_INVENTORY.xlsx",
+    "name": "TOOLKIT_INVENTORY.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 23895,
+    "created_at": "2025-12-22T19:22:24.275Z",
+    "modified_at": "2025-12-22T19:22:24.282Z",
+    "file_hash_sha256": "ce522e7a48c161e83c6c355341eb50e373ba8ef7763168c0cdecbccb9a6604b8"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\DRAFT TestBox_IntuitWFS Demo Proposal_v1.docx",
+    "name": "DRAFT TestBox_IntuitWFS Demo Proposal_v1.docx",
+    "extension": ".docx",
+    "size_bytes": 12621,
+    "created_at": "2025-12-23T17:38:22.657Z",
+    "modified_at": "2025-12-23T17:38:19.617Z",
+    "file_hash_sha256": "daa159f10bb3032d8b349fad20b52d11ff002479307b9669b164bfd8a3c282b3"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\GoCo + WFS Teams and Deliverables - Track Delivery Pipeline.csv",
+    "name": "GoCo + WFS Teams and Deliverables - Track Delivery Pipeline.csv",
+    "extension": ".csv",
+    "size_bytes": 38653,
+    "created_at": "2025-12-23T17:38:22.666Z",
+    "modified_at": "2025-12-23T17:38:19.603Z",
+    "file_hash_sha256": "49ee28f575cbad98460b3a1a6951a2047fb2967287a5d81205d3fb51fc724ca6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\GoCo Platform Comprehensive Feature List - Feature List.csv",
+    "name": "GoCo Platform Comprehensive Feature List - Feature List.csv",
+    "extension": ".csv",
+    "size_bytes": 32674,
+    "created_at": "2025-12-23T17:38:22.671Z",
+    "modified_at": "2025-12-23T17:38:19.617Z",
+    "file_hash_sha256": "a3319108c60262dda68222bba8af55dd69aa361d6cc78f12a8e0c55f108c78a6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\Intuit Workforce Solutions (WFS) - One sheet.docx",
+    "name": "Intuit Workforce Solutions (WFS) - One sheet.docx",
+    "extension": ".docx",
+    "size_bytes": 9620,
+    "created_at": "2025-12-23T17:38:22.674Z",
+    "modified_at": "2025-12-23T17:38:19.617Z",
+    "file_hash_sha256": "3ca3f4fea507ba9f1e2fece78a4703aa2f0adc130f62adc1c4f0aaa7957e91eb"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\Intuit Workforce Solutions (WFS) Overview and TestBox Integration Opportunities.pdf",
+    "name": "Intuit Workforce Solutions (WFS) Overview and TestBox Integration Opportunities.pdf",
+    "extension": ".pdf",
+    "size_bytes": 61709,
+    "created_at": "2025-12-23T17:38:22.674Z",
+    "modified_at": "2025-12-23T17:38:19.631Z",
+    "file_hash_sha256": "275bc87806aec29d9e6d9efaac0364acbaa447ec775188669fe100321633c297"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\WFS HCM Transformation FY26 Overview.pdf",
+    "name": "WFS HCM Transformation FY26 Overview.pdf",
+    "extension": ".pdf",
+    "size_bytes": 3801710,
+    "created_at": "2025-12-23T17:38:22.682Z",
+    "modified_at": "2025-12-23T17:38:19.652Z",
+    "file_hash_sha256": "3d2bc03a13cc3dc8737db34810231958208fe86d9ca6f8742867f7f955778922"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\Workforce Solutions (WFS) Intuit - meeting notes.docx",
+    "name": "Workforce Solutions (WFS) Intuit - meeting notes.docx",
+    "extension": ".docx",
+    "size_bytes": 20140,
+    "created_at": "2025-12-23T17:38:22.682Z",
+    "modified_at": "2025-12-23T17:38:19.633Z",
+    "file_hash_sha256": "4d63c5ad7c8c79fb1465e88fa854fe4019645584b07772e2c6efeef54dca463f"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)\\[External] TestBox_WFS Demo Scenarios.xlsx",
+    "name": "[External] TestBox_WFS Demo Scenarios.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 123756,
+    "created_at": "2025-12-23T17:38:22.690Z",
+    "modified_at": "2025-12-23T17:38:19.626Z",
+    "file_hash_sha256": "d2d6f0a2ea44bd575c5102e5c084fa90cd17657f04bdcfbf828a79cabe686047"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\DRAFT TestBox_IntuitWFS Demo Proposal_v1.docx",
+    "name": "DRAFT TestBox_IntuitWFS Demo Proposal_v1.docx",
+    "extension": ".docx",
+    "size_bytes": 12621,
+    "created_at": "2025-12-03T15:39:18.000Z",
+    "modified_at": "2025-12-23T17:38:19.617Z",
+    "file_hash_sha256": "daa159f10bb3032d8b349fad20b52d11ff002479307b9669b164bfd8a3c282b3"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\GoCo + WFS Teams and Deliverables - Track Delivery Pipeline.csv",
+    "name": "GoCo + WFS Teams and Deliverables - Track Delivery Pipeline.csv",
+    "extension": ".csv",
+    "size_bytes": 38653,
+    "created_at": "2025-10-30T00:31:32.000Z",
+    "modified_at": "2025-12-23T17:38:19.603Z",
+    "file_hash_sha256": "49ee28f575cbad98460b3a1a6951a2047fb2967287a5d81205d3fb51fc724ca6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\GoCo Platform Comprehensive Feature List - Feature List.csv",
+    "name": "GoCo Platform Comprehensive Feature List - Feature List.csv",
+    "extension": ".csv",
+    "size_bytes": 32674,
+    "created_at": "2025-10-29T22:13:46.000Z",
+    "modified_at": "2025-12-23T17:38:19.617Z",
+    "file_hash_sha256": "a3319108c60262dda68222bba8af55dd69aa361d6cc78f12a8e0c55f108c78a6"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\Intuit Workforce Solutions (WFS) - One sheet.docx",
+    "name": "Intuit Workforce Solutions (WFS) - One sheet.docx",
+    "extension": ".docx",
+    "size_bytes": 9620,
+    "created_at": "2025-12-04T13:30:46.000Z",
+    "modified_at": "2025-12-23T17:38:19.617Z",
+    "file_hash_sha256": "3ca3f4fea507ba9f1e2fece78a4703aa2f0adc130f62adc1c4f0aaa7957e91eb"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\Intuit Workforce Solutions (WFS) Overview and TestBox Integration Opportunities.pdf",
+    "name": "Intuit Workforce Solutions (WFS) Overview and TestBox Integration Opportunities.pdf",
+    "extension": ".pdf",
+    "size_bytes": 61709,
+    "created_at": "2025-10-27T13:18:22.000Z",
+    "modified_at": "2025-12-23T17:38:19.631Z",
+    "file_hash_sha256": "275bc87806aec29d9e6d9efaac0364acbaa447ec775188669fe100321633c297"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\WFS HCM Transformation FY26 Overview.pdf",
+    "name": "WFS HCM Transformation FY26 Overview.pdf",
+    "extension": ".pdf",
+    "size_bytes": 3801710,
+    "created_at": "2025-10-29T22:28:44.000Z",
+    "modified_at": "2025-12-23T17:38:19.652Z",
+    "file_hash_sha256": "3d2bc03a13cc3dc8737db34810231958208fe86d9ca6f8742867f7f955778922"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\Workforce Solutions (WFS) Intuit - meeting notes.docx",
+    "name": "Workforce Solutions (WFS) Intuit - meeting notes.docx",
+    "extension": ".docx",
+    "size_bytes": 20140,
+    "created_at": "2025-12-16T16:34:36.000Z",
+    "modified_at": "2025-12-23T17:38:19.633Z",
+    "file_hash_sha256": "4d63c5ad7c8c79fb1465e88fa854fe4019645584b07772e2c6efeef54dca463f"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001\\WFS (Intuit)\\[External] TestBox_WFS Demo Scenarios.xlsx",
+    "name": "[External] TestBox_WFS Demo Scenarios.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 123756,
+    "created_at": "2025-12-01T13:40:26.000Z",
+    "modified_at": "2025-12-23T17:38:19.626Z",
+    "file_hash_sha256": "d2d6f0a2ea44bd575c5102e5c084fa90cd17657f04bdcfbf828a79cabe686047"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WFS (Intuit)-20251223T173707Z-3-001.zip",
+    "name": "WFS (Intuit)-20251223T173707Z-3-001.zip",
+    "extension": ".zip",
+    "size_bytes": 2842734,
+    "created_at": "2025-12-23T17:37:32.920Z",
+    "modified_at": "2025-12-23T17:37:34.212Z",
+    "file_hash_sha256": "424c89fe12a23f1d895ccb4e2959871b931092477b460759061aba514543986a"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\WhatsApp Image 2025-12-26 at 09.12.33.jpeg",
+    "name": "WhatsApp Image 2025-12-26 at 09.12.33.jpeg",
+    "extension": ".jpeg",
+    "size_bytes": 163843,
+    "created_at": "2025-12-26T14:07:00.681Z",
+    "modified_at": "2025-12-26T14:07:16.759Z",
+    "file_hash_sha256": "b0ff7f15b8f94ca3373ef8501795fcb91efb68892449253d5cb45c40cfc36134"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\[External] Mailchimp SOW (1).docx",
+    "name": "[External] Mailchimp SOW (1).docx",
+    "extension": ".docx",
+    "size_bytes": 238703,
+    "created_at": "2025-12-23T18:29:37.894Z",
+    "modified_at": "2025-12-23T18:29:39.190Z",
+    "file_hash_sha256": "8c69556d510981fa2b08b64fe752dd5a1720e1fa2806811f478d6a5666ed44a3"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\[External] Mailchimp SOW.xlsx",
+    "name": "[External] Mailchimp SOW.xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 142019,
+    "created_at": "2025-12-23T17:52:13.586Z",
+    "modified_at": "2025-12-23T17:52:14.549Z",
+    "file_hash_sha256": "ec4543e90df80f52749b5534059cbdebc0c26df9193bef9b00d5ecf19e529f37"
+  },
+  {
+    "path": "C:\\Users\\adm_r\\Downloads\\[External] TestBox_WFS Demo Scenarios (2).xlsx",
+    "name": "[External] TestBox_WFS Demo Scenarios (2).xlsx",
+    "extension": ".xlsx",
+    "size_bytes": 123756,
+    "created_at": "2025-12-22T13:49:50.674Z",
+    "modified_at": "2025-12-22T13:49:51.427Z",
+    "file_hash_sha256": "0eeb2cc7b1202dce670549557f8b24a5de074cc504f3a7f6953e9de02f1ee2cc"
+  }
+]

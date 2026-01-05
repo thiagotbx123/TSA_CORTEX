@@ -4,10 +4,48 @@
 
 ## Estado Atual
 
-**Fase:** Produção (v1.0 Completo)
+**Fase:** Produção (v1.1 - Nova Arquitetura)
 **Última Atualização:** 2025-12-24
-**Status:** ✅ Pipeline completo + SpineHub + Repo público no GitHub
+**Status:** ✅ CLI coleta → Claude narra → Claude posta
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
+
+### Mudança Crítica v1.1 (2025-12-24)
+
+### Performance Excellence Framework v1 (2026-01-05)
+
+**Novo artefato:** Sistema de feedback para TSAs baseado em Netflix, Spotify, Google.
+
+**Arquivos:**
+- `output/Performance_Excellence_v1.docx` - Doc executivo
+- `output/Performance_Excellence_v1.xlsx` - Excel operacional (7 abas)
+- `output/PERFORMANCE_EXCELLENCE_v1_EXECUTIVE.md` - Markdown completo
+
+**Top 10 Behaviors (Q1):**
+1. Clear Daily Update
+2. Blocker + Ask + Follow-up
+3. Ticket Ownership E2E
+4. Evidence for Claims
+5. Pattern Contribution
+6. AI Usage (Analysis/Execution)
+7. Data Quality Checklist
+8. DE Gate Compliance
+9. Escalation Timing
+10. Learning Capture
+
+**Ownership:** Thiago (1st) | Waki (2nd)
+**Team:** Diego, Alexandra, Carlos, Gabrielle
+
+**Documentação:** `knowledge-base/learnings/2026-01-05_performance_excellence_framework.md`
+
+
+**ANTES (ruim):** CLI gerava narrativa via templates → output genérico
+**AGORA (bom):** CLI só coleta dados → Claude gera narrativa de qualidade RAC-14
+
+**Novo Fluxo:**
+1. `node dist/cli/index.js collect --start X --end Y`
+2. Gera `output/context_for_narrative.json`
+3. Claude lê o arquivo e gera narrativa manualmente
+4. Claude posta no Linear com aprovação
 
 ## Métricas de Coleta (última execução: 22-23 Dez 2025)
 

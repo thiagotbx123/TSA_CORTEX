@@ -5,9 +5,26 @@
 ## Estado Atual
 
 **Fase:** Produção (v1.1 - Nova Arquitetura)
-**Última Atualização:** 2025-12-24
+**Última Atualização:** 2026-01-06
 **Status:** ✅ CLI coleta → Claude narra → Claude posta
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
+
+### RFC Reviews em Andamento (2026-01-06)
+
+**RFC Category Definition:**
+- Sugestão: "Product Readiness" como categoria
+- Service model (TSA + DE) como moat diferencial
+- Comentários preparados, aguardando post
+
+**RFC Detailed Phases for Delivery:**
+- Objetivo: Incorporar Data Engineering no processo
+- Comentários inseridos no documento
+- Cowork com Thais agendado para amanhã
+- Principais mudanças: DE nos roles, stage gates com DE validation, escalation path
+
+**Documentação:**
+- `sessions/2026-01-06_19-00.md`
+- `knowledge-base/learnings/2026-01-06_rfc_reviews.md`
 
 ### Mudança Crítica v1.1 (2025-12-24)
 

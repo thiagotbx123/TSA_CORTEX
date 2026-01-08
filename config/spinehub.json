@@ -1,0 +1,80 @@
+{
+  "python": {
+    "path": null,
+    "bridge_path": null,
+    "timeout_ms": 60000,
+    "auto_install_deps": true
+  },
+  "analyzers": {
+    "enabled": true,
+    "tools": {
+      "ruff": {
+        "enabled": true,
+        "config": null
+      },
+      "bandit": {
+        "enabled": true,
+        "severity": "low"
+      },
+      "vulture": {
+        "enabled": true,
+        "min_confidence": 60
+      },
+      "radon": {
+        "enabled": true,
+        "min_complexity": "B"
+      }
+    },
+    "exclude_paths": [
+      "node_modules/**",
+      ".git/**",
+      "**/__pycache__/**",
+      "**/venv/**",
+      "**/.venv/**"
+    ],
+    "auto_fix": false
+  },
+  "quality": {
+    "enabled": true,
+    "validate_on_generate": true,
+    "block_on_failure": false,
+    "min_score": 70,
+    "rules": {
+      "LANG_001": true,
+      "PERS_001": true,
+      "SLACK_001": true,
+      "STRUCT_001": true,
+      "STRUCT_002": true,
+      "STRUCT_003": true,
+      "LINK_001": true,
+      "META_001": true
+    }
+  },
+  "credentials": {
+    "env_file": null,
+    "services": [
+      "slack",
+      "linear",
+      "google",
+      "github",
+      "anthropic"
+    ]
+  },
+  "linear_templates": {
+    "enabled": true,
+    "default_template": "weekly_update",
+    "custom_templates_path": null
+  },
+  "privacy": {
+    "redact_emails": true,
+    "redact_phone_numbers": true,
+    "redact_ssn": true,
+    "redact_credit_cards": true,
+    "redact_cpf_cnpj": true,
+    "redact_ip_addresses": false
+  },
+  "datetime": {
+    "default_timezone": "America/Sao_Paulo",
+    "default_range_days": 7
+  }
+}

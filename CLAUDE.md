@@ -65,6 +65,19 @@ TSA_CORTEX/
 4. **Git é obrigatório** - Todo trabalho deve ser versionado
 5. **TypeScript strict** - Sempre use tipagem forte
 6. **Testes** - Toda feature nova deve ter testes
+7. **WORKLOG EM INGLÊS 100%** - Output do worklog SEMPRE em inglês, terceira pessoa
+
+## Regras do Worklog (CRÍTICO)
+
+**ANTES de gerar qualquer worklog, LER `.claude/commands/worklog.md`**
+
+| Regra | Descrição |
+|-------|-----------|
+| Idioma | **Inglês 100%** - NUNCA português |
+| Pessoa | Terceira pessoa ("Thiago worked on...") |
+| Slack | NUNCA citar mensagens. Usar apenas para CONTEXTO |
+| Artifacts | Sempre incluir links clicáveis |
+| Outcomes | Cada tema deve ter resultado concreto |
 
 ## Padrões de Código
 

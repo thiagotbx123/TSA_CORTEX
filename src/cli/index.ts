@@ -16,7 +16,14 @@ import { normalizeEvents } from '../normalizer';
 import { clusterEvents } from '../clustering';
 import { generateWorklog, renderWorklogMarkdown, renderNarrativeWorklog } from '../worklog';
 import { postToLinear, NarrativeOptions } from '../linear';
-import { buildSpineHub, SpineHubData } from '../spinehub';
+import {
+  buildSpineHub,
+  SpineHubData,
+  CodeAnalyzer,
+  QualityValidator,
+  CredentialsManager,
+  LinearTemplates,
+} from '../spinehub';
 import { Config, SourceSystem, WorklogOutput } from '../types';
 
 // Load environment variables
@@ -385,7 +392,161 @@ program
     }
   });
 
+// ============================================
+// SPINEHUB INTEGRATION COMMANDS
+// ============================================
+
+// Analyze command - Run code analyzers
+program
+  .command('analyze')
+  .description('Run code analysis (Ruff, Bandit, Vulture, Radon)')
+  .argument('[paths...]', 'Paths to analyze (default: current directory)')
+  .option('-t, --tool <tool>', 'Run specific tool only (ruff|bandit|vulture|radon)')
+  .option('--check-tools', 'Check which tools are installed')
+  .action(async (paths, options) => {
+    try {
+      const analyzer = new CodeAnalyzer();
+
+      if (options.checkTools) {
+        console.log('🔧 Checking installed analysis tools...\n');
+        const status = await analyzer.checkTools();
+        console.log('Tool Status:');
+        for (const [tool, available] of Object.entries(status)) {
+          const icon = available ? '✅' : '❌';
+          console.log(`  ${icon} ${tool}`);
+        }
+        return;
+      }
+
+      const targetPaths = paths.length > 0 ? paths : ['.'];
+      console.log(`🔍 Analyzing code in: ${targetPaths.join(', ')}\n`);
+
+      if (options.tool) {
+        console.log(`Running ${options.tool} only...\n`);
+        const result = await analyzer.runSingle(options.tool, targetPaths);
+        console.log(`\n${options.tool.toUpperCase()} Results:`);
+        console.log(`  Issues found: ${result.issues.length}`);
+        if (result.issues.length > 0) {
+          for (const issue of result.issues.slice(0, 10)) {
+            console.log(`  ${issue.file}:${issue.line} - ${issue.code}: ${issue.message}`);
+          }
+          if (result.issues.length > 10) {
+            console.log(`  ... and ${result.issues.length - 10} more`);
+          }
+        }
+      } else {
+        console.log('Running all analyzers...\n');
+        const results = await analyzer.runAll(targetPaths);
+        console.log(analyzer.formatReport(results));
+      }
+    } catch (error: any) {
+      console.error(`\n❌ Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+// Validate command - Validate worklog quality
+program
+  .command('validate')
+  .description('Validate worklog quality (RAC-14 benchmark)')
+  .argument('<file>', 'Path to worklog file (markdown or JSON)')
+  .option('--min-score <score>', 'Minimum passing score (default: 70)', '70')
+  .option('--strict', 'Use strict validation mode')
+  .action(async (file, options) => {
+    try {
+      console.log(`🔍 Validating worklog: ${file}\n`);
+
+      const validator = new QualityValidator({
+        minScore: parseInt(options.minScore),
+        strictMode: options.strict,
+      });
+
+      const result = await validator.validateFile(file);
+
+      console.log(result.formatted_report);
+
+      if (!result.passed) {
+        process.exit(1);
+      }
+    } catch (error: any) {
+      console.error(`\n❌ Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+// Credentials command - Show credentials status
+program
+  .command('credentials')
+  .description('Show credentials and MCP server status')
+  .option('--copy-to <path>', 'Copy credentials to another project')
+  .option('--services <list>', 'Services to copy (comma-separated)')
+  .action(async (options) => {
+    try {
+      const manager = new CredentialsManager();
+
+      if (options.copyTo) {
+        const services = options.services?.split(',') || undefined;
+        console.log(`📋 Copying credentials to: ${options.copyTo}\n`);
+        const result = await manager.copyToProject(options.copyTo, services);
+        console.log(`  Copied ${result.copied} credentials`);
+        console.log(`  Total in target: ${result.total}`);
+        console.log(`  Target file: ${result.target}`);
+      } else {
+        await manager.printStatusReport();
+      }
+    } catch (error: any) {
+      console.error(`\n❌ Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+// Templates command - Show Linear templates
+program
+  .command('templates')
+  .description('List available Linear issue templates')
+  .option('--get <id>', 'Get specific template by ID')
+  .option('--apply <id>', 'Apply template with variables')
+  .option('--vars <json>', 'Variables as JSON string')
+  .action(async (options) => {
+    try {
+      const templates = new LinearTemplates();
+
+      if (options.get) {
+        const template = await templates.getTemplate(options.get);
+        if (!template) {
+          console.error(`❌ Template not found: ${options.get}`);
+          process.exit(1);
+        }
+        console.log(`\n📋 Template: ${template.name}\n`);
+        console.log(`ID: ${template.id}`);
+        console.log(`Title Pattern: ${template.title_pattern}`);
+        console.log(`Labels: ${template.labels.join(', ')}`);
+        console.log(`Variables: ${template.variables.join(', ')}`);
+        console.log(`\nBody Template:\n${template.body_template}`);
+      } else if (options.apply) {
+        const vars = options.vars ? JSON.parse(options.vars) : {};
+        const result = await templates.applyTemplate(options.apply, vars);
+        if (!result) {
+          console.error(`❌ Failed to apply template: ${options.apply}`);
+          process.exit(1);
+        }
+        console.log(`\n📝 Generated Issue:\n`);
+        console.log(`Title: ${result.title}`);
+        console.log(`Labels: ${result.labels.join(', ')}`);
+        console.log(`\nBody:\n${result.body}`);
+      } else {
+        await templates.printTemplates();
+      }
+    } catch (error: any) {
+      console.error(`\n❌ Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+// ============================================
 // Helper functions
+// ============================================
+
 function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });

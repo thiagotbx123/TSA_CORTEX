@@ -22,6 +22,49 @@ export { Entity, Relation, Pattern, Artifact, EntityType, RelationType } from '.
 export { SpineHubStorage } from './storage';
 export { validateWorklogQuality, QUALITY_RULES, RAC_14_TEMPLATE, generateWorklogTitle } from './benchmark';
 
+// Python Bridge Integration
+export { PythonBridge, getPythonBridge, BridgeResponse } from './bridge';
+
+// Python types (named exports to avoid conflicts with src/utils)
+export type {
+  Issue,
+  AnalyzerResult,
+  ToolStatus,
+  RunAllAnalyzersResult,
+  ValidationViolation,
+  ValidationReport,
+  QualityValidationResult,
+  CredentialStatus,
+  AllCredentialsStatus,
+  MCPStatus,
+  CopyCredentialsResult,
+  IssueTemplate,
+  TemplateListResult,
+  ApplyTemplateResult,
+  RedactionConfig,
+  ChannelMapping,
+  DateTimeInfo,
+} from './types';
+
+// Note: DateRange and RedactionResult are not re-exported here
+// to avoid conflicts with src/utils exports. Use SpineHubUtils.DateRange
+// if you need the Python bridge version.
+
+// Code Analyzers
+export { CodeAnalyzer, analyzeCode, checkAnalysisTools, AnalyzerTool } from './analyzers';
+
+// Quality Validator
+export { QualityValidator, validateWorklog, validateWorklogFile, isWorklogValid } from './quality';
+
+// Credentials Manager
+export { CredentialsManager, getCredentialsStatus, getMCPStatus, printCredentialsReport, ServiceName } from './credentials';
+
+// Linear Templates
+export { LinearTemplates, listLinearTemplates, getLinearTemplate, applyLinearTemplate, TemplateId, BUILTIN_TEMPLATES } from './linear';
+
+// SpineHub Utils (re-export from utils module)
+export * as SpineHubUtils from './utils';
+
 // Types for consolidated content
 export interface SlackMessage {
   timestamp: string;

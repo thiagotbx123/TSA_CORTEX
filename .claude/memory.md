@@ -4,10 +4,31 @@
 
 ## Estado Atual
 
-**Fase:** Produção (v1.2 - SpineHUB Python Integration)
-**Última Atualização:** 2026-01-08
+**Fase:** Produção (v1.3 - Linear Auto-Assignment)
+**Última Atualização:** 2026-01-15
 **Status:** ✅ CLI coleta → Claude narra → Claude posta + Code Analysis
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
+
+### Linear Auto-Assignment (2026-01-15)
+
+**Melhoria no script de postagem:**
+- Worklogs agora são criados automaticamente com:
+  - **Project:** TSA's Worklog
+  - **Assignee:** Usuário do .env (USER_DISPLAY_NAME)
+  - **Team:** Raccoons (RAC)
+
+**Script:** `output/post_worklog.js`
+
+**Configuração via .env:**
+```bash
+USER_DISPLAY_NAME=Thiago Rodrigues  # Assignee automático
+LINEAR_TEAM_KEY=RAC                  # Team (opcional)
+LINEAR_PROJECT_NAME=TSA's Worklog    # Project (opcional)
+```
+
+**Worklogs criados:**
+- RAC-19: Worklog 01-07 Jan (atualizado)
+- RAC-36: Worklog 08-14 Jan (novo)
 
 ### ⚠️ REGRAS CRÍTICAS DO WORKLOG
 
@@ -97,7 +118,18 @@ tsa-cortex templates           # Linear templates
 3. Claude lê o arquivo e gera narrativa manualmente
 4. Claude posta no Linear com aprovação
 
-## Métricas de Coleta (última execução: 22-23 Dez 2025)
+## Métricas de Coleta (última execução: 08-14 Jan 2026)
+
+| Fonte | Eventos | MY_WORK | Status |
+|-------|---------|---------|--------|
+| Slack | 1051 | 494 | ✅ Search API (ownership) |
+| Claude | 320 | - | ✅ Filtered |
+| Drive | 158 | - | ✅ OAuth2 |
+| Local | 75 | - | ✅ File scan |
+| Linear | 2 | - | ✅ SDK |
+| **Total** | **1606** | | |
+
+### Métricas Anteriores (22-23 Dez 2025)
 
 | Fonte | Eventos | MY_WORK | Status |
 |-------|---------|---------|--------|

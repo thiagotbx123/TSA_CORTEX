@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-01-08T13:37:23.776Z",
+  "lastUpdated": "2026-01-13T17:00:00.000Z",
   "entities": {
     "slack_user_U02FVNH7LGG": {
       "id": "slack_user_U02FVNH7LGG",
@@ -2756,7 +2756,20 @@
       ]
     }
   },
-  "patterns": {},
+  "patterns": {
+    "qbo_cross_dataset_reference": {
+      "id": "qbo_cross_dataset_reference",
+      "name": "QuickBooks Cross-Dataset Account Reference",
+      "description": "Journal Entry lines referencing account_ids from a different dataset cause parsing errors. In Multi-Entity QBO, each dataset has its own Chart of Accounts with unique IDs that are not interchangeable.",
+      "category": "data_quality",
+      "severity": "high",
+      "detection": "SELECT from JOURNAL_ENTRY_LINE JOIN CHART_OF_ACCOUNTS WHERE account.dataset_id != journal_entry.dataset_id",
+      "solution": "If accounts are intercompany-specific (e.g., 'Due to [Company]'), delete orphan records. Otherwise, map to equivalent accounts in correct dataset.",
+      "firstSeen": "2026-01-13",
+      "ticket": "PLA-3135",
+      "tags": ["quickbooks", "dataset", "journal-entry", "intercompany", "data-quality"]
+    }
+  },
   "artifacts": {
     "drive_1hiZYXrFUp9HmpBISY0MfKpq-XMqLnahg": {
       "id": "drive_1hiZYXrFUp9HmpBISY0MfKpq-XMqLnahg",

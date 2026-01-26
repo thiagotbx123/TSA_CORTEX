@@ -4,29 +4,72 @@
 
 ## Estado Atual
 
-**Fase:** Producao (v2.0 - SOPs + Investigacao)
+**Fase:** Producao (v2.1 - Ticket Management System)
 **Ultima Atualizacao:** 2026-01-26
-**Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado
+**Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado + TMS v1.0
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
+
+### Ticket Management System v1.0 (2026-01-26)
+
+**Documento completo publicado no CODA:**
+- URL: https://coda.io/d/Solutions-Central_djfymaxsTtA/Linear-Ticket-Management_sukx4jIV
+
+**Estrutura do TMS:**
+- **A. The Flow** - Intake → Triage → Due Diligence → Ticket Creation → Execution → Monitoring → Validation → Delivery → Closeout
+- **B. Critical Visibility Protocol** - Escalation rules
+- **C. Who Does What** - RACI Matrix (TSA vs Eng)
+- **D. Linear Standard** - P0-P3, labels, DoR, DoD
+- **E. Templates** - 10 templates
+
+**Arquivos criados:**
+- `knowledge-base/sops/ticket-management-system-coda.md` (CODA-ready EN)
+- `knowledge-base/sops/ticket-management-system-en.md` (Full EN)
+- `knowledge-base/sops/ticket-management-system.md` (PT-BR)
+- `knowledge-base/sops/intro-recorte.md` (snippet)
+- `knowledge-base/sops/raci-recorte.md` (snippet)
+- `knowledge-base/sops/resources-recorte.md` (snippet)
+
+**Key decisions:**
+- TSA owns ticket ate Refinement, depois Eng assume
+- RACI: apenas um Accountable por atividade
+- Critical Visibility: escalar imediatamente blockers
 
 ### Evolucao v2.0 (2026-01-26)
 
 **Novo escopo do TSA_CORTEX - 3 pilares:**
 1. **Worklog Automation** - Coleta e geracao (existente)
-2. **Procedimentos Operacionais (SOPs)** - Documentacao padronizada (NOVO)
+2. **Procedimentos Operacionais (SOPs)** - Documentacao padronizada (ATIVO)
 3. **Investigacao e Pesquisa** - Triangulacao de fontes (NOVO)
 
 **Mudancas implementadas:**
 - Credenciais CODA adicionadas ao `.env`
 - Estrutura `knowledge-base/sops/` criada
-- SOPs exemplo: `linear/criar-ticket.md`, `coda/atualizar-status.md`
+- Ticket Management System v1.0 publicado no CODA
 - API docs: `api/coda.md`
 - CLAUDE.md atualizado com novo escopo
 
 **Pendente:**
 - [ ] Implementar collector CODA em TypeScript
-- [ ] Criar mais SOPs (comunicacao, investigacao)
-- [ ] Testar integracao CODA via API
+- [ ] Criar templates detalhados no Linear
+- [ ] Treinar equipe TSA no novo processo TMS
+
+### Mapeamento Completo CODA + Linear (2026-01-26)
+
+**CODA Workspace (7 docs, 1527+ paginas):**
+- Solutions Central: 24 clientes, 114 paginas
+- Integrations Central: 503 paginas tecnicas
+- Product and Dev: 586 paginas
+- Clientes ativos: Apollo, Brevo, CallRail, Dixa, Gong, Mailchimp, mParticle, People.ai, QuickBooks, Syncari, Zendesk
+- Clientes OFF: Gem, HockeyStack
+
+**Linear (20 times, 5500+ issues):**
+- PLA (Platypus): 2005 issues - time principal
+- Timeline clientes: CallRail (Jun 2023) → Mailchimp (Jun 2025)
+- Top volume: QuickBooks, Gong, Brevo (250+ cada)
+
+**Documentos gerados:**
+- `knowledge-base/learnings/2026-01-26_coda_mapping_complete.md`
+- `knowledge-base/learnings/2026-01-26_linear_mapping_complete.md`
 
 ### Linear Auto-Assignment (2026-01-15)
 

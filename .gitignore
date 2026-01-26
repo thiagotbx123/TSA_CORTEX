@@ -77,12 +77,15 @@ desktop.ini
 logs/
 
 # ============================================
-# Temporários
+# Temporarios
 # ============================================
 *.tmp
 *.temp
 temp/
 tmp/
+tmpclaude-*/
+tmpclaude-*
+nul
 .cache/
 *.cache
 

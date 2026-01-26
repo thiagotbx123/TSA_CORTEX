@@ -4,10 +4,29 @@
 
 ## Estado Atual
 
-**Fase:** Produção (v1.3 - Linear Auto-Assignment)
-**Última Atualização:** 2026-01-15
-**Status:** ✅ CLI coleta → Claude narra → Claude posta + Code Analysis
+**Fase:** Producao (v2.0 - SOPs + Investigacao)
+**Ultima Atualizacao:** 2026-01-26
+**Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
+
+### Evolucao v2.0 (2026-01-26)
+
+**Novo escopo do TSA_CORTEX - 3 pilares:**
+1. **Worklog Automation** - Coleta e geracao (existente)
+2. **Procedimentos Operacionais (SOPs)** - Documentacao padronizada (NOVO)
+3. **Investigacao e Pesquisa** - Triangulacao de fontes (NOVO)
+
+**Mudancas implementadas:**
+- Credenciais CODA adicionadas ao `.env`
+- Estrutura `knowledge-base/sops/` criada
+- SOPs exemplo: `linear/criar-ticket.md`, `coda/atualizar-status.md`
+- API docs: `api/coda.md`
+- CLAUDE.md atualizado com novo escopo
+
+**Pendente:**
+- [ ] Implementar collector CODA em TypeScript
+- [ ] Criar mais SOPs (comunicacao, investigacao)
+- [ ] Testar integracao CODA via API
 
 ### Linear Auto-Assignment (2026-01-15)
 

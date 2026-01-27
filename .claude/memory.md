@@ -4,35 +4,57 @@
 
 ## Estado Atual
 
-**Fase:** Producao (v2.1 - Ticket Management System)
-**Ultima Atualizacao:** 2026-01-26
-**Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado + TMS v1.0
+**Fase:** Producao (v2.2 - Ticket Management System Refined)
+**Ultima Atualizacao:** 2026-01-27
+**Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado + TMS v2.0 + 11 Templates
 **Repo:** https://github.com/thiagotbx123/TSA_CORTEX
 
-### Ticket Management System v1.0 (2026-01-26)
+### Ticket Management System v2.0 (2026-01-27)
 
-**Documento completo publicado no CODA:**
+**Documento no CODA:**
 - URL: https://coda.io/d/Solutions-Central_djfymaxsTtA/Linear-Ticket-Management_sukx4jIV
 
-**Estrutura do TMS:**
-- **A. The Flow** - Intake → Triage → Due Diligence → Ticket Creation → Execution → Monitoring → Validation → Delivery → Closeout
-- **B. Critical Visibility Protocol** - Escalation rules
-- **C. Who Does What** - RACI Matrix (TSA vs Eng)
-- **D. Linear Standard** - P0-P3, labels, DoR, DoD
-- **E. Templates** - 10 templates
+**MAJOR UPDATE: Deep Learning + Validation Cycle**
+- 5 parallel agents researched Slack, Linear, Obsidian, Projects, Sessions
+- 8 critical errors identified and corrected
+- Confidence: 60% → 95%
+
+**Critical Corrections Made:**
+| Item | Before (Wrong) | After (Correct) |
+|------|----------------|-----------------|
+| On-call TSA | Existed | DOESN'T EXIST (devs only) |
+| Main channel | #tsa-internal | #scrum-of-scrums |
+| TSA ownership | Until Refinement | Until Backlog |
+| TSA Daily | Sync meeting | Async Slack reports |
+| Label Bug | Used | Customer Issues |
+| Label Tech Debt | Used | Refactor |
+| Lucas title | Solutions Manager | Tech Lead / Manager |
+| DoR/DoD | Used | "Checklists" |
+
+**11 Linear Templates Created (RAC-44 to RAC-54):**
+1. Bug (RAC-44)
+2. Feature (RAC-45)
+3. Spike (RAC-46)
+4. RCA (RAC-47)
+5. Internal Request (RAC-48)
+6. Customer Request (RAC-49)
+7. Tech Debt (RAC-50)
+8. Deploy (RAC-51)
+9. Onboarding (RAC-52)
+10. Worklog (RAC-53)
+11. Implementation (RAC-54)
 
 **Arquivos criados:**
-- `knowledge-base/sops/ticket-management-system-coda.md` (CODA-ready EN)
-- `knowledge-base/sops/ticket-management-system-en.md` (Full EN)
-- `knowledge-base/sops/ticket-management-system.md` (PT-BR)
-- `knowledge-base/sops/intro-recorte.md` (snippet)
-- `knowledge-base/sops/raci-recorte.md` (snippet)
-- `knowledge-base/sops/resources-recorte.md` (snippet)
+- `knowledge-base/sops/ticket-management-system-v2.md` (Corrected version)
+- `knowledge-base/learnings/TMS_COMPLETE_LEARNING_2026-01-27.md` (Full learnings)
+- `scripts/create_all_templates.js` (Template creation script)
 
-**Key decisions:**
-- TSA owns ticket ate Refinement, depois Eng assume
-- RACI: apenas um Accountable por atividade
-- Critical Visibility: escalar imediatamente blockers
+**Key decisions (VALIDATED):**
+- TSA owns ticket until **Backlog**, Eng takes over at Refinement
+- TSA returns for Production QA validation
+- RACI: No separate QA column (QA done by TSA + Dev)
+- Use "Customer Issues" not "Bug", "Refactor" not "Tech Debt"
+- Sam's escalation quote included
 
 ### Evolucao v2.0 (2026-01-26)
 

@@ -1,0 +1,414 @@
+# ═══════════════════════════════════════════════════
+# Config: Full Implementation Process
+# Uso: python generate_playbook.py --config config_implementation.yaml
+# ═══════════════════════════════════════════════════
+
+process_name: "Full Implementation Process"
+description: >
+  Processo padrão de ponta a ponta para implantação de soluções na TestBox.
+  Cobre desde a qualificação do deal até o encerramento formal do projeto,
+  incluindo gates, checklists e artefatos obrigatórios.
+
+owner: "Thiago Rodrigues (TSA Manager)"
+
+# ═══ ROLES ═══
+roles:
+  - name: TSA
+    description: "Technical Solutions Architect — coordena, planeja, QA"
+  - name: CE
+    description: "Customer Engineer — implementa tecnicamente"
+  - name: DATA
+    description: "Data Generation — cria dados sintéticos realistas"
+  - name: GTM
+    description: "Go-To-Market — interface com cliente e stakeholders"
+  - name: Eng
+    description: "Engineering — desenvolve features e resolve bugs"
+
+# ═══ TOOLS ═══
+tools:
+  - name: Linear
+    purpose: "Tickets, milestones, labels, tracking"
+  - name: Coda
+    purpose: "Documentação, SOPs, hubs de projeto"
+  - name: Slack
+    purpose: "Comunicação async, daily reports, escalonamento"
+  - name: Google Drive
+    purpose: "Evidence packs, SOWs, reports"
+  - name: Python Scripts
+    purpose: "Automação de tickets, validação, GANTT"
+
+# ═══ SOURCES ═══
+sources:
+  - "Filesystem local (projetos GEM-BOOM, intuit-boom)"
+  - "Linear API (tickets, milestones, labels)"
+  - "Slack (threads, decisões, patterns)"
+  - "Coda (Solutions Central, SOPs)"
+  - "Google Drive (Go To Market, Evidence)"
+
+# ═══ STAKEHOLDERS ═══
+stakeholders:
+  - name: "Comercial/GTM"
+  - name: "Arquiteto de Dados (TAS)"
+  - name: "Engenharia"
+  - name: "Data Gen"
+  - name: "PM/Delivery"
+  - name: "Executivo"
+
+# ═══ PHASES ═══
+phases:
+  - name: "Intake & Qualificação"
+    objective: "Decidir se a oportunidade vira projeto e com qual escopo"
+    owner: "GTM (R/A), TSA (C)"
+    duration: "1-5 dias"
+    where: "Slack, Calls, Google Drive"
+    why: "Evitar iniciar projetos sem escopo claro"
+    steps:
+      - "GTM recebe oportunidade"
+      - "Avaliar fit técnico e comercial"
+      - "Consultar TSA para sizing técnico"
+      - "Produzir SOW draft"
+      - "Decisão GO/NO-GO"
+    prerequisites:
+      - "Oportunidade identificada"
+    dod:
+      - "Escopo definido"
+      - "Recursos identificados"
+      - "SOW draft existente"
+      - "Timeline factível"
+    common_failures:
+      - "Iniciar sem SOW"
+      - "Não consultar TSA no sizing"
+    raci:
+      TSA: "C"
+      CE: "-"
+      DATA: "-"
+      GTM: "R/A"
+      Eng: "-"
+
+  - name: "Discovery & Sizing"
+    objective: "Entender tudo antes de escrever um único ticket"
+    owner: "TSA (R/A)"
+    duration: "3-5 dias"
+    where: "Coda, Google Drive, Calls"
+    why: "Garbage in, garbage out"
+    steps:
+      - "Coletar materiais (SOW, APIs, docs)"
+      - "Mapear escopo técnico"
+      - "Estimar sizing (S/M/L)"
+      - "Identificar riscos iniciais"
+      - "Brainstorm com CE e DATA"
+    prerequisites:
+      - "Gate 0 aprovado"
+      - "SOW disponível"
+    dod:
+      - "Deliverables do SOW listados"
+      - "APIs mapeadas"
+      - "Sizing estimado"
+      - "Risk register v0 criado"
+    common_failures:
+      - "Não ler documentação técnica"
+      - "Assumir que API suporta tudo"
+    raci:
+      TSA: "R/A"
+      CE: "C"
+      DATA: "C"
+      GTM: "C"
+      Eng: "I"
+
+  - name: "Pre-Project Planning"
+    objective: "Criar tickets, milestones e GANTT antes do kick-off"
+    owner: "TSA (R/A)"
+    duration: "3-4 horas (automação) a 1-2 dias"
+    where: "Linear, Google Sheets, Scripts Python"
+    why: "Preparação proativa = zero surpresas"
+    steps:
+      - "Desenhar milestones"
+      - "Criar tickets via script"
+      - "Rodar auditoria (10 checks)"
+      - "Enriquecer tickets com detalhes API"
+      - "Gerar GANTT"
+      - "Comunicar via Slack"
+    prerequisites:
+      - "Discovery completo"
+    dod:
+      - "Tickets criados no Linear"
+      - "Auditoria 10/10 PASS"
+      - "GANTT com datas e owners"
+      - "Slack report postado"
+    common_failures:
+      - "Criar tickets vagos"
+      - "Pular auditoria"
+    raci:
+      TSA: "R/A"
+      CE: "C"
+      DATA: "C"
+      GTM: "I"
+      Eng: "I"
+
+  - name: "Kick-off"
+    objective: "Alinhar time, confirmar escopo, definir cadências"
+    owner: "TSA (R/A)"
+    duration: "1 reunião + 1 dia setup"
+    where: "Zoom/Meet, Slack, Linear"
+    why: "Garante que todos sabem o que fazer"
+    steps:
+      - "Reunião de kick-off (30-60 min)"
+      - "Confirmar acesso ao tenant"
+      - "Verificar API keys"
+      - "Distribuir tickets"
+      - "Mensagem de kick-off no Slack"
+    prerequisites:
+      - "Planning completo"
+      - "Equipe confirmada"
+    dod:
+      - "Reunião realizada"
+      - "Cadências definidas"
+      - "Acesso confirmado"
+      - "Primeiro ticket assignado"
+    common_failures:
+      - "Kick-off sem GANTT"
+      - "Não confirmar acesso"
+    raci:
+      TSA: "R/A"
+      CE: "I"
+      DATA: "I"
+      GTM: "C"
+      Eng: "I"
+
+  - name: "Foundation"
+    objective: "Preparar ambiente: acessos, infra, configs base"
+    owner: "TSA (R/A), CE (R)"
+    duration: "3-7 dias"
+    where: "Tenant, AWS, Linear"
+    why: "Nada funciona sem a base"
+    steps:
+      - "Configurar tenant"
+      - "Setup infraestrutura"
+      - "Configurações core"
+      - "Validar acessos"
+      - "Documentar acessos"
+    prerequisites:
+      - "Kick-off realizado"
+      - "Acesso ao tenant"
+    dod:
+      - "Users conseguem logar"
+      - "API key funciona"
+      - "Staging separado"
+    common_failures:
+      - "Tenant demora"
+      - "API sem permissão de escrita"
+    raci:
+      TSA: "R/A"
+      CE: "R"
+      DATA: "I"
+      GTM: "I"
+      Eng: "C"
+
+  - name: "Build (Seed Data + Data Gen + Ingestion)"
+    objective: "Popular sistema com dados realistas e funcionais"
+    owner: "CE (R/A), DATA (R)"
+    duration: "7-14 dias"
+    where: "Scripts Python, APIs, Tenant"
+    why: "Demo sem dados = demo vazia"
+    steps:
+      - "Seed Data: entidades estáticas"
+      - "Data Gen: schema + distribuição + geração"
+      - "Ingestion: respeitar FK + rate limiting"
+      - "Validação 3-Gate (local + backend + auditoria)"
+    prerequisites:
+      - "Foundation completa"
+      - "APIs mapeadas"
+    dod:
+      - "Entidades criadas e visíveis na UI"
+      - "Gate 1 validate_csvs → 0 FAIL"
+      - "Gate 2 Retool → 0 erros"
+      - "Gate 3 Auditoria → PASS"
+    common_failures:
+      - "Dados genéricos"
+      - "FK order errada"
+      - "Rate limit"
+    raci:
+      TSA: "C"
+      CE: "R/A"
+      DATA: "R"
+      GTM: "I"
+      Eng: "C"
+
+  - name: "Stories & Feature Setup"
+    objective: "Configurar demos/features que o cliente verá"
+    owner: "TSA (R/A), CE (R)"
+    duration: "5-10 dias"
+    where: "Tenant, Linear"
+    why: "Dados precisam contar uma história convincente"
+    steps:
+      - "Configurar cada feature conforme SOW"
+      - "Validar end-to-end"
+      - "Demo interno (dry run)"
+      - "Documentar click paths"
+    prerequisites:
+      - "Build completo"
+    dod:
+      - "Features configuradas e testadas"
+      - "Click paths documentados"
+      - "Demo interno realizado"
+      - "Evidence pack iniciado"
+    common_failures:
+      - "Feature funciona parcialmente"
+      - "Pular demo interno"
+    raci:
+      TSA: "R/A"
+      CE: "R"
+      DATA: "C"
+      GTM: "I"
+      Eng: "C"
+
+  - name: "Validate (QA + UAT)"
+    objective: "Garantir qualidade antes de mostrar ao cliente"
+    owner: "TSA (R), GTM (A)"
+    duration: "5-7 dias"
+    where: "Tenant, Linear, Slack, Calls"
+    why: "Bug em UAT = credibilidade perdida"
+    steps:
+      - "QA interno (TSA testa como cliente)"
+      - "Criar tickets para bugs"
+      - "Fix bugs e re-test"
+      - "UAT com cliente"
+      - "Coletar feedback"
+    prerequisites:
+      - "Stories completas"
+    dod:
+      - "0 bugs P0/P1 abertos"
+      - "UAT realizado"
+      - "Sign-off do cliente"
+    common_failures:
+      - "QA superficial"
+      - "UAT sem roteiro"
+    raci:
+      TSA: "R"
+      CE: "R"
+      DATA: "I"
+      GTM: "A"
+      Eng: "C"
+
+  - name: "Launch & Go-Live"
+    objective: "Colocar em produção e entregar ao cliente"
+    owner: "CE (R), GTM (A)"
+    duration: "1-3 dias"
+    where: "Produção, Slack, Calls"
+    why: "O momento da verdade"
+    steps:
+      - "Deploy em produção"
+      - "Smoke test pós-deploy"
+      - "Walkthrough com cliente"
+      - "Comunicar go-live"
+    prerequisites:
+      - "UAT aprovado"
+    dod:
+      - "Deploy concluído"
+      - "Smoke test OK"
+      - "Cliente confirma funcionamento"
+    common_failures:
+      - "Deploy sem rollback plan"
+      - "Pular smoke test"
+    raci:
+      TSA: "C"
+      CE: "R"
+      DATA: "I"
+      GTM: "A"
+      Eng: "R"
+
+  - name: "Hypercare & Handover"
+    objective: "Suporte intensivo pós-go-live e transição para BAU"
+    owner: "GTM (R/A)"
+    duration: "5-10 dias"
+    where: "Slack, Calls, Coda"
+    why: "Primeiros dias são os mais críticos"
+    steps:
+      - "Monitorar diariamente"
+      - "Resposta rápida a bugs"
+      - "Check-in com cliente a cada 2 dias"
+      - "Gerar documentation package"
+      - "Handover formal"
+    prerequisites:
+      - "Go-live confirmado"
+    dod:
+      - "Zero bugs P0 durante hypercare"
+      - "Documentation package entregue"
+      - "Contact point definido"
+    common_failures:
+      - "Go-live e esquece"
+      - "Não documentar"
+    raci:
+      TSA: "I"
+      CE: "C"
+      DATA: "I"
+      GTM: "R/A"
+      Eng: "C"
+
+  - name: "Closeout & Retrospective"
+    objective: "Encerrar formalmente e capturar lições"
+    owner: "TSA (R/A)"
+    duration: "1-2 dias"
+    where: "Coda, Linear, Slack"
+    why: "Sem retro, erros se repetem"
+    steps:
+      - "Fechar todos os tickets"
+      - "Atualizar GANTT com datas reais"
+      - "Retrospectiva Keep/Stop/Start"
+      - "Atualizar playbook com lições"
+      - "Comunicação de encerramento"
+    prerequisites:
+      - "Handover completo"
+    dod:
+      - "100% tickets em Done"
+      - "Retro documentada"
+      - "Lições aplicadas ao playbook"
+    common_failures:
+      - "Projeto nunca fecha formalmente"
+      - "Lições não capturadas"
+    raci:
+      TSA: "R/A"
+      CE: "I"
+      DATA: "I"
+      GTM: "C"
+      Eng: "I"
+
+# ═══ METRICS ═══
+metrics:
+  - name: "Lead Time"
+    measures: "SOW assinado → go-live"
+    target: "Small: 3 sem · Medium: 6 sem · Large: 10 sem"
+  - name: "Cycle Time por Ticket"
+    measures: "Backlog → Done"
+    target: "< 5 dias (P2), < 1 dia (P0)"
+  - name: "Gate Pass Rate"
+    measures: "% gates aprovados na 1ª tentativa"
+    target: "> 80%"
+  - name: "Rework Rate"
+    measures: "Tickets reabertos / total"
+    target: "< 10%"
+  - name: "SOW Coverage"
+    measures: "% deliverables com tickets"
+    target: "100%"
+  - name: "Client Satisfaction"
+    measures: "Feedback pós-UAT"
+    target: "> 8/10"
+
+# ═══ RISKS ═══
+risks:
+  - description: "Tenant provisioning atrasado"
+    probability: "Médio"
+    impact: "Alto"
+    mitigation: "Solicitar 2 semanas antes"
+  - description: "API não suporta operação"
+    probability: "Médio"
+    impact: "Médio"
+    mitigation: "Mapear na Discovery"
+  - description: "Scope creep via Slack"
+    probability: "Médio"
+    impact: "Médio"
+    mitigation: "Change control formal"
+  - description: "Dados sintéticos genéricos"
+    probability: "Médio"
+    impact: "Alto"
+    mitigation: "Gate 3 auditoria de realismo"

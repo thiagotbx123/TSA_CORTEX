@@ -162,4 +162,41 @@ Producao do documento completo "Full Implementation Process" para publicacao no 
 - **Quality Gates:** 6/6 PASS (re-validados com criterio mais rigoroso)
 
 ---
-*Sessao consolidada em: 2026-02-10 (Ciclo 2 completado)*
+
+## CICLO 3: Rebuild V2 — English + Draft Integration (2026-02-10, continuacao)
+
+### Problema Identificado
+O Ciclo 2 entregou documento em PT-BR, mas ambos os drafts existentes no Coda (TMS v2.0 e Pre-Project Ticket Planning) estao em INGLES. Alem disso, o documento nao integrava de verdade os padroes e conteudo dos drafts — apenas mencionava.
+
+### Correcoes Aplicadas
+1. **Idioma**: Documento completo reescrito em INGLES (matching Coda drafts)
+2. **Estilo**: Adotou o mesmo estilo dos drafts existentes (emojis, tabelas, Live Examples, voz casual/direta)
+3. **Integracao real**: Phase 2 agora referencia explicitamente Pre-Project Planning. Templates seguem formato TMS v2.0. RACI usa mesma formatacao.
+4. **Live Examples**: Links reais para tickets GEM (RAC-109, TOU-1033, etc.) em cada fase
+5. **Cross-references**: Escalation section referencia TMS Section B. Cadences section referencia TMS Section C.
+
+### Fontes Re-Lidas (Full Read)
+- TMS v2.0: 378 linhas (completo)
+- Pre-Project Ticket Planning: 1210 linhas (completo)
+- GEM GANTT Mapping: 117 linhas
+- 3-Gate Pipeline: 150+ linhas
+- INTUIT_BOOM_TRANSFER: 6 docs (START_HERE, RUNBOOKS, RISK_MATRIX, etc.)
+- SOW Best Practices: 100 linhas
+- TMS Learning: 100 linhas
+
+### Arquivos Gerados
+| Arquivo | Descricao |
+|---------|-----------|
+| `output/FULL_IMPLEMENTATION_PROCESS_V2.md` | Documento completo V2 (1816 linhas) |
+| `output/CODA_READY_PASTE_V2.md` | Conteudo para colar no Coda (1424 linhas) |
+| `deliverables/full-implementation-process/FULL_IMPLEMENTATION_PROCESS.md` | Versao final no Git |
+| `deliverables/full-implementation-process/CODA_READY_PASTE.md` | Versao paste no Git |
+
+### Metricas do Ciclo 3
+- **Documento principal:** 1930 → 1816 linhas (mais conciso, sem duplicacao)
+- **Coda paste:** 1424 linhas (EN)
+- **Quality Gates:** 6/6 PASS
+- **Fontes re-lidas:** 7 documentos completos (~3000+ linhas)
+
+---
+*Sessao consolidada em: 2026-02-10 (Ciclo 3 completado)*

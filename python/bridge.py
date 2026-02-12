@@ -21,7 +21,10 @@ BRIDGE_ROOT = Path(__file__).parent.resolve()
 sys.path.insert(0, str(BRIDGE_ROOT))
 
 # Also add SpineHUB root if available (for development)
-SPINEHUB_ROOT = Path("C:/Users/adm_r/SpineHUB")
+# Configurable via SPINEHUB_ROOT env var, falls back to default location
+import os
+_spinehub_root = os.environ.get("SPINEHUB_ROOT", str(Path.home() / "SpineHUB"))
+SPINEHUB_ROOT = Path(_spinehub_root)
 if SPINEHUB_ROOT.exists():
     sys.path.insert(0, str(SPINEHUB_ROOT))
     sys.path.insert(0, str(SPINEHUB_ROOT / "src"))

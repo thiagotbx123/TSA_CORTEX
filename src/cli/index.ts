@@ -33,8 +33,8 @@ const program = new Command();
 
 program
   .name('tsa-cortex')
-  .description('Weekly Worklog Automation - Collect evidence and generate traceable worklogs')
-  .version('1.0.0');
+  .description('TSA Operations Hub - Worklog Automation, SOPs, and Investigation')
+  .version('2.3.0');
 
 // Main run command
 program

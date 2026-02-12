@@ -1,7 +1,7 @@
 {
   "name": "tsa-cortex",
-  "version": "1.0.0",
-  "description": "Weekly Worklog Automation - Collect evidence from Slack, Linear, Drive, Local files and generate traceable worklogs",
+  "version": "2.3.0",
+  "description": "TSA Operations Hub - Worklog Automation, SOPs, and Investigation powered by multi-source data collection and SpineHub",
   "main": "dist/index.js",
   "bin": {
     "tsa-cortex": "./dist/cli/index.js"

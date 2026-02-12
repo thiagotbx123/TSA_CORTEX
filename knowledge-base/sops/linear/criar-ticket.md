@@ -68,12 +68,15 @@ Documentar e rastrear trabalho no Linear de forma padronizada para a equipe TSA.
 
 ### 5. Adicionar Labels
 
-Labels comuns TSA:
-- `bug` - Defeito encontrado
-- `investigation` - Precisa analise
-- `blocked` - Esperando algo externo
-- `customer-request` - Pedido do cliente
-- `documentation` - Docs necessarias
+Labels comuns TSA (corrigido TMS v2.0):
+- `Customer Issues` - Defeito ou problema reportado pelo cliente
+- `Feature` - Nova funcionalidade
+- `Spike` - Investigacao/analise necessaria
+- `Refactor` - Tech debt / refatoracao
+- `Deploy` - Tarefas de deploy
+- `RCA` - Root Cause Analysis
+- `Internal Request` - Pedido interno
+- `Customer Request` - Pedido do cliente
 
 ### 6. Atribuir (se souber)
 
@@ -137,4 +140,4 @@ await linear.createIssue({
 ---
 
 **Automacao disponivel:** SIM - via TSA_CORTEX CLI
-**Ultima atualizacao:** 2026-01-26
+**Ultima atualizacao:** 2026-02-12 (labels corrigidos per TMS v2.0)

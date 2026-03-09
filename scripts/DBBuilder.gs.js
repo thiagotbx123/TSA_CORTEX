@@ -9,7 +9,7 @@ var COLUMN_MAP = {
   'GABI':      { status: 1, demandType: 2, customer: 3, currentFocus: 5, dateAdd: 6, eta: 7, deliveryDate: 11 },
   'CARLOS':    { status: 2, demandType: 5, customer: 6, currentFocus: 7, dateAdd: 8, eta: 9, deliveryDate: 14 },
   'ALEXANDRA': { status: 1, demandType: 2, customer: 3, currentFocus: 4, dateAdd: 5, eta: 6, deliveryDate: 10 },
-  'THIAGO':    { status: 1, demandType: 2, customer: 3, currentFocus: 4, dateAdd: 5, eta: 6, deliveryDate: -1 }
+  'THIAGO':    { status: 1, demandType: 2, customer: 3, currentFocus: 4, dateAdd: 5, eta: 6, deliveryDate: 10 }
 };
 
 var TSA_TABS = ['DIEGO', 'GABI', 'CARLOS', 'ALEXANDRA', 'THIAGO'];

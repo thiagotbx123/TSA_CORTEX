@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Rebuild 'thiago test' tab with English labels + improved formatting.
+Rebuild 'Thiago Calculations' tab with English labels + improved formatting.
 Row 1: English month names merged
 Row 2: Friendly labels (JAN W.1, FEB W.2, etc.)
 Row 3: Hidden - DB week range strings for formula matching
@@ -105,13 +105,13 @@ print("Labels:", week_labels)
 # --- Get sheet ID ---
 sp = sh.get(spreadsheetId=KPI_ID).execute()
 ids = {s['properties']['title']: s['properties']['sheetId'] for s in sp['sheets']}
-test_id = ids.get('thiago test')
+test_id = ids.get('Thiago Calculations')
 if not test_id:
-    print("ERROR: 'thiago test' not found")
+    print("ERROR: 'Thiago Calculations' not found")
     exit(1)
 
 # --- Clear existing content ---
-sh.values().clear(spreadsheetId=KPI_ID, range="'thiago test'!A:AZ").execute()
+sh.values().clear(spreadsheetId=KPI_ID, range="'Thiago Calculations'!A:AZ").execute()
 reqs = [
     {'unmergeCells': {'range': {'sheetId': test_id,
         'startRowIndex': 0, 'endRowIndex': 50, 'startColumnIndex': 0, 'endColumnIndex': 30}}},
@@ -192,7 +192,7 @@ print(f"Built {TOTAL_ROWS} rows x {TOTAL_COLS} cols")
 # Write all values
 sh.values().update(
     spreadsheetId=KPI_ID,
-    range=f"'thiago test'!A1:{LAST_COL}{TOTAL_ROWS}",
+    range=f"'Thiago Calculations'!A1:{LAST_COL}{TOTAL_ROWS}",
     valueInputOption='USER_ENTERED',
     body={'values': vals}
 ).execute()
@@ -204,7 +204,7 @@ for name, mweeks in months.items():
     mrow.append(name)
     mrow.extend([''] * (len(mweeks) - 1))
 sh.values().update(
-    spreadsheetId=KPI_ID, range=f"'thiago test'!A1:{LAST_COL}1",
+    spreadsheetId=KPI_ID, range=f"'Thiago Calculations'!A1:{LAST_COL}1",
     valueInputOption='USER_ENTERED', body={'values': [mrow]}
 ).execute()
 print("Written month names (English)")

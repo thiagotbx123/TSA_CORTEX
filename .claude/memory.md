@@ -8,34 +8,33 @@
 **Ultima Atualizacao:** 2026-02-12
 **Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado + TMS v2.0 + 11 Templates + Full Implementation Process + Internal Audit Complete
 
-### KPI Delivery Tracker (2026-03-09)
+### KPI Delivery Tracker (2026-03-09, updated across 4 sessions)
 
-**Purpose:** Track delivery performance (On Time vs Late) across all 5 TSA tabs
-**Architecture:** Source Tabs → DBBuilder.gs (Apps Script) → DB tab → IMPORTRANGE → KPI tab (COUNTIFS)
+**Purpose:** Track delivery performance (On Time vs Late) across 5 TSAs + 2 DEs
+**Architecture:** Source Tabs (5 TSA + 1 DE) → DBBuilder.gs (Apps Script) → DB tab → IMPORTRANGE → KPI tabs (COUNTIFS)
 
 **Key Files:**
-- `scripts/DBBuilder.gs.js` - Apps Script deployed to Google Sheets (327 lines)
-- `scripts/rebuild_kpi_tab.py` - Python KPI builder (~200 lines)
-- `scripts/add_week_ref.py` - Adds Week Ref column to DB tab
-- `scripts/deploy_gs.py` - Deploy script (requires Apps Script API scope - currently uses browser Monaco injection instead)
+- `scripts/DBBuilder.gs.js` - Apps Script (383 lines), supports TSA_TABS + DE_TABS
+- `scripts/rebuild_kpi_tab.py` - Python KPI builder for "Thiago Calculations" tab (5 TSAs)
+- `scripts/rebuild_kpi_thais.py` - Python KPI builder for "Thais test" tab (2 DEs)
+- `scripts/add_week_ref.py` - One-time: adds Week Ref column to DB tab
 
 **Spreadsheets:**
 - TSA_Tasks_Consolidate: `1XaJgJCExt_dQ-RBY0eINP-0UCnCH7hYjGC3ibPlluzw` (DB source)
-- KPIS Raccoons: `1SPyvjXW9OJ4_CywHqroRwKbSbdGI98O0xxkc4y1Sy9w` (KPI tab: "thiago test", gid=165687443)
+- KPIS Raccoons: `1SPyvjXW9OJ4_CywHqroRwKbSbdGI98O0xxkc4y1Sy9w`
+  - "Thiago Calculations" (gid=165687443) — 5 TSAs KPI
+  - "Thais test" (gid=1989068677) — 2 DEs KPI
+  - "DB_Data" (gid=468979879) — IMPORTRANGE bridge
 - Apps Script project: `1RkaFVSPODWbruk9I1iKW1i4Nh3zp7WRiPtXIWadpuQovur6xC9KKFVQX`
 
-**Critical Design Decisions:**
-- ETA uses MIN date (original commitment), Delivery Date uses MAX date (actual completion)
-- Dates created at noon (12:00) to avoid timezone offset issues
-- Formula: `On Time / (On Time + Late)` — ignores in-progress/overdue tasks
-- Week Ref format: `YY-MM W.N` (sortable, e.g., "25-12 W.3", "26-01 W.1")
-- KPI tab includes Dec 2025 through Apr 2026 (20 weeks)
-- Deploy to Apps Script via browser Monaco editor injection (base64 approach)
+**Key Design:**
+- ETA = MIN date, Delivery Date = MAX date, dates at noon (12:00)
+- Formula: `IFERROR(On Time / (On Time + Late), 1)` — empty = 100%
+- DE_TABS: person split on "/", NFD normalization for accents
+- Deploy via browser Monaco editor injection (base64 approach)
 
-**Audit Results (2026-03-09):**
-- 317 DB rows, 5 TSAs (Alexandra=60, Carlos=126, Diego=41, Gabi=53, Thiago=37)
-- 180 On Time, 15 Late, 53 Overdue, 27 On Track
-- Cross-validated all KPI percentages against DB source data
+**DB Stats (final):** 402 rows, THIAGO: 81 On Time + 4 Late
+**Session:** `sessions/2026-03-09_kpi-delivery-tracker.md`
 
 ### Internal Audit v2.3 (2026-02-12)
 

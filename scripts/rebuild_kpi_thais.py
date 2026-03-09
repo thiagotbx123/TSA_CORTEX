@@ -68,7 +68,7 @@ def make_formula(row, col_idx, category):
             f'DB_Data!$F:$F,"{category}"')
     on_time = f'COUNTIFS({base},DB_Data!$K:$K,"On Time")'
     late = f'COUNTIFS({base},DB_Data!$K:$K,"Late")'
-    return f'=IFERROR({on_time}/({on_time}+{late}),"")'
+    return f'=IFERROR({on_time}/({on_time}+{late}),1)'
 
 # --- Generate weeks ---
 weeks = gen_weeks()

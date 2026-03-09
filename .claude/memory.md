@@ -8,6 +8,35 @@
 **Ultima Atualizacao:** 2026-02-12
 **Status:** CLI coleta + Claude narra + SOPs documentados + CODA integrado + TMS v2.0 + 11 Templates + Full Implementation Process + Internal Audit Complete
 
+### KPI Delivery Tracker (2026-03-09)
+
+**Purpose:** Track delivery performance (On Time vs Late) across all 5 TSA tabs
+**Architecture:** Source Tabs → DBBuilder.gs (Apps Script) → DB tab → IMPORTRANGE → KPI tab (COUNTIFS)
+
+**Key Files:**
+- `scripts/DBBuilder.gs.js` - Apps Script deployed to Google Sheets (327 lines)
+- `scripts/rebuild_kpi_tab.py` - Python KPI builder (~200 lines)
+- `scripts/add_week_ref.py` - Adds Week Ref column to DB tab
+- `scripts/deploy_gs.py` - Deploy script (requires Apps Script API scope - currently uses browser Monaco injection instead)
+
+**Spreadsheets:**
+- TSA_Tasks_Consolidate: `1XaJgJCExt_dQ-RBY0eINP-0UCnCH7hYjGC3ibPlluzw` (DB source)
+- KPIS Raccoons: `1SPyvjXW9OJ4_CywHqroRwKbSbdGI98O0xxkc4y1Sy9w` (KPI tab: "thiago test", gid=165687443)
+- Apps Script project: `1RkaFVSPODWbruk9I1iKW1i4Nh3zp7WRiPtXIWadpuQovur6xC9KKFVQX`
+
+**Critical Design Decisions:**
+- ETA uses MIN date (original commitment), Delivery Date uses MAX date (actual completion)
+- Dates created at noon (12:00) to avoid timezone offset issues
+- Formula: `On Time / (On Time + Late)` — ignores in-progress/overdue tasks
+- Week Ref format: `YY-MM W.N` (sortable, e.g., "25-12 W.3", "26-01 W.1")
+- KPI tab includes Dec 2025 through Apr 2026 (20 weeks)
+- Deploy to Apps Script via browser Monaco editor injection (base64 approach)
+
+**Audit Results (2026-03-09):**
+- 317 DB rows, 5 TSAs (Alexandra=60, Carlos=126, Diego=41, Gabi=53, Thiago=37)
+- 180 On Time, 15 Late, 53 Overdue, 27 On Track
+- Cross-validated all KPI percentages against DB source data
+
 ### Internal Audit v2.3 (2026-02-12)
 
 **Commit:** `6164684` - 8-phase audit and reorganization

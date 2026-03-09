@@ -13,6 +13,8 @@ var COLUMN_MAP = {
 };
 
 var TSA_TABS = ['DIEGO', 'GABI', 'CARLOS', 'ALEXANDRA', 'THIAGO'];
+var DE_TABS = ['THAIS_YASMIN'];
+// THAIS_YASMIN column map: person=0, task=1, linearLink=2, customer=3, tsa=4, eta=5, dd=6, deliveryStatus=7
 var EXTERNAL_TYPES = ['external(customer)', 'external (customer)', 'incident'];
 var DB_HEADERS = ['TSA', 'Week Range', 'Current Focus', 'Status', 'Demand Type',
                   'Demand Category', 'Customer', 'Date Add', 'ETA', 'Delivery Date',
@@ -31,7 +33,7 @@ function onOpen() {
 function onEdit(e) {
   try {
     var sheetName = e.source.getActiveSheet().getName();
-    if (TSA_TABS.indexOf(sheetName) === -1) return;
+    if (TSA_TABS.indexOf(sheetName) === -1 && DE_TABS.indexOf(sheetName) === -1) return;
     var cache = CacheService.getScriptCache();
     var last = cache.get('lastDBBuild');
     if (last && (Date.now() - parseInt(last)) < 30000) return;
@@ -94,6 +96,59 @@ function buildDB() {
         calcPerf_(status, etaParsed, ddParsed, today),
         weekRef_(wr)
       ]);
+    }
+  });
+
+  // Process DE tabs (THAIS_YASMIN) - different column structure
+  DE_TABS.forEach(function(tab) {
+    var sheet = ss.getSheetByName(tab);
+    if (!sheet || sheet.getLastRow() < 2) return;
+    var data = sheet.getDataRange().getValues();
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var personRaw = getCell_(row, 0);
+      if (!personRaw) continue;
+      var task = getCell_(row, 1);
+      if (!task) continue;
+
+      var cust = getCell_(row, 3);
+      var etaRaw = row[5];
+      var ddRaw = row[6];
+      var deliveryStatus = getCell_(row, 7);
+
+      // Derive status for calcPerf_: On Time/Late = Done, On Track = In Progress
+      var status = '';
+      var ds = (deliveryStatus || '').toLowerCase();
+      if (ds === 'on time' || ds === 'late') status = 'Done';
+      else if (ds === 'on track') status = 'In Progress';
+
+      var etaParsed = parseMinDate_(etaRaw);
+      var ddParsed = parseMaxDate_(ddRaw);
+      var daParsed = etaParsed; // Use ETA as Date Add (no separate column)
+
+      var wr = daParsed ? weekRange_(daParsed) : '';
+
+      // Split person on "/" to create separate rows
+      var persons = String(personRaw).split('/').map(function(p) { return p.trim(); });
+      for (var p = 0; p < persons.length; p++) {
+        var name = persons[p].toUpperCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        allRows.push([
+          name,
+          wr,
+          task,
+          status,
+          'external (customer)',
+          'External',
+          cust,
+          daParsed || String(etaRaw || ''),
+          etaParsed || String(etaRaw || ''),
+          ddParsed || String(ddRaw || ''),
+          calcPerf_(status, etaParsed, ddParsed, today),
+          weekRef_(wr)
+        ]);
+      }
     }
   });
 

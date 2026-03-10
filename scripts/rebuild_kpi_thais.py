@@ -3,7 +3,8 @@
 Rebuild 'Thais test' tab in KPIS Raccoons spreadsheet.
 Same logic as rebuild_kpi_tab.py but for 2 Data Engineers: Thaís and Yasmim.
 """
-import os
+import os, sys
+sys.stdout.reconfigure(line_buffering=True, encoding='utf-8', errors='replace')
 from datetime import date, timedelta
 from collections import OrderedDict
 from dotenv import load_dotenv
@@ -13,16 +14,16 @@ from googleapiclient.discovery import build
 load_dotenv()
 
 KPI_ID = '1SPyvjXW9OJ4_CywHqroRwKbSbdGI98O0xxkc4y1Sy9w'
-DB_ID  = '1XaJgJCExt_dQ-RBY0eINP-0UCnCH7hYjGC3ibPlluzw'
-TAB_NAME = 'Thais test'
-TAB_ID = 1989068677
+TAB_NAME = 'Thais Calculations'
 FIRST_DATA_COL = 4  # Column E (0-indexed)
 
 DE_DISPLAY = ['Thais', 'Yasmim']
 NUM_PEOPLE = len(DE_DISPLAY)
 
-MONTH_EN = {12: 'DECEMBER', 1: 'JANUARY', 2: 'FEBRUARY', 3: 'MARCH', 4: 'APRIL'}
-MONTH_ABBR = {12: 'DEC', 1: 'JAN', 2: 'FEB', 3: 'MAR', 4: 'APR'}
+MONTH_EN = {1: 'JANUARY', 2: 'FEBRUARY', 3: 'MARCH', 4: 'APRIL', 5: 'MAY', 6: 'JUNE',
+            7: 'JULY', 8: 'AUGUST', 9: 'SEPTEMBER', 10: 'OCTOBER', 11: 'NOVEMBER', 12: 'DECEMBER'}
+MONTH_ABBR = {1: 'JAN', 2: 'FEB', 3: 'MAR', 4: 'APR', 5: 'MAY', 6: 'JUN',
+              7: 'JUL', 8: 'AUG', 9: 'SEP', 10: 'OCT', 11: 'NOV', 12: 'DEC'}
 
 # --- Auth ---
 creds = Credentials(
@@ -48,12 +49,13 @@ def col_letter(idx):
 def gen_weeks():
     weeks = []
     d = date(2025, 12, 1)  # First Monday Dec 2025
-    while d < date(2026, 4, 18):
+    while d < date(2027, 1, 2):  # Through end of 2026
         fri = d + timedelta(days=4)
         weeks.append({
             'db_str': f"{d.month:02d}/{d.day:02d} - {fri.month:02d}/{fri.day:02d}/{fri.year}",
             'month': d.month,
-            'year': d.year
+            'year': d.year,
+            'monday': d
         })
         d += timedelta(days=7)
     return weeks
@@ -70,8 +72,39 @@ def make_formula(row, col_idx, category):
     late = f'COUNTIFS({base},DB_Data!$K:$K,"Late")'
     return f'=IFERROR({on_time}/({on_time}+{late}),1)'
 
+def make_throughput_formula(row, col_idx):
+    """Count of Done tasks per DE per week (all categories)."""
+    cl = col_letter(col_idx)
+    tsa = f'UPPER($D{row})'
+    return f'=COUNTIFS(DB_Data!$A:$A,{tsa},DB_Data!$B:$B,{cl}$3,DB_Data!$D:$D,"Done")'
+
+def make_overdue_formula(row, col_idx):
+    """Count of Overdue tasks per DE per week."""
+    cl = col_letter(col_idx)
+    tsa = f'UPPER($D{row})'
+    return f'=COUNTIFS(DB_Data!$A:$A,{tsa},DB_Data!$B:$B,{cl}$3,DB_Data!$K:$K,"Overdue")'
+
+def make_internal_count_formula(row, col_idx):
+    """Count of Internal tasks per DE per week."""
+    cl = col_letter(col_idx)
+    tsa = f'UPPER($D{row})'
+    return f'=COUNTIFS(DB_Data!$A:$A,{tsa},DB_Data!$B:$B,{cl}$3,DB_Data!$F:$F,"Internal")'
+
+def make_external_count_formula(row, col_idx):
+    """Count of External tasks per DE per week."""
+    cl = col_letter(col_idx)
+    tsa = f'UPPER($D{row})'
+    return f'=COUNTIFS(DB_Data!$A:$A,{tsa},DB_Data!$B:$B,{cl}$3,DB_Data!$F:$F,"External")'
+
+def make_wip_formula(row, col_idx):
+    """Count of In Progress tasks per DE per week."""
+    cl = col_letter(col_idx)
+    tsa = f'UPPER($D{row})'
+    return f'=COUNTIFS(DB_Data!$A:$A,{tsa},DB_Data!$B:$B,{cl}$3,DB_Data!$D:$D,"In Progress")'
+
 # --- Generate weeks ---
 weeks = gen_weeks()
+today = date.today()
 TOTAL_COLS = FIRST_DATA_COL + len(weeks)
 LAST_COL = col_letter(TOTAL_COLS - 1)
 
@@ -87,22 +120,38 @@ print(f"Weeks: {len(weeks)}, Months: {len(months)}, Cols: {TOTAL_COLS} (A-{LAST_
 week_labels = []
 month_counters = {}
 for w in weeks:
-    month_counters.setdefault(w['month'], 0)
-    month_counters[w['month']] += 1
+    ym_key = (w['year'], w['month'])
+    month_counters.setdefault(ym_key, 0)
+    month_counters[ym_key] += 1
     yr = str(w['year'])[-2:]
-    week_labels.append(f"{yr}-{w['month']:02d} W.{month_counters[w['month']]}")
+    week_labels.append(f"{yr}-{w['month']:02d} W.{month_counters[ym_key]}")
 
 # --- Layout constants (2 people) ---
 # Row 1: Month names
 # Row 2: Week labels
 # Row 3: Hidden DB format
 # Row 4: blank separator (8px)
-# Row 5: Internal header
-# Rows 6-7: Internal data (2 people)
+# Row 5: Internal Delivery header
+# Rows 6-7: Internal Delivery data (2 people)
 # Row 8: blank separator (8px)
-# Row 9: External header
-# Rows 10-11: External data (2 people)
-# Total: 11 rows
+# Row 9: External Delivery header
+# Rows 10-11: External Delivery data (2 people)
+# Row 12: blank separator (8px)
+# Row 13: Throughput header
+# Rows 14-15: Throughput data (2 people)
+# Row 16: blank separator (8px)
+# Row 17: Overdue header
+# Rows 18-19: Overdue data (2 people)
+# Row 20: blank separator (8px)
+# Row 21: WIP header
+# Rows 22-23: WIP data (2 people)
+# Row 24: blank separator (8px)
+# Row 25: Internal Tasks (Count) header
+# Rows 26-27: Internal Tasks data (2 people)
+# Row 28: blank separator (8px)
+# Row 29: External Tasks (Count) header
+# Rows 30-31: External Tasks data (2 people)
+# Total: 31 rows
 
 INT_HEADER_ROW = 4   # 0-indexed
 INT_DATA_START = 5
@@ -111,19 +160,50 @@ SEP2_ROW = INT_DATA_END  # 7
 EXT_HEADER_ROW = SEP2_ROW + 1  # 8
 EXT_DATA_START = EXT_HEADER_ROW + 1  # 9
 EXT_DATA_END = EXT_DATA_START + NUM_PEOPLE  # 11
-TOTAL_ROWS_LAYOUT = EXT_DATA_END  # 11
+SEP3_ROW = EXT_DATA_END            # 11
+THRU_HEADER_ROW = SEP3_ROW + 1     # 12
+THRU_DATA_START = THRU_HEADER_ROW + 1  # 13
+THRU_DATA_END = THRU_DATA_START + NUM_PEOPLE  # 15
+SEP4_ROW = THRU_DATA_END           # 15
+OVRD_HEADER_ROW = SEP4_ROW + 1     # 16
+OVRD_DATA_START = OVRD_HEADER_ROW + 1  # 17
+OVRD_DATA_END = OVRD_DATA_START + NUM_PEOPLE  # 19
+SEP5_ROW = OVRD_DATA_END            # 19
+WIP_HEADER_ROW = SEP5_ROW + 1       # 20
+WIP_DATA_START = WIP_HEADER_ROW + 1  # 21
+WIP_DATA_END = WIP_DATA_START + NUM_PEOPLE  # 23
+SEP6_ROW = WIP_DATA_END             # 23
+ICNT_HEADER_ROW = SEP6_ROW + 1      # 24
+ICNT_DATA_START = ICNT_HEADER_ROW + 1  # 25
+ICNT_DATA_END = ICNT_DATA_START + NUM_PEOPLE  # 27
+SEP7_ROW = ICNT_DATA_END            # 27
+ECNT_HEADER_ROW = SEP7_ROW + 1      # 28
+ECNT_DATA_START = ECNT_HEADER_ROW + 1  # 29
+ECNT_DATA_END = ECNT_DATA_START + NUM_PEOPLE  # 31
+TOTAL_ROWS_LAYOUT = ECNT_DATA_END   # 31
 
 print(f"Layout: Int header row {INT_HEADER_ROW+1}, Int data rows {INT_DATA_START+1}-{INT_DATA_END}, "
       f"Ext header row {EXT_HEADER_ROW+1}, Ext data rows {EXT_DATA_START+1}-{EXT_DATA_END}")
 
+# --- Get sheet ID dynamically ---
+sp = sh.get(spreadsheetId=KPI_ID).execute()
+ids = {s['properties']['title']: s['properties']['sheetId'] for s in sp['sheets']}
+TAB_ID = ids.get(TAB_NAME)
+if TAB_ID is None:
+    print(f"ERROR: '{TAB_NAME}' not found in spreadsheet")
+    sys.exit(1)
+print(f"Sheet '{TAB_NAME}' → sheetId {TAB_ID}")
+
 # --- Clear existing content ---
-sh.values().clear(spreadsheetId=KPI_ID, range=f"'{TAB_NAME}'!A:AZ").execute()
+sh.values().clear(spreadsheetId=KPI_ID, range=f"'{TAB_NAME}'!A:{LAST_COL}").execute()
+CLEAR_ROWS = max(TOTAL_ROWS_LAYOUT + 2, 40)
+CLEAR_COLS = max(TOTAL_COLS + 2, 70)
 reqs = [
     {'unmergeCells': {'range': {'sheetId': TAB_ID,
-        'startRowIndex': 0, 'endRowIndex': 50, 'startColumnIndex': 0, 'endColumnIndex': 30}}},
+        'startRowIndex': 0, 'endRowIndex': CLEAR_ROWS, 'startColumnIndex': 0, 'endColumnIndex': CLEAR_COLS}}},
     {'repeatCell': {
         'range': {'sheetId': TAB_ID,
-            'startRowIndex': 0, 'endRowIndex': 50, 'startColumnIndex': 0, 'endColumnIndex': 30},
+            'startRowIndex': 0, 'endRowIndex': CLEAR_ROWS, 'startColumnIndex': 0, 'endColumnIndex': CLEAR_COLS},
         'cell': {'userEnteredFormat': {}}, 'fields': 'userEnteredFormat'}}
 ]
 # Remove existing conditional format rules
@@ -145,7 +225,7 @@ vals = []
 vals.append([''] * TOTAL_COLS)
 
 # Row 2: Week labels
-r2 = ['Metrics', 'Group', 'Category', 'DE']
+r2 = ['Metrics', '', '', 'DE']
 for label in week_labels:
     r2.append(label)
 vals.append(r2)
@@ -161,9 +241,8 @@ vals.append([])
 
 # Row 5: Internal header
 vals.append([
-    'DE Internal Demands', 'Delivery',
-    'Are estimations met effectively? (internal timelines)',
-    '>90% target'
+    'DE Internal Demands\nAre estimations met effectively? (internal timelines)',
+    '', '', '>90% target'
 ])
 
 # Rows 6-7: Internal data
@@ -171,7 +250,10 @@ for de in DE_DISPLAY:
     row = ['', '', '', de]
     rn = len(vals) + 1
     for i in range(len(weeks)):
-        row.append(make_formula(rn, FIRST_DATA_COL + i, 'Internal'))
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_formula(rn, FIRST_DATA_COL + i, 'Internal'))
     vals.append(row)
 
 # Row 8: blank separator
@@ -179,9 +261,8 @@ vals.append([])
 
 # Row 9: External header
 vals.append([
-    'DE External Demands', 'Delivery',
-    'Are estimations met effectively? (customer timelines)',
-    '>90% target'
+    'DE External Demands\nAre estimations met effectively? (customer timelines)',
+    '', '', '>90% target'
 ])
 
 # Rows 10-11: External data
@@ -189,7 +270,110 @@ for de in DE_DISPLAY:
     row = ['', '', '', de]
     rn = len(vals) + 1
     for i in range(len(weeks)):
-        row.append(make_formula(rn, FIRST_DATA_COL + i, 'External'))
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_formula(rn, FIRST_DATA_COL + i, 'External'))
+    vals.append(row)
+
+# Row 12: blank separator
+vals.append([])
+
+# Row 13: Throughput header
+vals.append([
+    'Throughput (Deliveries/Week)\nHow many tasks completed per week?',
+    '', '', '>=5 target'
+])
+
+# Rows 14-15: Throughput data
+for de in DE_DISPLAY:
+    row = ['', '', '', de]
+    rn = len(vals) + 1
+    for i in range(len(weeks)):
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_throughput_formula(rn, FIRST_DATA_COL + i))
+    vals.append(row)
+
+# Row 16: blank separator
+vals.append([])
+
+# Row 17: Overdue Snapshot header
+vals.append([
+    'Overdue Snapshot\nHow many tasks are overdue per week?',
+    '', '', '0 target'
+])
+
+# Rows 18-19: Overdue data
+for de in DE_DISPLAY:
+    row = ['', '', '', de]
+    rn = len(vals) + 1
+    for i in range(len(weeks)):
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_overdue_formula(rn, FIRST_DATA_COL + i))
+    vals.append(row)
+
+# Row 20: blank separator
+vals.append([])
+
+# Row 21: WIP header
+vals.append([
+    'WIP (Work in Progress)\nTasks currently open per week',
+    '', '', '<=3 target'
+])
+
+# Rows 22-23: WIP data
+for de in DE_DISPLAY:
+    row = ['', '', '', de]
+    rn = len(vals) + 1
+    for i in range(len(weeks)):
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_wip_formula(rn, FIRST_DATA_COL + i))
+    vals.append(row)
+
+# Row 24: blank separator
+vals.append([])
+
+# Row 25: Internal Tasks (Count) header
+vals.append([
+    'Internal Tasks (Count)\nHow many internal tasks per week?',
+    '', '', ''
+])
+
+# Rows 26-27: Internal Tasks count data
+for de in DE_DISPLAY:
+    row = ['', '', '', de]
+    rn = len(vals) + 1
+    for i in range(len(weeks)):
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_internal_count_formula(rn, FIRST_DATA_COL + i))
+    vals.append(row)
+
+# Row 28: blank separator
+vals.append([])
+
+# Row 29: External Tasks (Count) header
+vals.append([
+    'External Tasks (Count)\nHow many customer-facing tasks per week?',
+    '', '', ''
+])
+
+# Rows 30-31: External Tasks count data
+for de in DE_DISPLAY:
+    row = ['', '', '', de]
+    rn = len(vals) + 1
+    for i in range(len(weeks)):
+        if weeks[i]['monday'] > today:
+            row.append('')
+        else:
+            row.append(make_external_count_formula(rn, FIRST_DATA_COL + i))
     vals.append(row)
 
 TOTAL_ROWS = len(vals)
@@ -225,6 +409,19 @@ reqs.append({'mergeCells': {'range': {
     'sheetId': TAB_ID, 'startRowIndex': 0, 'endRowIndex': 1,
     'startColumnIndex': 0, 'endColumnIndex': 4
 }, 'mergeType': 'MERGE_ALL'}})
+
+# Merge A2:C2 (labels row)
+reqs.append({'mergeCells': {'range': {
+    'sheetId': TAB_ID, 'startRowIndex': 1, 'endRowIndex': 2,
+    'startColumnIndex': 0, 'endColumnIndex': 3
+}, 'mergeType': 'MERGE_ALL'}})
+
+# Merge A:C for group header rows
+for idx in [INT_HEADER_ROW, EXT_HEADER_ROW, THRU_HEADER_ROW, OVRD_HEADER_ROW, WIP_HEADER_ROW, ICNT_HEADER_ROW, ECNT_HEADER_ROW]:
+    reqs.append({'mergeCells': {'range': {
+        'sheetId': TAB_ID, 'startRowIndex': idx, 'endRowIndex': idx + 1,
+        'startColumnIndex': 0, 'endColumnIndex': 3
+    }, 'mergeType': 'MERGE_ALL'}})
 
 cs = FIRST_DATA_COL
 for name, mweeks in months.items():
@@ -286,8 +483,8 @@ reqs.append({'updateDimensionProperties': {
     'fields': 'pixelSize,hiddenByUser'
 }})
 
-# --- Separator rows (4 and 8, idx 3 and 7) ---
-for idx in [3, SEP2_ROW]:
+# --- Separator rows (8px gray) ---
+for idx in [3, SEP2_ROW, SEP3_ROW, SEP4_ROW, SEP5_ROW, SEP6_ROW, SEP7_ROW]:
     reqs.append({'updateDimensionProperties': {
         'properties': {'pixelSize': 8},
         'range': {'sheetId': TAB_ID, 'dimension': 'ROWS', 'startIndex': idx, 'endIndex': idx + 1},
@@ -303,10 +500,15 @@ for idx in [3, SEP2_ROW]:
 
 # --- Group headers ---
 GROUP_COLORS = [
-    {'red': 0.22, 'green': 0.46, 'blue': 0.69},  # Steel blue (internal)
-    {'red': 0.36, 'green': 0.54, 'blue': 0.66},  # Muted teal (external)
+    {'red': 0.22, 'green': 0.46, 'blue': 0.69},  # Steel blue (internal delivery)
+    {'red': 0.36, 'green': 0.54, 'blue': 0.66},  # Muted teal (external delivery)
+    {'red': 0.33, 'green': 0.53, 'blue': 0.42},  # Deep sage (throughput)
+    {'red': 0.66, 'green': 0.36, 'blue': 0.40},  # Muted burgundy (overdue)
+    {'red': 0.70, 'green': 0.55, 'blue': 0.25},  # Dark amber (WIP)
+    {'red': 0.45, 'green': 0.38, 'blue': 0.62},  # Muted indigo (internal count)
+    {'red': 0.62, 'green': 0.45, 'blue': 0.38},  # Muted terracotta (external count)
 ]
-for i, idx in enumerate([INT_HEADER_ROW, EXT_HEADER_ROW]):
+for i, idx in enumerate([INT_HEADER_ROW, EXT_HEADER_ROW, THRU_HEADER_ROW, OVRD_HEADER_ROW, WIP_HEADER_ROW, ICNT_HEADER_ROW, ECNT_HEADER_ROW]):
     reqs.append({'repeatCell': {
         'range': {'sheetId': TAB_ID, 'startRowIndex': idx, 'endRowIndex': idx + 1,
                   'startColumnIndex': 0, 'endColumnIndex': TOTAL_COLS},
@@ -315,6 +517,7 @@ for i, idx in enumerate([INT_HEADER_ROW, EXT_HEADER_ROW]):
             'textFormat': {'bold': True, 'fontSize': 10,
                            'foregroundColor': {'red': 1, 'green': 1, 'blue': 1}},
             'verticalAlignment': 'MIDDLE',
+            'wrapStrategy': 'WRAP',
             'borders': {
                 'top': {'style': 'SOLID_MEDIUM', 'colorStyle': {'rgbColor': {'red': 0.3, 'green': 0.3, 'blue': 0.3}}},
                 'bottom': {'style': 'SOLID_MEDIUM', 'colorStyle': {'rgbColor': {'red': 0.3, 'green': 0.3, 'blue': 0.3}}}
@@ -323,7 +526,10 @@ for i, idx in enumerate([INT_HEADER_ROW, EXT_HEADER_ROW]):
     }})
 
 # --- DE name column (D) ---
-for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END)]:
+for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END),
+             (THRU_DATA_START, THRU_DATA_END), (OVRD_DATA_START, OVRD_DATA_END),
+             (ICNT_DATA_START, ICNT_DATA_END), (ECNT_DATA_START, ECNT_DATA_END),
+             (WIP_DATA_START, WIP_DATA_END)]:
     reqs.append({'repeatCell': {
         'range': {'sheetId': TAB_ID, 'startRowIndex': s, 'endRowIndex': e,
                   'startColumnIndex': 3, 'endColumnIndex': 4},
@@ -340,6 +546,7 @@ TINT_A = {'red': 1.0,  'green': 1.0,  'blue': 1.0}
 TINT_B = {'red': 0.94, 'green': 0.96, 'blue': 0.98}
 THIN = {'style': 'SOLID', 'colorStyle': {'rgbColor': {'red': 0.75, 'green': 0.75, 'blue': 0.75}}}
 
+# Delivery Performance sections (PERCENT format)
 for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END)]:
     for i in range(len(weeks)):
         col = FIRST_DATA_COL + i
@@ -355,8 +562,29 @@ for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END)]:
             }}, 'fields': 'userEnteredFormat'
         }})
 
+# Throughput + Overdue + Internal Count + External Count + WIP sections (NUMBER format)
+for s, e in [(THRU_DATA_START, THRU_DATA_END), (OVRD_DATA_START, OVRD_DATA_END),
+             (ICNT_DATA_START, ICNT_DATA_END), (ECNT_DATA_START, ECNT_DATA_END),
+             (WIP_DATA_START, WIP_DATA_END)]:
+    for i in range(len(weeks)):
+        col = FIRST_DATA_COL + i
+        tint = TINT_A if i % 2 == 0 else TINT_B
+        reqs.append({'repeatCell': {
+            'range': {'sheetId': TAB_ID, 'startRowIndex': s, 'endRowIndex': e,
+                      'startColumnIndex': col, 'endColumnIndex': col + 1},
+            'cell': {'userEnteredFormat': {
+                'backgroundColor': tint,
+                'numberFormat': {'type': 'NUMBER', 'pattern': '0'},
+                'horizontalAlignment': 'CENTER', 'verticalAlignment': 'MIDDLE',
+                'borders': {'left': THIN, 'right': THIN, 'top': THIN, 'bottom': THIN}
+            }}, 'fields': 'userEnteredFormat'
+        }})
+
 # --- Left columns A-C: light bg ---
-for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END)]:
+for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END),
+             (THRU_DATA_START, THRU_DATA_END), (OVRD_DATA_START, OVRD_DATA_END),
+             (ICNT_DATA_START, ICNT_DATA_END), (ECNT_DATA_START, ECNT_DATA_END),
+             (WIP_DATA_START, WIP_DATA_END)]:
     reqs.append({'repeatCell': {
         'range': {'sheetId': TAB_ID, 'startRowIndex': s, 'endRowIndex': e,
                   'startColumnIndex': 0, 'endColumnIndex': 3},
@@ -382,7 +610,8 @@ reqs.append({'updateBorders': {
 }})
 
 # --- Bottom borders after data rows ---
-for row_idx in [INT_DATA_END - 1, EXT_DATA_END - 1]:
+for row_idx in [INT_DATA_END - 1, EXT_DATA_END - 1, THRU_DATA_END - 1, OVRD_DATA_END - 1,
+                ICNT_DATA_END - 1, ECNT_DATA_END - 1, WIP_DATA_END - 1]:
     reqs.append({'updateBorders': {
         'range': {'sheetId': TAB_ID, 'startRowIndex': row_idx, 'endRowIndex': row_idx + 1,
                   'startColumnIndex': 0, 'endColumnIndex': TOTAL_COLS},
@@ -400,13 +629,16 @@ reqs.append({'updateDimensionProperties': {
     'range': {'sheetId': TAB_ID, 'dimension': 'ROWS', 'startIndex': 1, 'endIndex': 2},
     'fields': 'pixelSize'
 }})
-for idx in [INT_HEADER_ROW, EXT_HEADER_ROW]:
+for idx in [INT_HEADER_ROW, EXT_HEADER_ROW, THRU_HEADER_ROW, OVRD_HEADER_ROW, WIP_HEADER_ROW, ICNT_HEADER_ROW, ECNT_HEADER_ROW]:
     reqs.append({'updateDimensionProperties': {
-        'properties': {'pixelSize': 30},
+        'properties': {'pixelSize': 42},
         'range': {'sheetId': TAB_ID, 'dimension': 'ROWS', 'startIndex': idx, 'endIndex': idx + 1},
         'fields': 'pixelSize'
     }})
-for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END)]:
+for s, e in [(INT_DATA_START, INT_DATA_END), (EXT_DATA_START, EXT_DATA_END),
+             (THRU_DATA_START, THRU_DATA_END), (OVRD_DATA_START, OVRD_DATA_END),
+             (ICNT_DATA_START, ICNT_DATA_END), (ECNT_DATA_START, ECNT_DATA_END),
+             (WIP_DATA_START, WIP_DATA_END)]:
     reqs.append({'updateDimensionProperties': {
         'properties': {'pixelSize': 26},
         'range': {'sheetId': TAB_ID, 'dimension': 'ROWS', 'startIndex': s, 'endIndex': e},
@@ -470,6 +702,82 @@ reqs.append({'addConditionalFormatRule': {'rule': {
         'format': {'backgroundColor': {'red': 0.91, 'green': 0.49, 'blue': 0.45}}
     }}, 'index': 2}})
 
+# --- Conditional formatting: Throughput ---
+throughput_ranges = [
+    {'sheetId': TAB_ID, 'startRowIndex': THRU_DATA_START, 'endRowIndex': THRU_DATA_END,
+     'startColumnIndex': FIRST_DATA_COL, 'endColumnIndex': TOTAL_COLS}
+]
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': throughput_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_GREATER_THAN_EQ', 'values': [{'userEnteredValue': '5'}]},
+        'format': {'backgroundColor': {'red': 0.56, 'green': 0.77, 'blue': 0.49}}
+    }}, 'index': 3}})
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': throughput_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_BETWEEN',
+                      'values': [{'userEnteredValue': '2'}, {'userEnteredValue': '4'}]},
+        'format': {'backgroundColor': {'red': 1.0, 'green': 0.85, 'blue': 0.4}}
+    }}, 'index': 4}})
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': throughput_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_LESS', 'values': [{'userEnteredValue': '2'}]},
+        'format': {'backgroundColor': {'red': 0.91, 'green': 0.49, 'blue': 0.45}}
+    }}, 'index': 5}})
+
+# --- Conditional formatting: Overdue Snapshot ---
+overdue_ranges = [
+    {'sheetId': TAB_ID, 'startRowIndex': OVRD_DATA_START, 'endRowIndex': OVRD_DATA_END,
+     'startColumnIndex': FIRST_DATA_COL, 'endColumnIndex': TOTAL_COLS}
+]
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': overdue_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_LESS_THAN_EQ', 'values': [{'userEnteredValue': '0'}]},
+        'format': {'backgroundColor': {'red': 0.56, 'green': 0.77, 'blue': 0.49}}
+    }}, 'index': 6}})
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': overdue_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_BETWEEN',
+                      'values': [{'userEnteredValue': '1'}, {'userEnteredValue': '2'}]},
+        'format': {'backgroundColor': {'red': 1.0, 'green': 0.85, 'blue': 0.4}}
+    }}, 'index': 7}})
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': overdue_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_GREATER_THAN_EQ', 'values': [{'userEnteredValue': '3'}]},
+        'format': {'backgroundColor': {'red': 0.91, 'green': 0.49, 'blue': 0.45}}
+    }}, 'index': 8}})
+
+# --- Conditional formatting: WIP ---
+wip_ranges = [
+    {'sheetId': TAB_ID, 'startRowIndex': WIP_DATA_START, 'endRowIndex': WIP_DATA_END,
+     'startColumnIndex': FIRST_DATA_COL, 'endColumnIndex': TOTAL_COLS}
+]
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': wip_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_LESS_THAN_EQ',
+                      'values': [{'userEnteredValue': '3'}]},
+        'format': {'backgroundColor': {'red': 0.56, 'green': 0.77, 'blue': 0.49}}
+    }}, 'index': 9}})
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': wip_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_BETWEEN',
+                      'values': [{'userEnteredValue': '4'}, {'userEnteredValue': '6'}]},
+        'format': {'backgroundColor': {'red': 1.0, 'green': 0.85, 'blue': 0.4}}
+    }}, 'index': 10}})
+reqs.append({'addConditionalFormatRule': {'rule': {
+    'ranges': wip_ranges,
+    'booleanRule': {
+        'condition': {'type': 'NUMBER_GREATER_THAN_EQ', 'values': [{'userEnteredValue': '7'}]},
+        'format': {'backgroundColor': {'red': 0.91, 'green': 0.49, 'blue': 0.45}}
+    }}, 'index': 11}})
+
 # --- Execute ---
 print(f"Sending {len(reqs)} formatting requests...")
 sh.batchUpdate(spreadsheetId=KPI_ID, body={'requests': reqs}).execute()
@@ -477,3 +785,6 @@ print("Done!")
 print(f"\nTab rebuilt: {TOTAL_ROWS} rows x {TOTAL_COLS} cols")
 print(f"People: {', '.join(DE_DISPLAY)}")
 print(f"Internal rows: {INT_DATA_START+1}-{INT_DATA_END} | External rows: {EXT_DATA_START+1}-{EXT_DATA_END}")
+print(f"Throughput rows: {THRU_DATA_START+1}-{THRU_DATA_END} | Overdue rows: {OVRD_DATA_START+1}-{OVRD_DATA_END}")
+print(f"Internal Count rows: {ICNT_DATA_START+1}-{ICNT_DATA_END} | External Count rows: {ECNT_DATA_START+1}-{ECNT_DATA_END}")
+print(f"WIP rows: {WIP_DATA_START+1}-{WIP_DATA_END}")

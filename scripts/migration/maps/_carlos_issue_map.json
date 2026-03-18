@@ -1,0 +1,681 @@
+{
+  "1": {
+    "id": "d26d3b2b-0697-47d9-9c23-3e2457fa41d4",
+    "identifier": "RAC-367",
+    "url": "https://linear.app/testbox/issue/RAC-367/deals-history-refactor"
+  },
+  "3": {
+    "id": "f366e154-6393-43cc-a63b-2749c75fa697",
+    "identifier": "RAC-368",
+    "url": "https://linear.app/testbox/issue/RAC-368/sandbox-improvements"
+  },
+  "4": {
+    "id": "07bce4c7-3847-4a06-a7a8-a9d37ae22bc9",
+    "identifier": "RAC-369",
+    "url": "https://linear.app/testbox/issue/RAC-369/gong-sandbox-improvements-and-custom-metrics-are-in-progress-with"
+  },
+  "14": {
+    "id": "81b1ccfd-2b11-43cb-b07b-b96a4a5ba4e7",
+    "identifier": "RAC-370",
+    "url": "https://linear.app/testbox/issue/RAC-370/fix-the-new-business-generated-and-forecast-values-for-sandbox"
+  },
+  "29": {
+    "id": "5dcced1b-4c5c-4d9b-a0d9-5289fd5e2775",
+    "identifier": "RAC-371",
+    "url": "https://linear.app/testbox/issue/RAC-371/sandbox-mirrors-demo"
+  },
+  "30": {
+    "id": "7e3c12b9-07e4-4428-bcf4-3f616f0a4b42",
+    "identifier": "RAC-372",
+    "url": "https://linear.app/testbox/issue/RAC-372/automate-the-meddicc-ai-trackers-for-hubspot-accounts"
+  },
+  "31": {
+    "id": "0392b33f-dfb9-43bc-834d-4a55a6c8deac",
+    "identifier": "RAC-373",
+    "url": "https://linear.app/testbox/issue/RAC-373/sandbox-ingestion-visibility"
+  },
+  "33": {
+    "id": "ae0bd6d8-714e-49ca-9d84-57a405cf4d96",
+    "identifier": "RAC-374",
+    "url": "https://linear.app/testbox/issue/RAC-374/automate-the-entire-hubspot-gong-account-creation"
+  },
+  "34": {
+    "id": "3aadfb5f-a369-4f9b-a2a9-0e38907e0210",
+    "identifier": "RAC-375",
+    "url": "https://linear.app/testbox/issue/RAC-375/deals-forecast-hiding-team-members"
+  },
+  "56": {
+    "id": "043ed754-29b3-4eae-926f-f045204f3cea",
+    "identifier": "RAC-376",
+    "url": "https://linear.app/testbox/issue/RAC-376/ai-builder"
+  },
+  "65": {
+    "id": "d1d325da-51d7-4cd9-a9a2-605ab4c83c51",
+    "identifier": "RAC-377",
+    "url": "https://linear.app/testbox/issue/RAC-377/sandbox-login-error"
+  },
+  "115": {
+    "id": "9751f06e-d357-4bb1-858f-f1c8b6d7904c",
+    "identifier": "RAC-378",
+    "url": "https://linear.app/testbox/issue/RAC-378/configure-hubspot-18-account"
+  },
+  "15": {
+    "id": "5637cf41-46b9-4238-9a4b-478000f21ade",
+    "identifier": "RAC-379",
+    "url": "https://linear.app/testbox/issue/RAC-379/ingest-the-test-account-using-the-salesforce-account-provided-by-gong"
+  },
+  "26": {
+    "id": "c04a17a4-6e7d-4024-90b7-2fe1f90d62c3",
+    "identifier": "RAC-380",
+    "url": "https://linear.app/testbox/issue/RAC-380/demo-account-refresh"
+  },
+  "28": {
+    "id": "9c0d2716-765d-4d94-943a-7627162fd2bb",
+    "identifier": "RAC-381",
+    "url": "https://linear.app/testbox/issue/RAC-381/historical-data-model"
+  },
+  "35": {
+    "id": "39a54282-38aa-41d5-9f9f-a2d9e712c3ff",
+    "identifier": "RAC-382",
+    "url": "https://linear.app/testbox/issue/RAC-382/add-the-missing-custom-fields-in-the-dev51-account"
+  },
+  "64": {
+    "id": "e57a5d95-1894-49f8-ba14-90cd908c2cd8",
+    "identifier": "RAC-383",
+    "url": "https://linear.app/testbox/issue/RAC-383/ingest-the-dev59-account-with-the-new-demo-data"
+  },
+  "66": {
+    "id": "8e700e4c-5785-4089-9623-b7d52da3c0c7",
+    "identifier": "RAC-384",
+    "url": "https://linear.app/testbox/issue/RAC-384/check-dev60-ingestion"
+  },
+  "67": {
+    "id": "979fbdc3-d2c3-4ed7-aac7-343060d807b0",
+    "identifier": "RAC-385",
+    "url": "https://linear.app/testbox/issue/RAC-385/import-team-members-manually-to-dev60-account"
+  },
+  "68": {
+    "id": "390be2c7-3588-42f4-8a55-b1a746c6a99e",
+    "identifier": "RAC-386",
+    "url": "https://linear.app/testbox/issue/RAC-386/start-ingestion-for-the-dev61-account"
+  },
+  "80": {
+    "id": "98027c34-9d57-404f-810c-2a25ce0428ce",
+    "identifier": "RAC-387",
+    "url": "https://linear.app/testbox/issue/RAC-387/make-the-final-adjustments-on-dev64"
+  },
+  "91": {
+    "id": "2b3fd22d-ef05-494e-b99d-48bb88c1522e",
+    "identifier": "RAC-388",
+    "url": "https://linear.app/testbox/issue/RAC-388/ingest-account-dev62-creating-team-members-manually-and-then-syncing"
+  },
+  "10": {
+    "id": "89f183b9-cfb6-46b9-b430-66e2877cfa6f",
+    "identifier": "RAC-389",
+    "url": "https://linear.app/testbox/issue/RAC-389/fix-the-deals-score-ingestion-step"
+  },
+  "12": {
+    "id": "f0877136-95b1-4b4d-96b9-9ce12c68dade",
+    "identifier": "RAC-390",
+    "url": "https://linear.app/testbox/issue/RAC-390/understand-how-the-deals-score-field-works"
+  },
+  "38": {
+    "id": "957e2a05-0026-4452-90e0-8f94302c832e",
+    "identifier": "RAC-391",
+    "url": "https://linear.app/testbox/issue/RAC-391/fix-forecast-page-to-have-forecast-in-all-different-sections"
+  },
+  "41": {
+    "id": "607deb93-34dd-4c50-83d1-3ae3211c2a07",
+    "identifier": "RAC-392",
+    "url": "https://linear.app/testbox/issue/RAC-392/move-or-create-more-deals-between-the-end-of-the-last-quarter-and-the"
+  },
+  "42": {
+    "id": "ec2dfd30-d77e-4108-af6e-54740262a29a",
+    "identifier": "RAC-393",
+    "url": "https://linear.app/testbox/issue/RAC-393/adjust-the-values-from-the-forecast-page-to-be-more-story-accurate"
+  },
+  "43": {
+    "id": "07722f30-1ada-4a6f-aec1-e1ec84c0704c",
+    "identifier": "RAC-394",
+    "url": "https://linear.app/testbox/issue/RAC-394/add-the-pushed-out-category-to-the-deals-analytics-changes-page"
+  },
+  "45": {
+    "id": "a458f047-88f5-4b87-b1f4-0fd393daff80",
+    "identifier": "RAC-395",
+    "url": "https://linear.app/testbox/issue/RAC-395/fix-the-deals-analytics-accuracy-page"
+  },
+  "51": {
+    "id": "8d4a6891-761c-41b5-9480-dc0fbc486121",
+    "identifier": "RAC-396",
+    "url": "https://linear.app/testbox/issue/RAC-396/remove-some-of-the-deal-pipeline-dashboards"
+  },
+  "57": {
+    "id": "c98da486-8be8-4f9a-adc6-15197ac944c4",
+    "identifier": "RAC-397",
+    "url": "https://linear.app/testbox/issue/RAC-397/add-missing-deals-pipeline-board-to-the-dataset"
+  },
+  "59": {
+    "id": "f3ed7733-2505-41ee-8138-d0d9b45f3b7f",
+    "identifier": "RAC-398",
+    "url": "https://linear.app/testbox/issue/RAC-398/update-the-forecast-column-named-commit-to-forecast"
+  },
+  "61": {
+    "id": "3dd3aab5-12a6-4a4e-9167-0658de8ee3e2",
+    "identifier": "RAC-399",
+    "url": "https://linear.app/testbox/issue/RAC-399/change-the-forecast-page-view-to-show-the-right-forecast-board-and"
+  },
+  "63": {
+    "id": "7bae4026-7761-446c-8c3b-a17cb206be2c",
+    "identifier": "RAC-400",
+    "url": "https://linear.app/testbox/issue/RAC-400/investigate-empty-values-for-the-deals-analytics-page-on-sandbox"
+  },
+  "46": {
+    "id": "706c516e-ff85-4ca5-abe6-cdefe0a5bbaf",
+    "identifier": "RAC-401",
+    "url": "https://linear.app/testbox/issue/RAC-401/change-the-engage-to-dos-page-to-display-different-types-of-flows"
+  },
+  "48": {
+    "id": "7a9a6465-2b4d-4702-9852-2a1884496cee",
+    "identifier": "RAC-402",
+    "url": "https://linear.app/testbox/issue/RAC-402/fix-the-engage-analytics-page"
+  },
+  "50": {
+    "id": "fa518bfc-1794-4fc9-bb31-12a2d70189c4",
+    "identifier": "RAC-403",
+    "url": "https://linear.app/testbox/issue/RAC-403/engage-templates-with-inline-prompts"
+  },
+  "52": {
+    "id": "5c4ad42f-be3e-4c65-9fdc-28fb65302ff3",
+    "identifier": "RAC-404",
+    "url": "https://linear.app/testbox/issue/RAC-404/custom-dashboards-and-metrics"
+  },
+  "53": {
+    "id": "d20f1ed7-c100-47fd-a20f-29bb0c7092c0",
+    "identifier": "RAC-405",
+    "url": "https://linear.app/testbox/issue/RAC-405/ai-trainer"
+  },
+  "54": {
+    "id": "cbb4d431-44ce-40a7-a07c-84b274ba5227",
+    "identifier": "RAC-406",
+    "url": "https://linear.app/testbox/issue/RAC-406/ai-populated-crm-fields-ai-data-extractor"
+  },
+  "93": {
+    "id": "821ae08a-37bd-4d5e-9a43-790a9d8f1c59",
+    "identifier": "RAC-407",
+    "url": "https://linear.app/testbox/issue/RAC-407/add-the-a-tier-accounts-into-two-different-engage-flows"
+  },
+  "6": {
+    "id": "5df92caa-b0e8-458a-8ae5-1e491095927f",
+    "identifier": "RAC-408",
+    "url": "https://linear.app/testbox/issue/RAC-408/fix-the-ai-trackers"
+  },
+  "11": {
+    "id": "1104e418-da8e-4049-b4d8-513257c543f3",
+    "identifier": "RAC-409",
+    "url": "https://linear.app/testbox/issue/RAC-409/open-spike-ticket-for-the-workspace-disconnection-issue"
+  },
+  "16": {
+    "id": "ce567b1d-5331-44b1-ae38-0a7233d32bf3",
+    "identifier": "RAC-410",
+    "url": "https://linear.app/testbox/issue/RAC-410/analyze-the-new-business-dashboard-intermittent-behavior"
+  },
+  "20": {
+    "id": "928eac83-2a8b-4383-9be4-affdfcd0362a",
+    "identifier": "RAC-411",
+    "url": "https://linear.app/testbox/issue/RAC-411/fix-hubspot-accounts-to-show-the-meddicc-ai-fields-properly"
+  },
+  "32": {
+    "id": "b72ebc55-cea1-4f1e-b750-76778e271ecf",
+    "identifier": "RAC-412",
+    "url": "https://linear.app/testbox/issue/RAC-412/gmail-token-disconnect"
+  },
+  "49": {
+    "id": "0c98e994-6d51-4bcf-95e1-df1f9ce51ae3",
+    "identifier": "RAC-413",
+    "url": "https://linear.app/testbox/issue/RAC-413/new-salesforce-custom-fields"
+  },
+  "24": {
+    "id": "9030f70a-39e3-447c-9363-8b8904b31a10",
+    "identifier": "RAC-414",
+    "url": "https://linear.app/testbox/issue/RAC-414/customer-call"
+  },
+  "27": {
+    "id": "f1092a19-3b14-4772-a297-e379ccd8c834",
+    "identifier": "RAC-415",
+    "url": "https://linear.app/testbox/issue/RAC-415/customer-call"
+  },
+  "37": {
+    "id": "b2e4f844-d41b-4020-88de-cf2618f33bf1",
+    "identifier": "RAC-416",
+    "url": "https://linear.app/testbox/issue/RAC-416/align-with-soranzo-resource-alocation-for-gong-tasks"
+  },
+  "55": {
+    "id": "8569ba2c-0ae6-4c0f-b37f-d50b822f1357",
+    "identifier": "RAC-417",
+    "url": "https://linear.app/testbox/issue/RAC-417/post-customer-call-alignment-with-shivani"
+  },
+  "58": {
+    "id": "e3c5e122-926b-4ed5-90e3-e9b4bb9fdc78",
+    "identifier": "RAC-418",
+    "url": "https://linear.app/testbox/issue/RAC-418/post-customer-call-alignment-with-shivani"
+  },
+  "90": {
+    "id": "666302bc-4a6c-4fa9-bad0-8973b52ad264",
+    "identifier": "RAC-419",
+    "url": "https://linear.app/testbox/issue/RAC-419/customer-call"
+  },
+  "130": {
+    "id": "a8b25425-9bc3-4511-803c-36861a19e792",
+    "identifier": "RAC-420",
+    "url": "https://linear.app/testbox/issue/RAC-420/customer-call"
+  },
+  "116": {
+    "id": "4dd2792b-1592-4808-99fd-102b81533d41",
+    "identifier": "RAC-421",
+    "url": "https://linear.app/testbox/issue/RAC-421/create-the-story-generation-framework-for-the-new-gong-demo-story"
+  },
+  "121": {
+    "id": "49032f7d-aa7d-42ed-8db5-c1875b6fa544",
+    "identifier": "RAC-422",
+    "url": "https://linear.app/testbox/issue/RAC-422/ingest-the-partner-demo-account"
+  },
+  "122": {
+    "id": "5d7f1a40-b5c5-478e-8941-5b59955015c2",
+    "identifier": "RAC-423",
+    "url": "https://linear.app/testbox/issue/RAC-423/work-on-a-new-date-format-for-the-gong-tables"
+  },
+  "13": {
+    "id": "2d01f02e-17c2-490c-a398-b5c5db8fede6",
+    "identifier": "RAC-424",
+    "url": "https://linear.app/testbox/issue/RAC-424/work-on-the-gong-visualizer-platform"
+  },
+  "117": {
+    "id": "9bc1d721-08f0-42d9-9517-4ae9a909967c",
+    "identifier": "RAC-425",
+    "url": "https://linear.app/testbox/issue/RAC-425/create-slack-workflow-to-deliver-sandbox-accounts-credentials"
+  },
+  "118": {
+    "id": "32dfee11-1818-48ce-9d87-bf7cd42a2288",
+    "identifier": "RAC-426",
+    "url": "https://linear.app/testbox/issue/RAC-426/reorganize-gong-drive"
+  },
+  "126": {
+    "id": "bcd7bfe5-c4df-4108-8d63-7ad3601f408e",
+    "identifier": "RAC-427",
+    "url": "https://linear.app/testbox/issue/RAC-427/document-the-gong-platform-workflow-and-capabilities"
+  },
+  "2": {
+    "id": "de3442aa-7f66-4184-b39c-8df121cec726",
+    "identifier": "RAC-428",
+    "url": "https://linear.app/testbox/issue/RAC-428/dataset-creation"
+  },
+  "5": {
+    "id": "b0425f14-a1f2-4c53-beac-41ed911e8efe",
+    "identifier": "RAC-429",
+    "url": "https://linear.app/testbox/issue/RAC-429/open-tickets-for-the-ce-team"
+  },
+  "8": {
+    "id": "9adde03e-8f8b-43fd-979e-62339205dc8c",
+    "identifier": "RAC-430",
+    "url": "https://linear.app/testbox/issue/RAC-430/add-screenshots-and-records-for-the-siteimprove-tickets"
+  },
+  "9": {
+    "id": "705f654c-48b4-4625-b8e0-192f0e83c65f",
+    "identifier": "RAC-431",
+    "url": "https://linear.app/testbox/issue/RAC-431/improve-the-user-simulator-script"
+  },
+  "17": {
+    "id": "af10a513-2bec-41b2-a175-4ef9b7cfa4b9",
+    "identifier": "RAC-432",
+    "url": "https://linear.app/testbox/issue/RAC-432/siteimprove-work-is-centered-on-the-activity-plan-dataset-and-a-new"
+  },
+  "18": {
+    "id": "dc153ca3-92d4-4eeb-8754-7157d8172b5a",
+    "identifier": "RAC-433",
+    "url": "https://linear.app/testbox/issue/RAC-433/add-vpn-or-proxy-to-the-simulator-script"
+  },
+  "19": {
+    "id": "c9e82210-4791-4448-a549-d997bf1c310f",
+    "identifier": "RAC-434",
+    "url": "https://linear.app/testbox/issue/RAC-434/open-ticket-for-adding-keywords-monitored-to-the-activity-plan"
+  },
+  "22": {
+    "id": "faaecbea-04d7-4500-b5ff-94df29702d7d",
+    "identifier": "RAC-435",
+    "url": "https://linear.app/testbox/issue/RAC-435/open-spike-ticket-to-investigate-how-can-we-simulate-traffic-on"
+  },
+  "25": {
+    "id": "2e9691c4-e22e-4808-9f2e-8184ba879f1c",
+    "identifier": "RAC-436",
+    "url": "https://linear.app/testbox/issue/RAC-436/create-ticket-for-the-dataset-rotation-strategy"
+  },
+  "21": {
+    "id": "21084c84-ae7c-40dc-bced-26d630ea0f04",
+    "identifier": "RAC-437",
+    "url": "https://linear.app/testbox/issue/RAC-437/create-the-tables-in-the-siteimprove-dataset-for-the-website-version"
+  },
+  "36": {
+    "id": "154b8adb-60bc-4c46-9114-f070b17000a3",
+    "identifier": "RAC-438",
+    "url": "https://linear.app/testbox/issue/RAC-438/create-website-rotation-logic"
+  },
+  "39": {
+    "id": "f9491d93-3844-402b-89b4-e31ad22f063f",
+    "identifier": "RAC-439",
+    "url": "https://linear.app/testbox/issue/RAC-439/change-the-dataset-table-for-key-metrics"
+  },
+  "40": {
+    "id": "cec335b6-05c1-449a-b5dc-621bb1b58074",
+    "identifier": "RAC-440",
+    "url": "https://linear.app/testbox/issue/RAC-440/create-the-dataset-table-for-siteimprove-dashboards"
+  },
+  "44": {
+    "id": "123b7ef1-09ba-47e7-afee-6054dd2fe202",
+    "identifier": "RAC-441",
+    "url": "https://linear.app/testbox/issue/RAC-441/create-the-data-to-power-the-dashboards-table"
+  },
+  "47": {
+    "id": "f2f2b9ec-f77a-403f-ac0c-d6d0e6865086",
+    "identifier": "RAC-442",
+    "url": "https://linear.app/testbox/issue/RAC-442/create-new-versions-from-the-government-website"
+  },
+  "60": {
+    "id": "a388dcf8-adba-4e97-a5c3-3deaa65e1b33",
+    "identifier": "RAC-443",
+    "url": "https://linear.app/testbox/issue/RAC-443/create-the-logic-to-schedule-userflows-during-the-activity-plan-and"
+  },
+  "62": {
+    "id": "b423a614-c4c0-4e2b-ac2c-692dd5477215",
+    "identifier": "RAC-444",
+    "url": "https://linear.app/testbox/issue/RAC-444/create-metadata-table-and-open-the-ticket"
+  },
+  "78": {
+    "id": "7a981080-062d-42c5-959b-9c3fd374ff40",
+    "identifier": "RAC-445",
+    "url": "https://linear.app/testbox/issue/RAC-445/open-ticket-for-the-elements-update-for-the-different-versions"
+  },
+  "81": {
+    "id": "ce995820-c8cd-48f5-ba9c-a54c9b0e9cb1",
+    "identifier": "RAC-446",
+    "url": "https://linear.app/testbox/issue/RAC-446/migrate-the-siteimprove-dataset-to-the-new-dataset-system-and-also"
+  },
+  "72": {
+    "id": "2d283d92-ede5-4677-9a2c-ee2686b190b7",
+    "identifier": "RAC-447",
+    "url": "https://linear.app/testbox/issue/RAC-447/generate-the-userflows-for-the-government-website-v2"
+  },
+  "73": {
+    "id": "664bd1d1-1290-4cea-a2bd-090a1356d714",
+    "identifier": "RAC-448",
+    "url": "https://linear.app/testbox/issue/RAC-448/generate-the-usersteps-for-the-government-website-v2"
+  },
+  "74": {
+    "id": "b8418efd-76da-4454-81bd-ebf299faf245",
+    "identifier": "RAC-449",
+    "url": "https://linear.app/testbox/issue/RAC-449/generate-the-funnels-for-the-government-website-v2"
+  },
+  "75": {
+    "id": "627e8cc1-44d7-4cf0-9562-eac8a38cf0d9",
+    "identifier": "RAC-450",
+    "url": "https://linear.app/testbox/issue/RAC-450/generate-the-events-for-the-government-website-v2"
+  },
+  "76": {
+    "id": "4cf6d06c-fb54-40b4-96f6-657ee09c2e25",
+    "identifier": "RAC-451",
+    "url": "https://linear.app/testbox/issue/RAC-451/generate-the-key-metrics-for-the-government-website-v2"
+  },
+  "77": {
+    "id": "0c24892a-edff-4bf2-8fbd-145741bfea1b",
+    "identifier": "RAC-452",
+    "url": "https://linear.app/testbox/issue/RAC-452/generate-the-keywords-for-the-government-website-v2"
+  },
+  "84": {
+    "id": "dac74bc6-ca2f-46e4-ae42-23168935ffcb",
+    "identifier": "RAC-453",
+    "url": "https://linear.app/testbox/issue/RAC-453/generate-the-userflows-for-the-government-website-v3"
+  },
+  "85": {
+    "id": "e9f5e5c3-4bdf-4c44-934e-116976e3e0e9",
+    "identifier": "RAC-454",
+    "url": "https://linear.app/testbox/issue/RAC-454/generate-the-usersteps-for-the-government-website-v3"
+  },
+  "86": {
+    "id": "c4f9e0af-eac7-46b9-8796-51486e3e1c1e",
+    "identifier": "RAC-455",
+    "url": "https://linear.app/testbox/issue/RAC-455/generate-the-funnels-for-the-government-website-v3"
+  },
+  "87": {
+    "id": "98426f03-14b2-4f64-88f3-efefb670cc5d",
+    "identifier": "RAC-456",
+    "url": "https://linear.app/testbox/issue/RAC-456/generate-the-events-for-the-government-website-v3"
+  },
+  "88": {
+    "id": "5546120c-f5b2-40b0-9143-ce786b553a68",
+    "identifier": "RAC-457",
+    "url": "https://linear.app/testbox/issue/RAC-457/generate-the-key-metrics-for-the-government-website-v3"
+  },
+  "89": {
+    "id": "da284947-0a88-4390-ba9b-074d5f7f0d03",
+    "identifier": "RAC-458",
+    "url": "https://linear.app/testbox/issue/RAC-458/generate-the-keywords-for-the-government-website-v3"
+  },
+  "92": {
+    "id": "0769066d-b78a-4e32-ac91-6e5ddbedbfbf",
+    "identifier": "RAC-459",
+    "url": "https://linear.app/testbox/issue/RAC-459/fix-flow-branches-for-v1-v2-and-v3"
+  },
+  "95": {
+    "id": "30c9095b-8c35-46c2-9437-ff798ff88b1d",
+    "identifier": "RAC-460",
+    "url": "https://linear.app/testbox/issue/RAC-460/generate-the-userflows-for-the-government-website-v4"
+  },
+  "96": {
+    "id": "0d53bb24-2529-49ff-8134-9935399fd6fa",
+    "identifier": "RAC-461",
+    "url": "https://linear.app/testbox/issue/RAC-461/generate-the-usersteps-for-the-government-website-v4"
+  },
+  "97": {
+    "id": "c00a3e2c-49cb-485f-8908-48f36c10c896",
+    "identifier": "RAC-462",
+    "url": "https://linear.app/testbox/issue/RAC-462/generate-the-funnels-for-the-government-website-v4"
+  },
+  "98": {
+    "id": "7229b432-8f31-4a2a-b51e-1c8b6cc58de2",
+    "identifier": "RAC-463",
+    "url": "https://linear.app/testbox/issue/RAC-463/generate-the-events-for-the-government-website-v4"
+  },
+  "99": {
+    "id": "776fd6d5-d448-4a14-acd2-17af0c598200",
+    "identifier": "RAC-464",
+    "url": "https://linear.app/testbox/issue/RAC-464/generate-the-key-metrics-for-the-government-website-v4"
+  },
+  "100": {
+    "id": "f662b0dd-a2c8-4ef4-89c1-cbc6f08cc486",
+    "identifier": "RAC-465",
+    "url": "https://linear.app/testbox/issue/RAC-465/generate-the-keywords-for-the-government-website-v4"
+  },
+  "101": {
+    "id": "6f46ce52-26d6-4b5b-b4a2-17530c0ac243",
+    "identifier": "RAC-466",
+    "url": "https://linear.app/testbox/issue/RAC-466/generate-the-userflows-for-the-government-website-v5"
+  },
+  "102": {
+    "id": "3c8e9b2b-7d62-4660-ac5e-f7817c3c14d3",
+    "identifier": "RAC-467",
+    "url": "https://linear.app/testbox/issue/RAC-467/generate-the-usersteps-for-the-government-website-v5"
+  },
+  "103": {
+    "id": "47e8f8cc-94ad-47e8-95c8-5c7d4188cee5",
+    "identifier": "RAC-468",
+    "url": "https://linear.app/testbox/issue/RAC-468/generate-the-funnels-for-the-government-website-v5"
+  },
+  "104": {
+    "id": "04a91009-925c-4fbe-8f92-b6b0c3e52370",
+    "identifier": "RAC-469",
+    "url": "https://linear.app/testbox/issue/RAC-469/generate-the-events-for-the-government-website-v5"
+  },
+  "105": {
+    "id": "d4223ad9-f391-4687-84e4-3ef561389654",
+    "identifier": "RAC-470",
+    "url": "https://linear.app/testbox/issue/RAC-470/generate-the-key-metrics-for-the-government-website-v5"
+  },
+  "106": {
+    "id": "c76cd09c-9d42-4296-bb5b-8d7ad69dd8f8",
+    "identifier": "RAC-471",
+    "url": "https://linear.app/testbox/issue/RAC-471/generate-the-keywords-for-the-government-website-v5"
+  },
+  "107": {
+    "id": "690885a2-488a-463d-a250-0b0fb95abe49",
+    "identifier": "RAC-472",
+    "url": "https://linear.app/testbox/issue/RAC-472/generate-the-userflows-for-the-government-website-v6"
+  },
+  "108": {
+    "id": "992a76bb-83cc-4960-991b-400ed1f04fc7",
+    "identifier": "RAC-473",
+    "url": "https://linear.app/testbox/issue/RAC-473/generate-the-usersteps-for-the-government-website-v6"
+  },
+  "109": {
+    "id": "d3c25291-514e-43dc-baed-a05a7d95e8e7",
+    "identifier": "RAC-474",
+    "url": "https://linear.app/testbox/issue/RAC-474/generate-the-funnels-for-the-government-website-v6"
+  },
+  "110": {
+    "id": "ec5c0fb0-39e9-464d-86e8-dfc4142b5e1e",
+    "identifier": "RAC-475",
+    "url": "https://linear.app/testbox/issue/RAC-475/generate-the-events-for-the-government-website-v6"
+  },
+  "111": {
+    "id": "b42c5053-82c4-4b43-89fc-afd70ad97b07",
+    "identifier": "RAC-476",
+    "url": "https://linear.app/testbox/issue/RAC-476/generate-the-key-metrics-for-the-government-website-v6"
+  },
+  "112": {
+    "id": "c744b185-924b-4c2f-8d20-0c8ca83e8e87",
+    "identifier": "RAC-477",
+    "url": "https://linear.app/testbox/issue/RAC-477/generate-the-keywords-for-the-government-website-v6"
+  },
+  "23": {
+    "id": "d82ee8d7-b09c-4c4c-8b1c-e748f367535b",
+    "identifier": "RAC-478",
+    "url": "https://linear.app/testbox/issue/RAC-478/open-ticket-to-add-monitored-keywords-to-activity-plan"
+  },
+  "69": {
+    "id": "ba736b5f-761a-46a1-a4a1-27546a80d67d",
+    "identifier": "RAC-479",
+    "url": "https://linear.app/testbox/issue/RAC-479/check-userflows-schedules"
+  },
+  "70": {
+    "id": "ff84cc25-1f07-4471-98c0-87e9ac37682d",
+    "identifier": "RAC-480",
+    "url": "https://linear.app/testbox/issue/RAC-480/check-userflows-distribution"
+  },
+  "79": {
+    "id": "3a62c456-e297-4b2e-be9a-27602f5604b4",
+    "identifier": "RAC-481",
+    "url": "https://linear.app/testbox/issue/RAC-481/increase-the-ammount-of-simulated-users-accross-all-userflows-in-all"
+  },
+  "114": {
+    "id": "df74f354-a226-4a10-ba2c-4adf771daa3a",
+    "identifier": "RAC-482",
+    "url": "https://linear.app/testbox/issue/RAC-482/adjust-siteimprove-data-to-ensure-that-all-funnels-events-metrics-and"
+  },
+  "131": {
+    "id": "4b2596dc-3180-4805-b106-f3ceb5605028",
+    "identifier": "RAC-483",
+    "url": "https://linear.app/testbox/issue/RAC-483/fix-dataset-values-to-work-with-the-current-infrastructure-limitations"
+  },
+  "82": {
+    "id": "e386e77f-7649-4ea2-98f8-57523de1c76b",
+    "identifier": "RAC-484",
+    "url": "https://linear.app/testbox/issue/RAC-484/finish-the-v1-for-the-financial-story-website"
+  },
+  "94": {
+    "id": "9c1e634b-e51b-4dae-9346-97582f8381ac",
+    "identifier": "RAC-485",
+    "url": "https://linear.app/testbox/issue/RAC-485/create-the-bank-website"
+  },
+  "120": {
+    "id": "76667dd4-a806-4df0-a01e-e6b3b9016232",
+    "identifier": "RAC-486",
+    "url": "https://linear.app/testbox/issue/RAC-486/generate-funnels-key-metrics-events-userflows-and-other-data-elements"
+  },
+  "83": {
+    "id": "4406e699-79c6-4a5e-988c-de0137dba7e9",
+    "identifier": "RAC-487",
+    "url": "https://linear.app/testbox/issue/RAC-487/customer-call"
+  },
+  "119": {
+    "id": "0c37f12f-be93-4bb8-a2f4-7eb37f57077e",
+    "identifier": "RAC-488",
+    "url": "https://linear.app/testbox/issue/RAC-488/reorganize-siteimprove-drive"
+  },
+  "123": {
+    "id": "2f7479e9-0cec-487b-b6c2-17833e767ac2",
+    "identifier": "RAC-489",
+    "url": "https://linear.app/testbox/issue/RAC-489/document-the-story-elements-for-the-siteimprove-government-vertical"
+  },
+  "124": {
+    "id": "cdabc761-b6df-4f30-9b97-96af3ddc493a",
+    "identifier": "RAC-490",
+    "url": "https://linear.app/testbox/issue/RAC-490/document-the-siteimprove-platform-workflow-and-capabilities"
+  },
+  "125": {
+    "id": "02eee8ee-fc15-4cd2-a1c2-8e19be49cc41",
+    "identifier": "RAC-491",
+    "url": "https://linear.app/testbox/issue/RAC-491/document-the-siteimprove-technical-implementation-details"
+  },
+  "127": {
+    "id": "42466018-6943-42cb-bdc8-c8e704fd27d0",
+    "identifier": "RAC-492",
+    "url": "https://linear.app/testbox/issue/RAC-492/get-timelines-on-the-website-rotation-fix"
+  },
+  "132": {
+    "id": "87557f76-bc10-435d-bd95-1277e3c68327",
+    "identifier": "RAC-493",
+    "url": "https://linear.app/testbox/issue/RAC-493/release-new-dataset-version-and-monitore-engineering-team-to-check-the"
+  },
+  "113": {
+    "id": "d28c21c1-4fc4-4c91-9c00-badf7b0b36fa",
+    "identifier": "RAC-494",
+    "url": "https://linear.app/testbox/issue/RAC-494/study-the-apollo-documentation-to-get-on-par-with-the-project"
+  },
+  "128": {
+    "id": "5ae7fced-d10b-4bb7-91e4-b8bf85ef8b26",
+    "identifier": "RAC-495",
+    "url": "https://linear.app/testbox/issue/RAC-495/document-apollo-platform-usage-and-workflows"
+  },
+  "129": {
+    "id": "0e6d0e6e-80f5-4f30-95e3-9a2d638fec69",
+    "identifier": "RAC-496",
+    "url": "https://linear.app/testbox/issue/RAC-496/plan-apollo-implementation-improvements"
+  },
+  "7": {
+    "id": "69e31354-70c3-458b-b483-99d883e9ffb1",
+    "identifier": "RAC-497",
+    "url": "https://linear.app/testbox/issue/RAC-497/alinhar-ticket-mais-objetivos"
+  },
+  "71": {
+    "id": "d0e86036-7d72-498d-8457-639a60e4ab6f",
+    "identifier": "RAC-498",
+    "url": "https://linear.app/testbox/issue/RAC-498/fill-the-routine-spreadsheet-initial-work"
+  },
+  "_parents": {
+    "Gong - Sandbox Development & Provisioning": "dcf6a4e7-cc15-4972-a4df-2f7d42e9f336",
+    "Gong - Demo Account Refresh & Ingestion": "e3528f2a-0631-43cc-b44c-8ba8a9cf4b5f",
+    "Gong - Deals & Forecast": "95c30935-2740-4dce-94f4-71ac0cd36da0",
+    "Gong - Engage & AI Features": "4aa37aac-83f2-4f8b-8532-040dc151da6c",
+    "Gong - Maintenance & Bug Fixes": "f00e72c7-72a4-41e8-8c83-9146c7f9a2a6",
+    "Gong - Customer Calls & Alignment": "c4ed09bc-99ad-4202-ab90-50697ade32e9",
+    "Gong - Story Framework & New Initiatives": "2c518ce4-4d6f-4bd4-8909-e631ca149679",
+    "Gong - Internal & Documentation": "5f4a589b-ec02-4fce-9b7f-7c066f102cb7",
+    "Siteimprove - Setup & Configuration": "426ddece-acfa-4936-a1bd-bece427a3265",
+    "Siteimprove - Dataset & Table Design": "1256a80e-796e-45c7-b220-e7fde6457947",
+    "Siteimprove - Gov Website Data Gen (v2-v3)": "eb733d6b-4907-45d8-ae47-750536fbbc5d",
+    "Siteimprove - Gov Website Data Gen (v4-v6)": "a7716e1d-591b-4005-bfc7-a878af8800f5",
+    "Siteimprove - Userflows & Validation": "6de8427e-3974-49ff-8714-7c0ee1a1deab",
+    "Siteimprove - Financial Website": "a24686e3-7498-4a25-9543-a8f221fc4731",
+    "Siteimprove - Customer Calls & Documentation": "3b33194f-f672-44a0-b882-04d5c993b09a",
+    "Apollo - Implementation": "cb01a1ce-e195-4875-9440-89ab83a9e15a",
+    "Internal - TSA Operations (Carlos)": "155baa46-7d70-45bd-a891-3da82648938d"
+  }
+}

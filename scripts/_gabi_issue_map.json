@@ -1,0 +1,226 @@
+{
+  "1": {
+    "id": "d26979be-860d-4f9c-9891-5cddac7bb5c6",
+    "identifier": "RAC-307",
+    "url": "https://linear.app/testbox/issue/RAC-307/bia-campaing"
+  },
+  "2": {
+    "id": "171f1cfe-1310-4e6f-a39d-bb1f3f5143e1",
+    "identifier": "RAC-308",
+    "url": "https://linear.app/testbox/issue/RAC-308/bia-base-is-done-team-is-focused-on-bia-campaign-resilience-wrap-up"
+  },
+  "3": {
+    "id": "9cf2f6a9-e437-4606-a919-e96130e07eb8",
+    "identifier": "RAC-309",
+    "url": "https://linear.app/testbox/issue/RAC-309/arrumar-workflow"
+  },
+  "21": {
+    "id": "482b6a91-3be4-4ef6-ba0a-597a81112cf4",
+    "identifier": "RAC-310",
+    "url": "https://linear.app/testbox/issue/RAC-310/action-plan-definition"
+  },
+  "24": {
+    "id": "31ff3fd6-2367-4d9e-9006-e6c143bae2f9",
+    "identifier": "RAC-311",
+    "url": "https://linear.app/testbox/issue/RAC-311/audit-data-generation"
+  },
+  "34": {
+    "id": "8c1623a0-fc71-4a1e-a5e1-d307170ffa32",
+    "identifier": "RAC-312",
+    "url": "https://linear.app/testbox/issue/RAC-312/compliance"
+  },
+  "41": {
+    "id": "954feb1a-fe11-4f47-9f7a-f7d592e14989",
+    "identifier": "RAC-313",
+    "url": "https://linear.app/testbox/issue/RAC-313/validate-rcsa"
+  },
+  "42": {
+    "id": "c6375b3c-f5fe-479a-aa31-f5760b3e5304",
+    "identifier": "RAC-314",
+    "url": "https://linear.app/testbox/issue/RAC-314/validate-rcsa-campaigns"
+  },
+  "43": {
+    "id": "eb1b8e10-aada-4fa5-b56f-b9e98c927d07",
+    "identifier": "RAC-315",
+    "url": "https://linear.app/testbox/issue/RAC-315/validate-rcsa-hierarchy"
+  },
+  "4": {
+    "id": "869823fd-a0e5-4d08-850a-57204d332122",
+    "identifier": "RAC-316",
+    "url": "https://linear.app/testbox/issue/RAC-316/initial-configurations-ce"
+  },
+  "5": {
+    "id": "d06661ed-0303-4285-a753-4018ee1d4aab",
+    "identifier": "RAC-317",
+    "url": "https://linear.app/testbox/issue/RAC-317/mailchimp-dev-integration-is-in-test-website-still-needs-to-be-rebuilt"
+  },
+  "6": {
+    "id": "ebd7fd0d-e9f0-40cb-850f-03a82ca8a0fe",
+    "identifier": "RAC-318",
+    "url": "https://linear.app/testbox/issue/RAC-318/manter-configuracao-do-website"
+  },
+  "16": {
+    "id": "5711b38c-adf0-4ee8-9bf8-61303e2ac766",
+    "identifier": "RAC-319",
+    "url": "https://linear.app/testbox/issue/RAC-319/shopify-tool"
+  },
+  "27": {
+    "id": "4cc2a0e6-7fb3-44c3-bb12-e1cb2233e83a",
+    "identifier": "RAC-320",
+    "url": "https://linear.app/testbox/issue/RAC-320/shopify-login"
+  },
+  "28": {
+    "id": "a6b5f750-776b-4255-a85b-479af025a357",
+    "identifier": "RAC-321",
+    "url": "https://linear.app/testbox/issue/RAC-321/html-block"
+  },
+  "29": {
+    "id": "7318c177-934e-4994-be1d-4a84dba3a4cc",
+    "identifier": "RAC-322",
+    "url": "https://linear.app/testbox/issue/RAC-322/cloudinary"
+  },
+  "12": {
+    "id": "2f3a82b7-2453-476e-b366-c445a67ae80d",
+    "identifier": "RAC-323",
+    "url": "https://linear.app/testbox/issue/RAC-323/ticket-for-email-automation"
+  },
+  "13": {
+    "id": "c93d54d8-d24b-4174-af62-f40d70f9d787",
+    "identifier": "RAC-324",
+    "url": "https://linear.app/testbox/issue/RAC-324/customer-segmentation"
+  },
+  "17": {
+    "id": "e60093c8-ca01-4d31-ac0a-da8f9c1357cd",
+    "identifier": "RAC-325",
+    "url": "https://linear.app/testbox/issue/RAC-325/framework-ab-testing"
+  },
+  "18": {
+    "id": "53debb55-6b27-408b-b342-de40c162d88a",
+    "identifier": "RAC-326",
+    "url": "https://linear.app/testbox/issue/RAC-326/design-event-tracking-and-analytics-framework"
+  },
+  "19": {
+    "id": "d801bda6-8b91-42f6-8d17-dfa9eb292201",
+    "identifier": "RAC-327",
+    "url": "https://linear.app/testbox/issue/RAC-327/abandonment-cart-automation"
+  },
+  "20": {
+    "id": "4224f598-95be-4d4c-a702-6e9051e1dcec",
+    "identifier": "RAC-328",
+    "url": "https://linear.app/testbox/issue/RAC-328/browse-abandonment-automation"
+  },
+  "26": {
+    "id": "505e1a99-427f-4638-b503-022293565054",
+    "identifier": "RAC-329",
+    "url": "https://linear.app/testbox/issue/RAC-329/emails-template"
+  },
+  "39": {
+    "id": "fb5fc813-89ac-4603-8335-ed2d5ea9e981",
+    "identifier": "RAC-330",
+    "url": "https://linear.app/testbox/issue/RAC-330/sms-portion"
+  },
+  "40": {
+    "id": "142bcd52-1a9e-4140-bca6-c703eb15319b",
+    "identifier": "RAC-331",
+    "url": "https://linear.app/testbox/issue/RAC-331/sms-story-requirements"
+  },
+  "30": {
+    "id": "d4101f21-f956-4448-9c8b-5124daeedbb1",
+    "identifier": "RAC-332",
+    "url": "https://linear.app/testbox/issue/RAC-332/tags"
+  },
+  "31": {
+    "id": "c853d3f3-590d-4b22-9767-dcd2b279cdf9",
+    "identifier": "RAC-333",
+    "url": "https://linear.app/testbox/issue/RAC-333/activity-plan-for-customers"
+  },
+  "32": {
+    "id": "c6de7803-ef8c-4497-b0c6-2936bfab463f",
+    "identifier": "RAC-334",
+    "url": "https://linear.app/testbox/issue/RAC-334/activity-plan-for-orders"
+  },
+  "33": {
+    "id": "c32f8b76-46ed-44dc-9e6a-27aee4c393c0",
+    "identifier": "RAC-335",
+    "url": "https://linear.app/testbox/issue/RAC-335/activity-plan-for-abandoned-carts"
+  },
+  "14": {
+    "id": "a05ce607-015a-4866-8f38-db22ea2efe17",
+    "identifier": "RAC-336",
+    "url": "https://linear.app/testbox/issue/RAC-336/qa-table-from-dataset"
+  },
+  "10": {
+    "id": "72835726-4856-4ed2-870d-6bf821171f08",
+    "identifier": "RAC-337",
+    "url": "https://linear.app/testbox/issue/RAC-337/pop-up-forms-and-landing-pages-design"
+  },
+  "11": {
+    "id": "091ef885-cf5c-45fc-8de6-0c98f1742a79",
+    "identifier": "RAC-338",
+    "url": "https://linear.app/testbox/issue/RAC-338/tickets-for-spike"
+  },
+  "35": {
+    "id": "93fa2eb5-3555-41b6-a806-c212647d75a0",
+    "identifier": "RAC-339",
+    "url": "https://linear.app/testbox/issue/RAC-339/uat-docs-for-core-stories"
+  },
+  "36": {
+    "id": "ae4fbe54-11ef-48ce-ac4a-55b211d3840f",
+    "identifier": "RAC-340",
+    "url": "https://linear.app/testbox/issue/RAC-340/scripts-for-browse-abandonment"
+  },
+  "7": {
+    "id": "93613881-c29d-4de0-b814-8cea736616f3",
+    "identifier": "RAC-341",
+    "url": "https://linear.app/testbox/issue/RAC-341/year-n-data"
+  },
+  "22": {
+    "id": "7ceed496-0a74-4e8d-b861-4b0344a7ef42",
+    "identifier": "RAC-342",
+    "url": "https://linear.app/testbox/issue/RAC-342/meetings-sync"
+  },
+  "23": {
+    "id": "f97e98a3-9f81-4a91-a4ca-c66416496628",
+    "identifier": "RAC-343",
+    "url": "https://linear.app/testbox/issue/RAC-343/japonese-version"
+  },
+  "25": {
+    "id": "f1c4fd40-d9db-4f12-bcc6-d5983df87f8a",
+    "identifier": "RAC-344",
+    "url": "https://linear.app/testbox/issue/RAC-344/japonese-dataset"
+  },
+  "37": {
+    "id": "1cb3f994-2650-4e84-9da0-ff80fa5f4b96",
+    "identifier": "RAC-345",
+    "url": "https://linear.app/testbox/issue/RAC-345/sheets-with-crm-data-japanese"
+  },
+  "38": {
+    "id": "b16e4cb5-b119-4dc3-8234-7b77357df14a",
+    "identifier": "RAC-346",
+    "url": "https://linear.app/testbox/issue/RAC-346/emails-translation-year-1"
+  },
+  "8": {
+    "id": "fbeff229-6bb8-4d2b-ae3e-97ba9a8b6b89",
+    "identifier": "RAC-347",
+    "url": "https://linear.app/testbox/issue/RAC-347/adjustments"
+  },
+  "9": {
+    "id": "01fbffb9-2b18-4cb6-b372-ef056350a053",
+    "identifier": "RAC-348",
+    "url": "https://linear.app/testbox/issue/RAC-348/ajustar-tabelas"
+  },
+  "15": {
+    "id": "ae3a9d78-1777-476f-8ade-8bf333e54b4f",
+    "identifier": "RAC-349",
+    "url": "https://linear.app/testbox/issue/RAC-349/bug-list"
+  },
+  "_parents": {
+    "Archer - BIA Campaign & Data Generation": "aececcca-9f5c-4c31-ab1b-827412b74299",
+    "Mailchimp - Website & Shopify Integration": "3621132e-e072-43c3-867b-0e1be65d9ad1",
+    "Mailchimp - Email Automation & Campaigns": "4e50b65b-2a9e-4761-9c10-4ca31b2f08ef",
+    "Mailchimp - Dataset & Activity Plans": "925ff99e-d5b7-4bed-844f-95ce73af280a",
+    "Mailchimp - UAT & Design": "c64d8527-6ee9-4f50-b9be-f5f4cc5d656d",
+    "Staircase - Data & Japanese Version": "97c9ff39-9670-4734-a50c-4c812873be8e",
+    "Staircase - Adjustments & Bug Fixes": "5a8427cb-5346-4425-ac9c-1bdd7b582132"
+  }
+}

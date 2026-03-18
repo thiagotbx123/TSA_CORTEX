@@ -1,0 +1,598 @@
+{
+  "4": {
+    "id": "6be3aa7f-bd0e-4796-a7fb-4bbdf772ba11",
+    "identifier": "RAC-518",
+    "url": "https://linear.app/testbox/issue/RAC-518/tsa-documentation-process"
+  },
+  "5": {
+    "id": "789dbc97-9606-48a7-b74c-e4726ab3cd9a",
+    "identifier": "RAC-519",
+    "url": "https://linear.app/testbox/issue/RAC-519/tsa-communication-process"
+  },
+  "6": {
+    "id": "0bfe8de9-5982-485b-91a5-d93a7496c119",
+    "identifier": "RAC-520",
+    "url": "https://linear.app/testbox/issue/RAC-520/tsa-feedback-plan-doc"
+  },
+  "7": {
+    "id": "e4cda922-eae8-4a72-a9ce-962a0966ccd4",
+    "identifier": "RAC-521",
+    "url": "https://linear.app/testbox/issue/RAC-521/tsa-routine-guide"
+  },
+  "8": {
+    "id": "c10ec237-971f-477c-bf56-12c0ccdff3ab",
+    "identifier": "RAC-522",
+    "url": "https://linear.app/testbox/issue/RAC-522/tsa-documentation-process"
+  },
+  "32": {
+    "id": "544d8eb8-8307-4f35-959b-774f6dcbb163",
+    "identifier": "RAC-523",
+    "url": "https://linear.app/testbox/issue/RAC-523/tsa-routine-mapping"
+  },
+  "35": {
+    "id": "72cfbb78-ee6d-442e-950c-cc708e4f25e2",
+    "identifier": "RAC-524",
+    "url": "https://linear.app/testbox/issue/RAC-524/sales-force-at-coda"
+  },
+  "9": {
+    "id": "b272d7e4-58b1-4383-825a-078b71c6c0b3",
+    "identifier": "RAC-525",
+    "url": "https://linear.app/testbox/issue/RAC-525/customer-overview-gong"
+  },
+  "10": {
+    "id": "8cb37df7-b5b1-45ed-a8d1-b93252e8c7ea",
+    "identifier": "RAC-526",
+    "url": "https://linear.app/testbox/issue/RAC-526/customer-overview-qbo"
+  },
+  "11": {
+    "id": "bbb33f31-fbaf-4e55-b975-29f1043b3315",
+    "identifier": "RAC-527",
+    "url": "https://linear.app/testbox/issue/RAC-527/customer-overview-mailchimp"
+  },
+  "12": {
+    "id": "7b82e93a-f8ec-4cc6-b3c8-80bdf80b2bb7",
+    "identifier": "RAC-528",
+    "url": "https://linear.app/testbox/issue/RAC-528/customer-overview-archer"
+  },
+  "13": {
+    "id": "f9e28d44-c490-402f-bf3f-9067275129e2",
+    "identifier": "RAC-529",
+    "url": "https://linear.app/testbox/issue/RAC-529/customer-overview-tabs"
+  },
+  "14": {
+    "id": "93022b64-7062-42e5-a349-9a09911f563f",
+    "identifier": "RAC-530",
+    "url": "https://linear.app/testbox/issue/RAC-530/customer-overview-tropic"
+  },
+  "15": {
+    "id": "9429949b-3454-4b93-b314-d1db7a667683",
+    "identifier": "RAC-531",
+    "url": "https://linear.app/testbox/issue/RAC-531/customer-overview-peopleai"
+  },
+  "16": {
+    "id": "a93cca6e-fd18-4b96-a6e5-58b7769adc09",
+    "identifier": "RAC-532",
+    "url": "https://linear.app/testbox/issue/RAC-532/customer-overview-peopleai"
+  },
+  "18": {
+    "id": "82b4af36-9116-4bfa-8b41-26eda01bbacd",
+    "identifier": "RAC-533",
+    "url": "https://linear.app/testbox/issue/RAC-533/customer-overview-gainsight"
+  },
+  "19": {
+    "id": "b7dd1de8-f010-40e7-9527-5b9c79db453f",
+    "identifier": "RAC-534",
+    "url": "https://linear.app/testbox/issue/RAC-534/customer-overview-brevo"
+  },
+  "20": {
+    "id": "58f6692f-b34f-42aa-a7e6-bb370e659fb4",
+    "identifier": "RAC-535",
+    "url": "https://linear.app/testbox/issue/RAC-535/customer-overview-others"
+  },
+  "21": {
+    "id": "e56fc3e9-a595-481d-aa58-63ea5d30446f",
+    "identifier": "RAC-536",
+    "url": "https://linear.app/testbox/issue/RAC-536/tsa-flowchart"
+  },
+  "113": {
+    "id": "56c91bcd-f0fe-4622-a813-65d5e07bba19",
+    "identifier": "RAC-537",
+    "url": "https://linear.app/testbox/issue/RAC-537/intuit-coda-extraction-44-pages-winter-release-intel"
+  },
+  "39": {
+    "id": "1a6838df-193c-4784-b1a4-12d54eae313c",
+    "identifier": "RAC-538",
+    "url": "https://linear.app/testbox/issue/RAC-538/winter-release-validation-matrix-v4"
+  },
+  "40": {
+    "id": "9e31aa5f-0f46-4a07-b4d2-9b760dfd0944",
+    "identifier": "RAC-539",
+    "url": "https://linear.app/testbox/issue/RAC-539/winter-release-gantt-v9-final"
+  },
+  "42": {
+    "id": "50ab8159-5031-40bf-afab-b5288197d92b",
+    "identifier": "RAC-540",
+    "url": "https://linear.app/testbox/issue/RAC-540/winter-release-staging-linear-tickets-pla-32123213"
+  },
+  "49": {
+    "id": "de0eedbb-16b9-4fb3-9965-3aca21ed9586",
+    "identifier": "RAC-541",
+    "url": "https://linear.app/testbox/issue/RAC-541/winter-release-feature-28-cost-groups-validation"
+  },
+  "50": {
+    "id": "13baeda8-f700-4151-94b2-fee51deda5c0",
+    "identifier": "RAC-542",
+    "url": "https://linear.app/testbox/issue/RAC-542/uat-marathon-5-sessions-rows-29-31-pandl-recovery-evidence"
+  },
+  "51": {
+    "id": "c55c6276-9026-43ae-8e97-48507c7062f2",
+    "identifier": "RAC-543",
+    "url": "https://linear.app/testbox/issue/RAC-543/177-uat-screenshots-downloaded-and-annotated-with-red-arrows"
+  },
+  "52": {
+    "id": "55d2fc5e-8f98-4cc8-a986-00bc17ec5a95",
+    "identifier": "RAC-544",
+    "url": "https://linear.app/testbox/issue/RAC-544/cone-uat-dual-persona-audit-32-features"
+  },
+  "53": {
+    "id": "e610d21a-69fa-45eb-94b3-44beebd18e38",
+    "identifier": "RAC-545",
+    "url": "https://linear.app/testbox/issue/RAC-545/uat-sales-prints-grouped-into-pdfs-hyperlink-xlsx"
+  },
+  "47": {
+    "id": "a18d4138-8fb1-466e-ace2-f73a8af3288b",
+    "identifier": "RAC-546",
+    "url": "https://linear.app/testbox/issue/RAC-546/health-check-cycle-keystone-construction-playwright"
+  },
+  "57": {
+    "id": "6d4f682c-a3db-41b2-a77f-788596be033c",
+    "identifier": "RAC-547",
+    "url": "https://linear.app/testbox/issue/RAC-547/tco-feature-checker-audit-apex-tire-10-stations"
+  },
+  "58": {
+    "id": "2802d0c5-d85d-4897-a9df-2d5ef2389be8",
+    "identifier": "RAC-548",
+    "url": "https://linear.app/testbox/issue/RAC-548/nv2-non-profit-health-check-v1-v2-30-stations"
+  },
+  "59": {
+    "id": "91cd277f-81e2-4610-8779-690661c3c689",
+    "identifier": "RAC-549",
+    "url": "https://linear.app/testbox/issue/RAC-549/nv2-deep-audit-v3-p0-fixed-40-stations"
+  },
+  "60": {
+    "id": "281fe351-d5f3-4819-848a-c27774e6bf5a",
+    "identifier": "RAC-550",
+    "url": "https://linear.app/testbox/issue/RAC-550/qbo-sweep-v30-master-prompt-creation-46-checks"
+  },
+  "61": {
+    "id": "1b6036c7-2f31-41c7-a5c6-c798b082842c",
+    "identifier": "RAC-551",
+    "url": "https://linear.app/testbox/issue/RAC-551/mid-market-sweep-v1-v2-keystone-construction"
+  },
+  "62": {
+    "id": "8f16dc65-089a-4e34-a5ca-68e42b15d0db",
+    "identifier": "RAC-552",
+    "url": "https://linear.app/testbox/issue/RAC-552/qsp-events-sweep-v1-v2-revalidation"
+  },
+  "63": {
+    "id": "fcb410d8-3492-488d-b973-49448122a864",
+    "identifier": "RAC-553",
+    "url": "https://linear.app/testbox/issue/RAC-553/product-events-sweep-fix-revalidation"
+  },
+  "64": {
+    "id": "f360d91e-d90b-43c6-b737-d3d4e315ff97",
+    "identifier": "RAC-554",
+    "url": "https://linear.app/testbox/issue/RAC-554/nv3-manufacturing-construction-clone-sweeps"
+  },
+  "41": {
+    "id": "80292023-0cb3-4920-8a53-df8de9f478ba",
+    "identifier": "RAC-555",
+    "url": "https://linear.app/testbox/issue/RAC-555/ic-bills-gap-investigation-pla-3202"
+  },
+  "43": {
+    "id": "2687a32a-1867-478b-a35e-bc115fdecb46",
+    "identifier": "RAC-556",
+    "url": "https://linear.app/testbox/issue/RAC-556/keystone-consolidated-balance-sheet-fix"
+  },
+  "44": {
+    "id": "9fe85e69-f9c5-4db6-bce5-f261e72f2d6b",
+    "identifier": "RAC-557",
+    "url": "https://linear.app/testbox/issue/RAC-557/employee-duplication-fix-admin-accounts-discovery"
+  },
+  "45": {
+    "id": "943e2933-7e51-4d0b-9261-0191ec7d453f",
+    "identifier": "RAC-558",
+    "url": "https://linear.app/testbox/issue/RAC-558/ies-release-readiness-intel-report"
+  },
+  "46": {
+    "id": "fe6d6a5c-10f1-42a5-9bce-1f1b5ffc399f",
+    "identifier": "RAC-559",
+    "url": "https://linear.app/testbox/issue/RAC-559/qbo-war-room-complete-ingestion-session-30hrs"
+  },
+  "54": {
+    "id": "ee768a30-3e10-40e4-b16b-7aa9d16425fe",
+    "identifier": "RAC-560",
+    "url": "https://linear.app/testbox/issue/RAC-560/accounting-ai-ready-to-post-investigation-4-approaches"
+  },
+  "55": {
+    "id": "9d81d72e-3b5e-427e-9326-16100293d451",
+    "identifier": "RAC-561",
+    "url": "https://linear.app/testbox/issue/RAC-561/ic-account-mapping-investigation"
+  },
+  "56": {
+    "id": "b9613e01-3f27-4a19-8d68-7b5326764600",
+    "identifier": "RAC-562",
+    "url": "https://linear.app/testbox/issue/RAC-562/bank-rules-creation-and-auto-post-experiment"
+  },
+  "66": {
+    "id": "48162407-6bdc-4ada-bcb0-a0a8fe1d5740",
+    "identifier": "RAC-563",
+    "url": "https://linear.app/testbox/issue/RAC-563/dataset-vs-sales-audit-master-worklog-pla-32553256"
+  },
+  "67": {
+    "id": "6e995173-72d7-4ae9-93d8-5289474699fc",
+    "identifier": "RAC-564",
+    "url": "https://linear.app/testbox/issue/RAC-564/pandl-negative-for-professional-services-pla-3332"
+  },
+  "2": {
+    "id": "9521d7b2-e285-472d-a9a2-4cacda84d499",
+    "identifier": "RAC-565",
+    "url": "https://linear.app/testbox/issue/RAC-565/handover-qbo-to-alexandra"
+  },
+  "22": {
+    "id": "edee8ce1-8ef3-4bb5-8a53-5acadea7238a",
+    "identifier": "RAC-566",
+    "url": "https://linear.app/testbox/issue/RAC-566/winter-release-support"
+  },
+  "38": {
+    "id": "630414e4-1e25-474d-b8bd-375d2840c886",
+    "identifier": "RAC-567",
+    "url": "https://linear.app/testbox/issue/RAC-567/canonical-intuit-qbo-guide-12-part-consolidated-knowledge-doc"
+  },
+  "48": {
+    "id": "ebce7539-6970-4dc9-a25e-4ac4cec2323d",
+    "identifier": "RAC-568",
+    "url": "https://linear.app/testbox/issue/RAC-568/qbo-super-access-system-build"
+  },
+  "65": {
+    "id": "244582dc-cab1-4cf8-a3bf-cb57a8b53578",
+    "identifier": "RAC-569",
+    "url": "https://linear.app/testbox/issue/RAC-569/qbo-playbook-cockpit-xlsx-94-items-10-phases"
+  },
+  "111": {
+    "id": "2b6f5e56-39d1-474a-bc37-c029f8b89041",
+    "identifier": "RAC-570",
+    "url": "https://linear.app/testbox/issue/RAC-570/wfs-milestone-plan-5-phases-dec-17-mar-4"
+  },
+  "112": {
+    "id": "b28b71a2-ef3e-41d0-b34f-e0b19e5ffc0d",
+    "identifier": "RAC-571",
+    "url": "https://linear.app/testbox/issue/RAC-571/gantt-audit-wfs-mailchimp-both-untouched-templates"
+  },
+  "3": {
+    "id": "8937481b-8f85-465a-9079-e980396561e1",
+    "identifier": "RAC-572",
+    "url": "https://linear.app/testbox/issue/RAC-572/gem-integration-support"
+  },
+  "68": {
+    "id": "469d41ca-0224-465b-aafc-c6118a159f18",
+    "identifier": "RAC-573",
+    "url": "https://linear.app/testbox/issue/RAC-573/gem-milestone-plan-code-quality-audit"
+  },
+  "69": {
+    "id": "8256efd4-384f-4292-85b0-f633af4fab90",
+    "identifier": "RAC-574",
+    "url": "https://linear.app/testbox/issue/RAC-574/gem-deep-learn-intelligence-34-value-stories-api-testing"
+  },
+  "70": {
+    "id": "51ff9937-5f5d-417d-a904-e58df76ac176",
+    "identifier": "RAC-575",
+    "url": "https://linear.app/testbox/issue/RAC-575/gem-pre-signature-due-diligence-green-light"
+  },
+  "71": {
+    "id": "cde72323-47e4-49c1-8bb2-6857c198fd8a",
+    "identifier": "RAC-576",
+    "url": "https://linear.app/testbox/issue/RAC-576/gem-pipeline-28-linear-tickets-visual-deliverables"
+  },
+  "72": {
+    "id": "ba3dcdf1-7a80-4f5c-950f-4148707a9e48",
+    "identifier": "RAC-577",
+    "url": "https://linear.app/testbox/issue/RAC-577/gem-linear-evidence-taufer-pattern-analysis"
+  },
+  "73": {
+    "id": "0ea8b080-5240-46cc-95ed-0f20edf3dc72",
+    "identifier": "RAC-578",
+    "url": "https://linear.app/testbox/issue/RAC-578/gem-linear-reorganization-timeline-correction-7-to-17-weeks"
+  },
+  "74": {
+    "id": "6df8cd3a-7bb0-4a27-a502-4efc6fc2e2c5",
+    "identifier": "RAC-579",
+    "url": "https://linear.app/testbox/issue/RAC-579/gem-docx-v3-delivery-31-screenshots-drive-upload"
+  },
+  "75": {
+    "id": "21316da8-9c31-4950-80a2-333a5fdc754d",
+    "identifier": "RAC-580",
+    "url": "https://linear.app/testbox/issue/RAC-580/gem-linear-tickets-stories-1-6-demo-rac-120-to-rac-127"
+  },
+  "76": {
+    "id": "21dbc736-8074-4dcb-9d5a-c3e3aab63619",
+    "identifier": "RAC-581",
+    "url": "https://linear.app/testbox/issue/RAC-581/gong-api-exploration-6530-calls-40-users-30-engage-flows"
+  },
+  "77": {
+    "id": "c8983315-41f0-4560-bd70-6ebd033077b8",
+    "identifier": "RAC-582",
+    "url": "https://linear.app/testbox/issue/RAC-582/gong-sandboxes-stuck-investigation"
+  },
+  "78": {
+    "id": "a124721f-4862-4443-820c-c3fdeeb60add",
+    "identifier": "RAC-583",
+    "url": "https://linear.app/testbox/issue/RAC-583/gong-sfdc-saml-login-investigation"
+  },
+  "79": {
+    "id": "877e3bf1-33fe-43ad-8664-e1629511ee8e",
+    "identifier": "RAC-584",
+    "url": "https://linear.app/testbox/issue/RAC-584/gong-engage-analytics-deep-investigation-4-root-causes"
+  },
+  "33": {
+    "id": "4e2eee19-3296-4217-8a28-43d4cb737483",
+    "identifier": "RAC-585",
+    "url": "https://linear.app/testbox/issue/RAC-585/support-gabi"
+  },
+  "34": {
+    "id": "0fec6f12-6b3c-4988-a5d5-601fcf76758f",
+    "identifier": "RAC-586",
+    "url": "https://linear.app/testbox/issue/RAC-586/auto-slack-report-retro"
+  },
+  "80": {
+    "id": "29313586-5951-4c66-af8b-5d13c79c232d",
+    "identifier": "RAC-587",
+    "url": "https://linear.app/testbox/issue/RAC-587/mailchimp-project-setup-spinehub-structure-50-files"
+  },
+  "81": {
+    "id": "64048416-d2f0-4107-a5f5-df238793fb3f",
+    "identifier": "RAC-588",
+    "url": "https://linear.app/testbox/issue/RAC-588/mailchimp-signup-date-fix-80-anonymous-clients"
+  },
+  "82": {
+    "id": "4a215cb1-4c18-4cd8-a364-61ad6074fec9",
+    "identifier": "RAC-589",
+    "url": "https://linear.app/testbox/issue/RAC-589/mailchimp-audit-duplicate-ids-timestamp-inconsistency"
+  },
+  "83": {
+    "id": "5a47e8e8-a264-4457-b7be-8eb2a07091b7",
+    "identifier": "RAC-590",
+    "url": "https://linear.app/testbox/issue/RAC-590/mailchimp-uat-audit-3-critical-errors-in-welcome-journey"
+  },
+  "84": {
+    "id": "463e0be5-7dae-40e7-9d8b-6c62379b4767",
+    "identifier": "RAC-591",
+    "url": "https://linear.app/testbox/issue/RAC-591/mailchimp-weekly-analysis-confidence-correction"
+  },
+  "87": {
+    "id": "8046b2d6-41cd-47f7-bef3-98cffd27b614",
+    "identifier": "RAC-592",
+    "url": "https://linear.app/testbox/issue/RAC-592/callrail-deep-learning-1542-slack-97-linear-noframe-migration"
+  },
+  "88": {
+    "id": "ca8011f9-8071-4686-901c-e34bcccc1a61",
+    "identifier": "RAC-593",
+    "url": "https://linear.app/testbox/issue/RAC-593/callrail-noframe-response-strategy"
+  },
+  "89": {
+    "id": "6dddaccb-a9a1-4cf1-9928-5c7c902c7665",
+    "identifier": "RAC-594",
+    "url": "https://linear.app/testbox/issue/RAC-594/callrail-inc-26-account-center-discovery-resolution"
+  },
+  "85": {
+    "id": "12dd5769-5729-4643-8f86-851e5fd75842",
+    "identifier": "RAC-595",
+    "url": "https://linear.app/testbox/issue/RAC-595/siteimprove-deep-learning-273-slack-40-linear-569-api-endpoints"
+  },
+  "86": {
+    "id": "08c055be-36fb-47af-9d21-07534d84c8cf",
+    "identifier": "RAC-596",
+    "url": "https://linear.app/testbox/issue/RAC-596/siteimprove-sql-validation-150-flow-steps"
+  },
+  "17": {
+    "id": "a4c91bd4-0cf6-4f63-a7fc-09ec539755ee",
+    "identifier": "RAC-597",
+    "url": "https://linear.app/testbox/issue/RAC-597/tsa-routine-of-data-gen"
+  },
+  "90": {
+    "id": "43dba0d4-5650-47f9-9037-e98ea9ecfc17",
+    "identifier": "RAC-598",
+    "url": "https://linear.app/testbox/issue/RAC-598/hockeystack-deep-analysis-259-slack-deal-terms-dollar595k3yr"
+  },
+  "91": {
+    "id": "b873d636-8c2a-422b-b5be-b9601c50b303",
+    "identifier": "RAC-599",
+    "url": "https://linear.app/testbox/issue/RAC-599/hockeystack-thiago-onboarding-book-650-lines"
+  },
+  "92": {
+    "id": "a0348834-cbd5-4c18-b02b-bf3d9b0914d0",
+    "identifier": "RAC-600",
+    "url": "https://linear.app/testbox/issue/RAC-600/peopleai-rest-api-full-mapping-40-endpoints"
+  },
+  "93": {
+    "id": "218cfd93-473e-4484-9826-9355ed8314da",
+    "identifier": "RAC-601",
+    "url": "https://linear.app/testbox/issue/RAC-601/apollo-deep-learn-v21-276-linear-2237-slack-84-drive-212-urls"
+  },
+  "94": {
+    "id": "6b14b989-9c32-46cc-a3ba-305ef23160ac",
+    "identifier": "RAC-602",
+    "url": "https://linear.app/testbox/issue/RAC-602/tropic-general-update-ingestion-pipeline-analysis"
+  },
+  "1": {
+    "id": "60c74f3d-ea4d-4ef2-8631-2d1918720c37",
+    "identifier": "RAC-603",
+    "url": "https://linear.app/testbox/issue/RAC-603/tsa-coda-doc"
+  },
+  "27": {
+    "id": "378e2350-2097-4047-b038-0a88717fe28c",
+    "identifier": "RAC-604",
+    "url": "https://linear.app/testbox/issue/RAC-604/build-2026-roadmap"
+  },
+  "28": {
+    "id": "b9a85ce2-cea7-4ad8-9765-69adbec0d372",
+    "identifier": "RAC-605",
+    "url": "https://linear.app/testbox/issue/RAC-605/build-2026-stratetgic"
+  },
+  "37": {
+    "id": "79368924-4e30-4ebd-b623-261e3d15bd5d",
+    "identifier": "RAC-606",
+    "url": "https://linear.app/testbox/issue/RAC-606/feedback-coda"
+  },
+  "23": {
+    "id": "cf5fbb3b-2c3b-4fef-830c-1b4e9d167ef3",
+    "identifier": "RAC-607",
+    "url": "https://linear.app/testbox/issue/RAC-607/tsa-feedback-plan"
+  },
+  "24": {
+    "id": "7de47c97-0d34-4c03-adce-bf2675882a64",
+    "identifier": "RAC-608",
+    "url": "https://linear.app/testbox/issue/RAC-608/gantt-routine"
+  },
+  "25": {
+    "id": "bee0f5cb-6907-4487-9965-2138f02ffee4",
+    "identifier": "RAC-609",
+    "url": "https://linear.app/testbox/issue/RAC-609/dailys-reports-team-improvements"
+  },
+  "26": {
+    "id": "e4b2f5c8-a57e-47b8-9ffc-28ccf6e21070",
+    "identifier": "RAC-610",
+    "url": "https://linear.app/testbox/issue/RAC-610/organize-weekly-sync-routine-with-thais"
+  },
+  "29": {
+    "id": "704fb5f1-06b1-4517-ab11-bf36092e815a",
+    "identifier": "RAC-611",
+    "url": "https://linear.app/testbox/issue/RAC-611/help-waki-qa-monarch"
+  },
+  "30": {
+    "id": "3b2d5ece-f61e-4820-94e4-5b08016fc303",
+    "identifier": "RAC-612",
+    "url": "https://linear.app/testbox/issue/RAC-612/build-a-professional-onboarding"
+  },
+  "31": {
+    "id": "5a198236-cbf7-4f7f-a7bb-d23a1ee33a29",
+    "identifier": "RAC-613",
+    "url": "https://linear.app/testbox/issue/RAC-613/tsa-kpi"
+  },
+  "36": {
+    "id": "9aa06206-a8d1-43c8-864f-2a8a96664f00",
+    "identifier": "RAC-614",
+    "url": "https://linear.app/testbox/issue/RAC-614/solutions-excellence-2026-strategic-plan"
+  },
+  "95": {
+    "id": "f2a7edeb-3195-4ccd-8b08-6b3c62aa326e",
+    "identifier": "RAC-615",
+    "url": "https://linear.app/testbox/issue/RAC-615/spinehub-v30-collectors-ported-to-python"
+  },
+  "96": {
+    "id": "4bff5658-bd7c-4347-b89c-cf801743aec9",
+    "identifier": "RAC-616",
+    "url": "https://linear.app/testbox/issue/RAC-616/tsa-cortex-worklog-automation-v13-rac-36"
+  },
+  "97": {
+    "id": "c447dabd-e711-4845-8216-2cb33ac62f82",
+    "identifier": "RAC-617",
+    "url": "https://linear.app/testbox/issue/RAC-617/retro-tsa-project-created-retrospective-slack-report-generator"
+  },
+  "98": {
+    "id": "839180a1-65fc-49e8-a7de-f1cd7d94ba4c",
+    "identifier": "RAC-618",
+    "url": "https://linear.app/testbox/issue/RAC-618/report-check-project-obm-matrix-100-point-scoring"
+  },
+  "99": {
+    "id": "232f4df0-fa1d-48b0-b311-f69d66589f88",
+    "identifier": "RAC-619",
+    "url": "https://linear.app/testbox/issue/RAC-619/tsa-routine-indicators-26-indicators-6-categories"
+  },
+  "100": {
+    "id": "c8ac514c-9295-431d-abed-382adde69f35",
+    "identifier": "RAC-620",
+    "url": "https://linear.app/testbox/issue/RAC-620/all-pedals-ama-report-setup"
+  },
+  "101": {
+    "id": "2105a2ea-69af-4a53-88eb-0a2eda78bcb2",
+    "identifier": "RAC-621",
+    "url": "https://linear.app/testbox/issue/RAC-621/tsa-daily-report-project-created"
+  },
+  "102": {
+    "id": "5a2b9f2d-2b79-44d1-b8ce-90fd4e097621",
+    "identifier": "RAC-622",
+    "url": "https://linear.app/testbox/issue/RAC-622/tsa-cortex-full-implementation-process-playbook-11-phases"
+  },
+  "103": {
+    "id": "bb9d9634-16b4-493a-9654-15f3ad11f747",
+    "identifier": "RAC-623",
+    "url": "https://linear.app/testbox/issue/RAC-623/tsa-cortex-internal-audit-v23-18-findings-critical-bug-fixed"
+  },
+  "106": {
+    "id": "fc78f5c2-6be8-46c0-a085-9ea1264e3f65",
+    "identifier": "RAC-624",
+    "url": "https://linear.app/testbox/issue/RAC-624/weekly-standup-ppt-automation-weekly-ppt-desktop-shortcut"
+  },
+  "107": {
+    "id": "448f444f-a939-4b6a-adff-4dcdb0d3d5ba",
+    "identifier": "RAC-625",
+    "url": "https://linear.app/testbox/issue/RAC-625/tbx-feature-checker-sync-15-python-files-4-commits"
+  },
+  "104": {
+    "id": "1d974638-c474-4b3f-a4e5-c1e9ffbd1f63",
+    "identifier": "RAC-626",
+    "url": "https://linear.app/testbox/issue/RAC-626/tsa-feedback-reports-5-docx-4-individual-unified"
+  },
+  "108": {
+    "id": "8e3c145e-c08b-4080-b4b9-5f986e28f60c",
+    "identifier": "RAC-627",
+    "url": "https://linear.app/testbox/issue/RAC-627/coaching-analysis-carlos-standup-scorecard-2610-7-errors"
+  },
+  "109": {
+    "id": "0b4e9a61-9a7b-455e-8a54-80b4c57f173c",
+    "identifier": "RAC-628",
+    "url": "https://linear.app/testbox/issue/RAC-628/coaching-analysis-gayathri-communication-11-errors"
+  },
+  "110": {
+    "id": "7b5ca3c9-5d20-4211-a596-0c5368cf1935",
+    "identifier": "RAC-629",
+    "url": "https://linear.app/testbox/issue/RAC-629/horizontal-audit-of-25-projects-8-retrofitted-with-spinehub"
+  },
+  "114": {
+    "id": "d80fe00a-06b3-40b7-9d6d-0f470b6d4907",
+    "identifier": "RAC-630",
+    "url": "https://linear.app/testbox/issue/RAC-630/shock-plan-project-consolidation-gm-proposal-ce-engagement"
+  },
+  "115": {
+    "id": "70054447-6d26-4393-9afd-ad467203143b",
+    "identifier": "RAC-631",
+    "url": "https://linear.app/testbox/issue/RAC-631/intuit-qbo-post-deal-playbook-v5-1453-lines"
+  },
+  "116": {
+    "id": "dc5fb2bf-6915-4eb2-9caf-05e5bf3e89c6",
+    "identifier": "RAC-632",
+    "url": "https://linear.app/testbox/issue/RAC-632/qbo-environment-master-xlsx-79-items"
+  },
+  "_parents": {
+    "CODA - TSA Process Documentation": "3b99ff85-a45f-4bad-9dab-662c559f3bda",
+    "CODA - Customer Overview Pages": "ceee9fe3-a21b-4881-bafb-12394e4731c2",
+    "CODA - Flowchart & Knowledge Base": "4b799d54-2574-4248-8b11-e344de310de5",
+    "QBO - Winter Release Validation": "a66bd360-22c1-46b8-8d5f-88fe1c536a0b",
+    "QBO - Environment Health & Sweeps": "2691cbe6-8374-4c6e-b68c-8871aac3bf12",
+    "QBO - Financial Investigations": "90f25971-5bfd-406c-b936-43190c76762b",
+    "QBO - Deliverables & Handover": "bb70a8f9-0961-41bf-b567-1af2d5fcb9c6",
+    "GEM - Strategy & Due Diligence": "41e4e3e7-b394-4253-ac97-7fe5ccfe6437",
+    "GEM - Implementation & Delivery": "b9ebf653-29d4-40b2-be9a-54c58230552e",
+    "Gong - Investigations & Support": "e62c9092-aaa3-4464-b1e8-26c480d48d89",
+    "Mailchimp - Support & Audits": "ec6cbc1d-a315-4c19-9fee-f58ef7617234",
+    "CallRail - Investigation & Response": "12c6caf1-7dd0-4779-b46c-883c3a6b0103",
+    "Siteimprove - Deep Learning & Validation": "c6490038-214a-4b96-a713-cb14c78cfdfb",
+    "HockeyStack - Analysis & Onboarding": "b0b347a7-c2c3-4fcd-9097-60062fa5418b",
+    "Other Customers - Research & Analysis": "c4e8a24a-c93e-4d92-9eda-f77564879b71",
+    "Internal - Waki Alignment": "d7a0f6c1-4449-4e7b-a8d0-3d00e8717a14",
+    "Internal - TSA Process & KPIs": "e801f396-2e03-44b8-adea-b82a68e50cc6",
+    "Internal - Tool Development": "6cf7d1ef-6f4d-4c39-b9e2-78465b3d89c8",
+    "Internal - Leadership & Coaching": "15079919-6bf6-4dc6-84f0-17f7370dc9e3"
+  }
+}

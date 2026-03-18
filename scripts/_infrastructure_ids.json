@@ -1,0 +1,27 @@
+{
+  "labels": {
+    "Archer": "20f03684-1ef1-4194-8eeb-67c0ec7f89c1",
+    "Mailchimp": "0f7cdc0e-b4d1-4c1b-844a-0c0751014055",
+    "Staircase": "b48ab084-e6b6-46c7-9a99-e9022d3057e2",
+    "Gong": "63aad579-bb8c-4f71-93d5-9be5f2bd4c1c",
+    "Siteimprove": "e27a6fd9-811d-48de-ace3-5d45a07b2f59",
+    "Apollo": "0852f0d5-b582-49dd-9ab0-7006c45210ab",
+    "GEM": "9e0dd48f-90bb-42fa-9376-5a28ca0d08ad",
+    "CallRail": "50e0d66d-addc-4a83-90c2-862a5775afeb",
+    "Tropic": "7c646e26-c927-47a0-9f8d-5e770a256b63",
+    "People.ai": "890f30a7-2f47-46d6-8cf2-c38509fc73ff",
+    "Demo": "340d1426-ad4a-4a1a-bf01-bb4d4a6d1335",
+    "Sandbox": "3f6e0ccb-6f27-4c95-97a3-8e1b24fedbba"
+  },
+  "projects": {
+    "[Archer] Implementation": "f6dade9a-05b6-482b-a2ee-16f3d04ae711",
+    "[Mailchimp] Implementation": "bd241897-7518-4963-a9a9-ec99fc36936f",
+    "[Staircase] Implementation": "dcd11ea1-d883-4f36-8f21-c6d84027bdd5",
+    "[Gong] Implementation": "ab0dde3c-09c4-4b53-8bf2-c78579240730",
+    "[Siteimprove] Implementation": "30ddab6f-eaed-42ac-9ecd-b2d03b668012",
+    "[Apollo] Implementation": "6ec07cae-a9b7-4996-b207-6d8ca3634e82",
+    "[GEM] Implementation": "e7e478a1-2fe3-4a03-84a6-73719a6ffd59",
+    "[Internal] TSA Operations": "26760852-ba0d-4012-adf5-d5d1dcc07671",
+    "[CallRail] Operations": "2e8d65ef-6892-4300-83ce-1b48c5eb5e17"
+  }
+}

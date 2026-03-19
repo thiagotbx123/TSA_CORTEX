@@ -1,0 +1,61 @@
+[
+  {
+    "id": "RAC-174",
+    "title": "[GEM] Generate resumes for candidates",
+    "assignee": "Thaís Linzmaier",
+    "status": "Triage",
+    "createdAt": "2026-02-03T16:10:58.702Z",
+    "updatedAt": "2026-02-17T17:49:34.654Z",
+    "completedAt": null,
+    "dueDate": null,
+    "parentId": null,
+    "labels": [
+      {
+        "name": "gem-project"
+      },
+      {
+        "name": "data-gen"
+      },
+      {
+        "name": "new-scope"
+      }
+    ],
+    "project": "[Gem] Implementation"
+  },
+  {
+    "id": "RAC-133",
+    "title": "[GEM] Add notes and emails to candidates",
+    "assignee": "Thaís Linzmaier",
+    "status": "Triage",
+    "createdAt": "2026-02-03T16:10:59.629Z",
+    "updatedAt": "2026-02-17T17:49:34.468Z",
+    "completedAt": null,
+    "dueDate": null,
+    "parentId": null,
+    "labels": [
+      {
+        "name": "gem-project"
+      },
+      {
+        "name": "data-gen"
+      },
+      {
+        "name": "new-scope"
+      }
+    ],
+    "project": "[Gem] Implementation"
+  },
+  {
+    "id": "RAC-175",
+    "title": "[GEM] Create applications",
+    "assignee": "Thaís Linzmaier",
+    "status": "Triage",
+    "createdAt": "2026-02-05T16:57:57.046Z",
+    "updatedAt": "2026-02-17T17:46:50.805Z",
+    "completedAt": null,
+    "dueDate": null,
+    "parentId": null,
+    "labels": [],
+    "project": "[Gem] Implementation"
+  }
+]

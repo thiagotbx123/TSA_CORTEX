@@ -67,6 +67,27 @@ for r in data:
                 r['dateAdd'] = f"20{yr}-{mon:02d}-{day:02d}"
                 fixes['weeks_fixed'] += 1
 
+    # 5. Fix 2019 dates → 2025 (Gabi data entry error)
+    if r.get('dateAdd', '').startswith('2019-'):
+        r['dateAdd'] = '2025-' + r['dateAdd'][5:]
+        if r['week'].startswith('19-'):
+            r['week'] = '25-' + r['week'][3:]
+        fixes.setdefault('year_fixed', 0)
+        fixes['year_fixed'] += 1
+    if r.get('eta', '').startswith('2019-'):
+        r['eta'] = '2025-' + r['eta'][5:]
+    if r.get('delivery', '').startswith('2019-'):
+        r['delivery'] = '2025-' + r['delivery'][5:]
+
+    # 6. Clean corrupted ETA/delivery fields (sentences instead of dates)
+    for field in ('eta', 'delivery'):
+        val = r.get(field, '')
+        if val and len(val) > 12 and not re.match(r'^\d{4}-\d{2}-\d{2}', val):
+            r[field] = ''
+            r['perf'] = 'No ETA' if field == 'eta' else r['perf']
+            fixes.setdefault('corrupted_cleaned', 0)
+            fixes['corrupted_cleaned'] += 1
+
 print(f"\nFixes applied:")
 for k, v in fixes.items():
     print(f"  {k}: {v}")

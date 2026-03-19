@@ -152,12 +152,14 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 
 /* Member cards */
 .member-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:18px}
-.member-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden}
+.member-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .member-card .mc-name{font-weight:700;font-size:.88em;margin-bottom:6px;color:var(--text)}
+.member-card .mc-body{flex:1}
 .member-card .mc-row{display:flex;justify-content:space-between;font-size:.72em;color:var(--dim);padding:2px 0}
 .member-card .mc-row b{color:var(--text)}
-.member-card .mc-bar{height:4px;border-radius:2px;background:var(--gray-l);margin-top:6px;overflow:hidden}
-.member-card .mc-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.member-card .mc-bar{margin-top:auto;padding-top:8px}
+.member-card .mc-bar-track{height:4px;border-radius:2px;background:var(--gray-l);overflow:hidden}
+.member-card .mc-bar-inner{height:100%;border-radius:2px;transition:width .3s}
 .member-card .mc-alert{position:absolute;top:8px;right:10px;font-size:.65em;font-weight:700;padding:2px 6px;border-radius:10px}
 .mc-alert-warn{background:var(--yellow-l);color:var(--yellow)}
 .mc-alert-ok{background:var(--green-l);color:var(--green)}
@@ -193,9 +195,9 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <button class="segment-btn" data-seg="Internal">Internal<span class="seg-count" id="segInt"></span></button>
 </div>
 
-<div class="member-cards" id="memberCards"></div>
-
 <div class="kpi-strip" id="kpiStrip"></div>
+
+<div class="member-cards" id="memberCards"></div>
 
 <div class="tabs" id="tabBar">
   <div class="tab active" data-tab="accuracy">ETA Accuracy</div>
@@ -700,13 +702,15 @@ function renderMemberCards(){
 
     return`<div class="member-card">${alert}
       <div class="mc-name">${p}</div>
-      <div class="mc-row"><span>Total</span><b>${total}</b></div>
-      <div class="mc-row"><span>Done</span><b>${done} (${donePct}%)</b></div>
-      <div class="mc-row"><span>Open</span><b>${open}</b></div>
-      <div class="mc-row"><span>On Time</span><b style="color:var(--green)">${onTime}</b></div>
-      <div class="mc-row"><span>Late/Overdue</span><b style="color:var(--red)">${late+overdue}</b></div>
-      ${noEta>0?`<div class="mc-row"><span>No ETA</span><b style="color:var(--light)">${noEta}</b></div>`:''}
-      <div class="mc-bar"><div class="mc-bar-fill" style="width:${donePct}%;background:${barColor}"></div></div>
+      <div class="mc-body">
+        <div class="mc-row"><span>Total</span><b>${total}</b></div>
+        <div class="mc-row"><span>Done</span><b>${done} (${donePct}%)</b></div>
+        <div class="mc-row"><span>Open</span><b>${open}</b></div>
+        <div class="mc-row"><span>On Time</span><b style="color:var(--green)">${onTime}</b></div>
+        <div class="mc-row"><span>Late/Overdue</span><b style="color:${late+overdue>0?'var(--red)':'var(--dim)'}">${late+overdue}</b></div>
+        <div class="mc-row"><span>No ETA</span><b style="color:${noEta>0?'var(--yellow)':'var(--dim)'}">${noEta}</b></div>
+      </div>
+      <div class="mc-bar"><div class="mc-bar-track"><div class="mc-bar-inner" style="width:${donePct}%;background:${barColor}"></div></div></div>
     </div>`;
   });
   el.innerHTML=cards.join('');

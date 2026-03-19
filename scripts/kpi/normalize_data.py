@@ -88,6 +88,41 @@ for r in data:
             fixes.setdefault('corrupted_cleaned', 0)
             fixes['corrupted_cleaned'] += 1
 
+    # 7. Fix short date formats like "11-Fev" → "2026-02-11"
+    for field in ('eta', 'delivery'):
+        val = r.get(field, '').strip()
+        if val:
+            m2 = re.match(r'^(\d{1,2})-([A-Za-z]{3})$', val)
+            if m2:
+                day = int(m2.group(1))
+                mon_map = {'jan': 1, 'jab': 1, 'fev': 2, 'feb': 2, 'mar': 3, 'abr': 4, 'apr': 4,
+                           'mai': 5, 'may': 5, 'jun': 6, 'jul': 7, 'ago': 8, 'aug': 8,
+                           'set': 9, 'sep': 9, 'out': 10, 'oct': 10, 'nov': 11, 'dez': 12, 'dec': 12}
+                mon_str = m2.group(2).lower()
+                if mon_str in mon_map:
+                    mon = mon_map[mon_str]
+                    yr = 2025 if mon == 12 else 2026
+                    r[field] = f"{yr}-{mon:02d}-{day:02d}"
+                    fixes.setdefault('short_dates_fixed', 0)
+                    fixes['short_dates_fixed'] += 1
+
+    # 8. Fix delivery < dateAdd when clearly wrong year (2024/2025 typos)
+    da = r.get('dateAdd', '')
+    dl = r.get('delivery', '')
+    if da and dl and len(da) == 10 and len(dl) == 10:
+        try:
+            from datetime import datetime as _dt
+            d1 = _dt.strptime(da, '%Y-%m-%d')
+            d2 = _dt.strptime(dl, '%Y-%m-%d')
+            # If delivery is exactly 1 year behind dateAdd, fix the year
+            diff_days = (d1 - d2).days
+            if 360 <= diff_days <= 370:
+                r['delivery'] = f"{d1.year}-{dl[5:]}"
+                fixes.setdefault('year_in_delivery_fixed', 0)
+                fixes['year_in_delivery_fixed'] += 1
+        except:
+            pass
+
 print(f"\nFixes applied:")
 for k, v in fixes.items():
     print(f"  {k}: {v}")

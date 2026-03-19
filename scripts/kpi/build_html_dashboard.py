@@ -150,6 +150,26 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .audit-table .perf-na{color:var(--light)}
 .audit-stats{padding:10px 20px;font-size:.72em;color:var(--dim);border-top:1px solid var(--gray-l);display:flex;gap:16px;flex-wrap:wrap}
 
+/* Member cards */
+.member-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:18px}
+.member-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden}
+.member-card .mc-name{font-weight:700;font-size:.88em;margin-bottom:6px;color:var(--text)}
+.member-card .mc-row{display:flex;justify-content:space-between;font-size:.72em;color:var(--dim);padding:2px 0}
+.member-card .mc-row b{color:var(--text)}
+.member-card .mc-bar{height:4px;border-radius:2px;background:var(--gray-l);margin-top:6px;overflow:hidden}
+.member-card .mc-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.member-card .mc-alert{position:absolute;top:8px;right:10px;font-size:.65em;font-weight:700;padding:2px 6px;border-radius:10px}
+.mc-alert-warn{background:var(--yellow-l);color:var(--yellow)}
+.mc-alert-ok{background:var(--green-l);color:var(--green)}
+
+/* Activity heat colors */
+.heat-vol-0{background:var(--white);color:#d5d8dd;font-weight:300;font-size:.75em}
+.heat-vol-1{background:#eff6ff;color:var(--blue)}
+.heat-vol-2{background:#dbeafe;color:#1d4ed8}
+.heat-vol-3{background:#bfdbfe;color:#1e40af}
+.heat-vol-4{background:#93c5fd;color:#1e3a8a}
+.heat-vol-5{background:#3b82f6;color:#fff}
+
 /* Footer */
 .footer{text-align:center;margin-top:24px;padding:12px;color:var(--light);font-size:.7em}
 
@@ -173,12 +193,15 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <button class="segment-btn" data-seg="Internal">Internal<span class="seg-count" id="segInt"></span></button>
 </div>
 
+<div class="member-cards" id="memberCards"></div>
+
 <div class="kpi-strip" id="kpiStrip"></div>
 
 <div class="tabs" id="tabBar">
   <div class="tab active" data-tab="accuracy">ETA Accuracy</div>
   <div class="tab" data-tab="velocity">Faster Implementations</div>
   <div class="tab" data-tab="reliability">Implementation Reliability</div>
+  <div class="tab" data-tab="activity">Team Activity</div>
 </div>
 
 <div class="tab-panel active" id="panel-accuracy">
@@ -202,6 +225,14 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
     <div class="title"><span class="dot" style="background:var(--green)"></span>Implementation Reliability<span class="info-btn" onmouseenter="showTip(event,'<b>Effective Delivery Rate (S10)</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late + Overdue)<br><span class=tip-label>Target</span>: &gt;85%<br><span class=tip-label>Key Difference</span>: Unlike KPI1, this also penalizes open overdue tasks<br><span class=tip-label>Excludes</span>: Tasks with No ETA, No Delivery, Canceled<br><br>Strictest reliability metric. Counts both past failures (Late) and current risks (Overdue). Hover cells to see problematic tasks.')" onmouseleave="hideTip()">?</span></div>
     <div class="trend-wrap" id="trend-reliability"></div>
     <div style="overflow-x:auto"><table class="heatmap" id="grid-reliability"></table></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-activity">
+  <div class="grid-section">
+    <div class="title"><span class="dot" style="background:var(--accent)"></span>Team Activity<span class="info-btn" onmouseenter="showTip(event,'<b>Task Volume</b><br><span class=tip-label>Shows</span>: Number of tasks per person per week<br><span class=tip-label>Includes</span>: All tasks regardless of status<br><span class=tip-label>Color</span>: Darker = more tasks<br><br>Identifies workload distribution and gaps. If a person shows 0 across weeks, they may have untracked work or missing data.')" onmouseleave="hideTip()">?</span></div>
+    <div class="trend-wrap" id="trend-activity"></div>
+    <div style="overflow-x:auto"><table class="heatmap" id="grid-activity"></table></div>
   </div>
 </div>
 
@@ -605,6 +636,82 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
   });
 }
 
+/* ── Activity calc ─────────────────────────────────── */
+function calcActivity(rows){
+  return{val:rows.length,n:rows.length,
+    done:rows.filter(r=>r.status==='Done').length,
+    open:rows.filter(r=>r.status!=='Done'&&r.status!=='Canceled').length,
+    canceled:rows.filter(r=>r.status==='Canceled').length};
+}
+function fmtCount(v){return(v===null||v===undefined)?'—':v}
+function heatVol(val){
+  if(val===null||val===undefined||val===0)return'heat-vol-0';
+  if(val<=2)return'heat-vol-1';if(val<=4)return'heat-vol-2';
+  if(val<=7)return'heat-vol-3';if(val<=12)return'heat-vol-4';
+  return'heat-vol-5';
+}
+function tipActivity(person,week,calc,rows){
+  if(rows.length===0)return`<b>${person}</b> &middot; ${week}<br><span class="tip-label">No tasks this week</span>`;
+  let html=`<b>${person}</b> &middot; ${week}`;
+  html+=`<br><span class="tip-label">Tasks</span>: <b>${calc.n}</b>`;
+  html+=`<br>Done: ${calc.done} &middot; Open: ${calc.open}`;
+  if(calc.canceled>0)html+=` &middot; Canceled: ${calc.canceled}`;
+  const statuses=[...new Set(rows.map(r=>r.status))].sort();
+  html+=`<br>Statuses: ${statuses.join(', ')}`;
+  if(rows.length<=5){
+    html+=`<div class="tip-section"><span class="tip-label">Tasks:</span>`;
+    rows.forEach(r=>{const cls=r.status==='Done'?'tip-ontime':'tip-late';html+=`<div class="tip-task ${cls}">${esc(r.focus.slice(0,50))}</div>`});
+    html+=`</div>`;
+  }
+  return html;
+}
+
+/* ── Member summary cards ──────────────────────────── */
+function renderMemberCards(){
+  const data=getFiltered();
+  const people=getPeople();
+  const el=document.getElementById('memberCards');
+
+  const cards=people.map(p=>{
+    const pr=data.filter(r=>r.tsa===p);
+    const done=pr.filter(r=>r.status==='Done').length;
+    const open=pr.filter(r=>r.status!=='Done'&&r.status!=='Canceled').length;
+    const onTime=pr.filter(r=>r.perf==='On Time').length;
+    const late=pr.filter(r=>r.perf==='Late').length;
+    const overdue=pr.filter(r=>r.perf==='Overdue').length;
+    const noEta=pr.filter(r=>r.perf==='No ETA').length;
+    const total=pr.length;
+    const donePct=total>0?Math.round(done/total*100):0;
+    const measured=onTime+late+overdue;
+    const accPct=measured>0?Math.round(onTime/measured*100):null;
+
+    // Recent activity: tasks in last 2 weeks
+    const lastWeeks=CORE_WEEKS.slice(-2);
+    const recent=pr.filter(r=>lastWeeks.includes(r.week)).length;
+
+    // Alert
+    let alert='';
+    if(recent===0&&total>0)alert='<span class="mc-alert mc-alert-warn">NO RECENT</span>';
+    else if(noEta>total*0.5)alert='<span class="mc-alert mc-alert-warn">'+noEta+' NO ETA</span>';
+    else if(accPct!==null&&accPct>=85)alert='<span class="mc-alert mc-alert-ok">ON TRACK</span>';
+
+    // Bar color
+    const barColor=donePct>=80?'var(--green)':donePct>=50?'var(--yellow)':'var(--red)';
+
+    return`<div class="member-card">${alert}
+      <div class="mc-name">${p}</div>
+      <div class="mc-row"><span>Total</span><b>${total}</b></div>
+      <div class="mc-row"><span>Done</span><b>${done} (${donePct}%)</b></div>
+      <div class="mc-row"><span>Open</span><b>${open}</b></div>
+      <div class="mc-row"><span>On Time</span><b style="color:var(--green)">${onTime}</b></div>
+      <div class="mc-row"><span>Late/Overdue</span><b style="color:var(--red)">${late+overdue}</b></div>
+      ${noEta>0?`<div class="mc-row"><span>No ETA</span><b style="color:var(--light)">${noEta}</b></div>`:''}
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:${donePct}%;background:${barColor}"></div></div>
+    </div>`;
+  });
+  el.innerHTML=cards.join('');
+}
+
 /* ── Segment counts ────────────────────────────────── */
 function updateSegmentCounts(){
   const base=RAW.filter(r=>r.week&&isCoreWeek(r.week)&&(state.person==='ALL'||r.tsa===state.person));
@@ -734,13 +841,16 @@ function copyTSV(){
 /* ── Render all ─────────────────────────────────────── */
 function render(){
   updateSegmentCounts();
+  renderMemberCards();
   renderKPIStrip();
   buildGrid('grid-accuracy',calcAccuracy,fmtPct,heatPct,tipAccuracy);
   buildGrid('grid-velocity',calcVelocity,fmtDays,heatDays,tipVelocity);
   buildGrid('grid-reliability',calcReliability,fmtPct,heatPct,tipReliability);
+  buildGrid('grid-activity',calcActivity,fmtCount,heatVol,tipActivity);
   renderTrend('trend-accuracy',calcAccuracy,'ETA Accuracy','#3b82f6',.9,'Target 90%',false);
   renderTrend('trend-velocity',calcVelocity,'Faster Implementations','#d97706',28,'Target 28d',true);
   renderTrend('trend-reliability',calcReliability,'Implementation Reliability','#059669',.85,'Target 85%',false);
+  renderTrend('trend-activity',calcActivity,'Task Volume','#6366f1',5,'Avg 5/week',false);
   renderAuditTable();
 }
 

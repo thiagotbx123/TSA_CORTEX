@@ -208,7 +208,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 
 <div class="tab-panel active" id="panel-accuracy">
   <div class="grid-section">
-    <div class="title"><span class="dot" style="background:var(--blue)"></span>ETA Accuracy<span class="info-btn" onmouseenter="showTip(event,'<b>ETA Accuracy (S9)</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late)<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>Tolerance</span>: Delivery within 7 days of ETA = On Time<br><span class=tip-label>Excludes</span>: Tasks with No ETA, No Delivery Date, Canceled, On Track<br><br>Measures whether the committed ETA was met. Higher = more predictable team.')" onmouseleave="hideTip()">?</span></div>
+    <div class="title"><span class="dot" style="background:var(--blue)"></span>ETA Accuracy<span class="info-btn" onmouseenter="showTip(event,'<b>ETA Accuracy (S9)</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late)<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>On Time</span>: Delivered on or before ETA<br><span class=tip-label>Excludes</span>: Tasks with No ETA, No Delivery Date, Canceled, On Track<br><br>Measures whether the committed ETA was met. Higher = more predictable team.')" onmouseleave="hideTip()">?</span></div>
     <div class="trend-wrap" id="trend-accuracy"></div>
     <div style="overflow-x:auto"><table class="heatmap" id="grid-accuracy"></table></div>
   </div>
@@ -584,7 +584,8 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
   datasets.push({label:targetLabel,data:CORE_WEEKS.map(()=>targetVal),borderColor:'#ef4444aa',borderDash:[6,4],borderWidth:1.5,pointRadius:0,pointHoverRadius:0,fill:false});
 
   // Week labels matching table (W1, W2, etc — grouped by month)
-  const weekLabels=CORE_WEEKS.map(w=>{const[,,wn]=parseWeek(w);return'W'+wn});
+  const mNames=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const weekLabels=CORE_WEEKS.map(w=>{const[,m,wn]=parseWeek(w);return mNames[m]+' W'+wn});
 
   const canvasId=containerId+'-canvas';
   el.innerHTML=`<h4>Weekly Trend</h4><canvas id="${canvasId}"></canvas>`;

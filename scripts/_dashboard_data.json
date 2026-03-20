@@ -7440,7 +7440,7 @@
     "dateAdd": "2026-01-27",
     "eta": "2026-02-03",
     "delivery": "2026-02-06",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-93",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-93/loss-events",
     "source": "linear"
@@ -7627,7 +7627,7 @@
     "dateAdd": "2026-02-04",
     "eta": "2026-02-26",
     "delivery": "2026-02-27",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-104",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-104/create-pending-records-for-scorecards-peopleai-synthetic-data",
     "source": "linear"
@@ -7763,7 +7763,7 @@
     "dateAdd": "2026-02-10",
     "eta": "2026-02-13",
     "delivery": "2026-02-17",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-108",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-108/de-team-create-internal-feedback-form",
     "source": "linear"
@@ -7780,7 +7780,7 @@
     "dateAdd": "2026-01-27",
     "eta": "2026-02-09",
     "delivery": "2026-02-12",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-95",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-95/rcsa-campaigns",
     "source": "linear"
@@ -7797,7 +7797,7 @@
     "dateAdd": "2026-01-27",
     "eta": "2026-02-09",
     "delivery": "2026-02-11",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-94",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-94/rcsa",
     "source": "linear"
@@ -7831,7 +7831,7 @@
     "dateAdd": "2026-01-19",
     "eta": "2026-02-06",
     "delivery": "2026-02-10",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-25",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-25/risks",
     "source": "linear"
@@ -8273,7 +8273,7 @@
     "dateAdd": "2025-11-25",
     "eta": "2025-11-28",
     "delivery": "2025-12-02",
-    "perf": "On Time",
+    "perf": "Late",
     "ticketId": "OPO-15",
     "ticketUrl": "https://linear.app/testbox/issue/OPO-15/people-ai-data-quality-testing-for-ai-hallucination-detection",
     "source": "linear"

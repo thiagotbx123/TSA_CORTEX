@@ -128,7 +128,7 @@ def calc_perf(status, eta, delivery, date_add):
             d_eta = datetime.strptime(eta, '%Y-%m-%d')
             d_del = datetime.strptime(delivery[:10], '%Y-%m-%d')
             diff = (d_del - d_eta).days
-            if diff <= 7:  # within 1 week tolerance
+            if diff <= 0:  # on time = delivered on or before ETA
                 return 'On Time'
             else:
                 return 'Late'

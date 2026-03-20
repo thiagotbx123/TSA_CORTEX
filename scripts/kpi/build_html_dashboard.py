@@ -79,8 +79,8 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .heatmap .week-header{background:var(--gray-bg);font-size:.78em;color:var(--dim);padding:7px 8px}
 .heatmap .month-first{border-left:3px solid var(--accent)!important}
 .heatmap .person-label{text-align:left;font-weight:600;padding-left:16px;background:var(--white);border-right:2px solid var(--border);min-width:120px;font-size:.9em;color:var(--text)}
-.heatmap .team-row td{font-weight:800;background:var(--gray-bg);border-top:2px solid var(--border);font-size:.92em}
-.heatmap .team-row .person-label{background:var(--gray-bg);color:var(--accent);font-size:.82em;text-transform:uppercase;letter-spacing:.3px;font-weight:800;white-space:normal;line-height:1.3}
+.heatmap .team-row td{font-weight:800;background:#eef2ff;border-top:3px solid var(--accent);font-size:.92em}
+.heatmap .team-row .person-label{background:#eef2ff;color:var(--accent);font-size:.82em;text-transform:uppercase;letter-spacing:.3px;font-weight:800;white-space:normal;line-height:1.3}
 .heatmap td.cell{min-width:60px;font-weight:600;font-size:.9em;border:1px solid var(--gray-l);cursor:default;position:relative;transition:transform .1s}
 .heatmap td.cell:hover{transform:scale(1.05);z-index:1;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .heatmap td.total-col{background:#eef2ff!important;font-weight:800;border-left:3px solid var(--accent);font-size:.92em}
@@ -239,6 +239,11 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 </div>
 
 <div class="tooltip" id="tooltip"></div>
+
+<div class="grid-section" id="customerKPISection" style="margin-top:20px">
+  <div class="title"><span class="dot" style="background:var(--accent)"></span><span id="customerKPITitle">KPI by Customer</span><span class="info-btn" id="clientKpiInfo">?</span></div>
+  <div style="overflow-x:auto"><table class="heatmap" id="customerKPITable"></table></div>
+</div>
 
 <div class="audit-section" id="auditSection">
   <div class="audit-header" id="auditToggle">
@@ -547,93 +552,82 @@ function renderKPIStrip(){
   }).join('');
 }
 
-/* ── Mini trend charts ──────────────────────────────── */
+/* ── Combo trend charts (bars + line) ─────────────── */
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
 
 function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabel, isInverse){
   const el=document.getElementById(containerId);
   const data=getFiltered();
-  const people=getPeople();
 
-  // Compute team overall + per-person min/max band
-  const teamVals=[], minVals=[], maxVals=[];
+  /* Compute per-week: KPI value + task composition */
+  const teamVals=[],onTimeArr=[],lateArr=[],overdueArr=[],noEtaArr=[];
   CORE_WEEKS.forEach(w=>{
     const rows=data.filter(r=>r.week===w);
     const teamCalc=calcFn(rows);
     teamVals.push(teamCalc.val!==null?(typeof teamCalc.val==='number'?+teamCalc.val.toFixed(2):teamCalc.val):null);
-
-    // Per-person values for this week (for range band)
-    const personVals=people.map(p=>{
-      const pr=data.filter(r=>r.tsa===p&&r.week===w);
-      const c=calcFn(pr);return c.val;
-    }).filter(v=>v!==null);
-    minVals.push(personVals.length>0?Math.min(...personVals):null);
-    maxVals.push(personVals.length>0?Math.max(...personVals):null);
+    onTimeArr.push(rows.filter(r=>r.perf==='On Time').length);
+    lateArr.push(rows.filter(r=>r.perf==='Late').length);
+    overdueArr.push(rows.filter(r=>r.perf==='Overdue').length);
+    noEtaArr.push(rows.filter(r=>r.perf==='No ETA'||r.perf==='No Delivery Date').length);
   });
 
   const datasets=[];
 
-  // Range band (max line — filled down to min)
-  datasets.push({label:'Range (min-max)',data:maxVals,borderColor:'transparent',backgroundColor:color+'18',borderWidth:0,fill:'+1',tension:.3,pointRadius:0,pointHoverRadius:0});
-  datasets.push({label:'_min',data:minVals,borderColor:'transparent',backgroundColor:'transparent',borderWidth:0,fill:false,tension:.3,pointRadius:0,pointHoverRadius:0});
+  /* Stacked bars: task composition (left y-axis) */
+  datasets.push({type:'bar',label:'On Time',data:onTimeArr,backgroundColor:'#34d39988',borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
+  datasets.push({type:'bar',label:'Late',data:lateArr,backgroundColor:'#f8717188',borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
+  datasets.push({type:'bar',label:'Overdue',data:overdueArr,backgroundColor:'#fbbf2488',borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
+  datasets.push({type:'bar',label:'No ETA',data:noEtaArr,backgroundColor:'#d1d5db88',borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
 
-  // Team overall
-  datasets.push({label:'Team',data:teamVals,borderColor:color,backgroundColor:color+'22',borderWidth:2.5,fill:false,tension:.3,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:color});
+  /* KPI line (right y-axis) — thin, small dots, spans gaps */
+  datasets.push({type:'line',label:fmtLabel,data:teamVals,borderColor:color,backgroundColor:color+'22',borderWidth:1.5,fill:false,tension:.3,pointRadius:2,pointHoverRadius:5,pointBackgroundColor:color,yAxisID:'yLine',order:1,spanGaps:true});
 
-  // Target line
-  datasets.push({label:targetLabel,data:CORE_WEEKS.map(()=>targetVal),borderColor:'#ef4444aa',borderDash:[6,4],borderWidth:1.5,pointRadius:0,pointHoverRadius:0,fill:false});
+  /* Target line */
+  datasets.push({type:'line',label:targetLabel,data:CORE_WEEKS.map(()=>targetVal),borderColor:'#ef444466',borderDash:[4,3],borderWidth:1,pointRadius:0,pointHoverRadius:0,yAxisID:'yLine',order:1,fill:false});
 
-  // Week labels matching table (W1, W2, etc — grouped by month)
   const mNames=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const weekLabels=CORE_WEEKS.map(w=>{const[,m,wn]=parseWeek(w);return mNames[m]+' W'+wn});
 
   const canvasId=containerId+'-canvas';
-  el.innerHTML=`<h4>Weekly Trend</h4><canvas id="${canvasId}"></canvas>`;
+  el.innerHTML=`<h4>Weekly Trend — bars: task breakdown &middot; line: ${fmtLabel}</h4><canvas id="${canvasId}"></canvas>`;
 
   destroyChart(canvasId);
   charts[canvasId]=new Chart(document.getElementById(canvasId),{
-    type:'line',
+    type:'bar',
     data:{labels:weekLabels,datasets},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:true,position:'bottom',labels:{
-          color:'#374151',font:{size:11,weight:'500'},boxWidth:10,padding:10,usePointStyle:true,pointStyle:'circle',
-          filter:function(item){return item.text!=='_min'}
+          color:'#374151',font:{size:11,weight:'500'},boxWidth:10,padding:10,usePointStyle:true
         }},
         tooltip:{
           enabled:true,backgroundColor:'#1e293bee',titleColor:'#93c5fd',titleFont:{size:12,weight:'700'},
           bodyColor:'#e2e8f0',bodyFont:{size:11},padding:12,cornerRadius:8,boxPadding:4,
-          filter:function(item){return item.dataset.label!=='_min'&&item.dataset.label!=='Range (min-max)'},
           callbacks:{
             title:function(items){if(!items[0])return'';const idx=items[0].dataIndex;return CORE_WEEKS[idx]||'';},
             label:function(ctx){
               if(ctx.raw===null||ctx.raw===undefined)return null;
               const name=ctx.dataset.label;
-              if(name===targetLabel||name==='_min'||name==='Range (min-max)')return null;
-              const val=ctx.raw;
-              const fmtVal=isInverse?val.toFixed(0)+'d':(val*100).toFixed(0)+'%';
-              const diff=isInverse?(val-targetVal):(val-targetVal)*100;
-              const diffStr=isInverse?(diff>0?'+'+diff.toFixed(0)+'d':diff.toFixed(0)+'d'):(diff>0?'+'+diff.toFixed(0)+'pp':diff.toFixed(0)+'pp');
-              const icon=isInverse?(val<=targetVal?'ON TARGET':'BELOW'):(val>=targetVal?'ON TARGET':'BELOW');
-              return ` Team: ${fmtVal}  (${diffStr} vs target) — ${icon}`;
-            },
-            afterBody:function(items){
-              const idx=items[0]?items[0].dataIndex:-1;
-              if(idx<0)return'';
-              const mn=minVals[idx],mx=maxVals[idx];
-              if(mn===null)return'';
-              const fmn=isInverse?mn.toFixed(0)+'d':(mn*100).toFixed(0)+'%';
-              const fmx=isInverse?mx.toFixed(0)+'d':(mx*100).toFixed(0)+'%';
-              return '  Range: '+fmn+' — '+fmx;
+              if(name===targetLabel)return null;
+              if(name===fmtLabel){
+                const val=ctx.raw;
+                const fmtVal=isInverse?val.toFixed(0)+'d':(val*100).toFixed(0)+'%';
+                const diff=isInverse?(val-targetVal):(val-targetVal)*100;
+                const diffStr=isInverse?(diff>0?'+'+diff.toFixed(0)+'d':diff.toFixed(0)+'d'):(diff>0?'+'+diff.toFixed(0)+'pp':diff.toFixed(0)+'pp');
+                const icon=isInverse?(val<=targetVal?'ON TARGET':'BELOW'):(val>=targetVal?'ON TARGET':'BELOW');
+                return ` ${fmtLabel}: ${fmtVal}  (${diffStr}) — ${icon}`;
+              }
+              return ' '+name+': '+ctx.raw;
             }
           }
         }
       },
       scales:{
-        y:{ticks:{color:'#6b7280',font:{size:10},callback:function(v){return isInverse?v+'d':(v*100).toFixed(0)+'%'}},grid:{color:'#e5e7eb88'},beginAtZero:!isInverse},
-        x:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'#f3f4f622'}}
+        yBar:{position:'left',stacked:true,ticks:{color:'#6b7280',font:{size:10},stepSize:1},grid:{color:'#e5e7eb88'},title:{display:true,text:'Tasks',color:'#9ca3af',font:{size:10}},beginAtZero:true},
+        yLine:{position:'right',ticks:{color:color,font:{size:10},callback:function(v){return isInverse?v+'d':(v*100).toFixed(0)+'%'}},grid:{drawOnChartArea:false},title:{display:true,text:fmtLabel,color:color,font:{size:10}},beginAtZero:!isInverse,min:isInverse?0:0,max:isInverse?undefined:1},
+        x:{stacked:true,ticks:{color:'#6b7280',font:{size:10}},grid:{color:'#f3f4f622'}}
       }
     }
   });
@@ -724,6 +718,62 @@ function updateSegmentCounts(){
   document.getElementById('segInt').textContent=' ('+base.filter(r=>r.category==='Internal').length+')';
 }
 
+/* ── KPI by Client ────────────────────────────────── */
+const CLIENT_TIP_ACC='<b>ETA Accuracy (S9)</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late)<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>On Time</span>: Delivered on or before ETA<br><span class=tip-label>Excludes</span>: No ETA, No Delivery, Canceled, On Track';
+const CLIENT_TIP_VEL='<b>Avg Execution Time (S8)</b><br><span class=tip-label>Formula</span>: Average(Delivery Date - Date Added)<br><span class=tip-label>Target</span>: &lt;28 days<br><span class=tip-label>Includes</span>: Only Done tasks with both dates<br><span class=tip-label>Excludes</span>: Open tasks, negative durations';
+const CLIENT_TIP_REL='<b>Effective Delivery Rate (S10)</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late + Overdue)<br><span class=tip-label>Target</span>: &gt;85%<br><span class=tip-label>Key Difference</span>: Also penalizes open overdue tasks<br><span class=tip-label>Excludes</span>: No ETA, No Delivery, Canceled';
+const CLIENT_TIP_EXT='<b>KPI by Customer</b><br><span class=tip-label>Shows</span>: ETA Accuracy, Avg Execution, Delivery Rate per customer<br><span class=tip-label>Scope</span>: External tasks with a customer assigned<br><span class=tip-label>Colors</span>: Same heat scale as main grids';
+const CLIENT_TIP_INT='<b>KPI by Customer</b><br><span class=tip-label>Shows</span>: ETA Accuracy, Avg Execution, Delivery Rate per internal demand<br><span class=tip-label>Scope</span>: Internal tasks grouped by context (product, project, routine)<br><span class=tip-label>Colors</span>: Same heat scale as main grids';
+
+const INTERNAL_CONTEXTS=new Set(['Waki','TBX','Routine','General','Coda','All',"Internal \u2013 Sam's Board Meeting"]);
+function renderCustomerKPI(){
+  const isInt=state.category==='Internal';
+  const base=RAW.filter(r=>{
+    if(!r.week||!isCoreWeek(r.week))return false;
+    if(state.person!=='ALL'&&r.tsa!==state.person)return false;
+    if(!r.customer)return false;
+    if(isInt)return r.category==='Internal'&&INTERNAL_CONTEXTS.has(r.customer);
+    return r.category==='External';
+  });
+  document.getElementById('customerKPITitle').textContent=isInt?'KPI by Internal Demand':'KPI by Customer';
+  const el=document.getElementById('customerKPITable');
+  if(!base.length){el.innerHTML='<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--dim)">No customer data in this view</td></tr>';return}
+  const custs=[...new Set(base.map(r=>r.customer))];
+  custs.sort((a,b)=>base.filter(r=>r.customer===b).length-base.filter(r=>r.customer===a).length);
+  const cols=['Customer','Tasks','Done','On Time','Late','Overdue','No ETA','ETA Accuracy','Avg Execution','Delivery Rate'];
+  const colTips={7:CLIENT_TIP_ACC,8:CLIENT_TIP_VEL,9:CLIENT_TIP_REL};
+  function kpiRow(label,rows,isTeam){
+    const t=rows.length,dn=rows.filter(r=>r.status==='Done').length;
+    const ot=rows.filter(r=>r.perf==='On Time').length,lt=rows.filter(r=>r.perf==='Late').length;
+    const ov=rows.filter(r=>r.perf==='Overdue').length,ne=rows.filter(r=>r.perf==='No ETA').length;
+    const ad=ot+lt,acc=ad>0?ot/ad:null;
+    const rd=ot+lt+ov,rel=rd>0?ot/rd:null;
+    const ds=rows.filter(r=>r.delivery&&r.dateAdd&&r.status==='Done').map(r=>daysBetween(r.dateAdd,r.delivery)).filter(d=>d!==null&&d>=0);
+    const avg=ds.length>0?ds.reduce((a,b)=>a+b,0)/ds.length:null;
+    const cls=isTeam?' class="team-row"':'';
+    const bg=isTeam?'':((rowIdx%2===0)?'background:#f9fafb;':'');
+    const lbl=isTeam?`<td class="person-label">OVERALL</td>`:`<td class="person-label" style="${bg}">${label}</td>`;
+    if(!isTeam)rowIdx++;
+    return`<tr${cls}>${lbl}<td style="${bg}">${t}</td><td style="${bg}">${dn}</td><td style="${bg}color:var(--green);font-weight:600">${ot}</td><td style="${bg}color:${lt?'var(--red)':'var(--dim)'}">${lt}</td><td style="${bg}color:${ov?'var(--yellow)':'var(--dim)'}">${ov}</td><td style="${bg}color:${ne?'var(--yellow)':'var(--dim)'}">${ne}</td><td class="cell ${acc!==null?heatPct(acc):'heat-na'}" style="font-weight:700">${fmtPct(acc)}</td><td class="cell ${avg!==null?heatDays(avg):'heat-na'}" style="font-weight:700">${fmtDays(avg)}</td><td class="cell ${rel!==null?heatPct(rel):'heat-na'}" style="font-weight:700">${fmtPct(rel)}</td></tr>`;
+  }
+  let h='<thead><tr>'+cols.map((c,i)=>{
+    if(colTips[i]){const tid='ct'+(tipCounter++);tipCache[tid]=colTips[i];return'<th>'+c+' <span class="info-btn" data-ctip="'+tid+'">?</span></th>';}
+    return'<th>'+c+'</th>';
+  }).join('')+'</tr></thead>';
+  let rowIdx=0;
+  let b='<tbody>';
+  custs.forEach(c=>{b+=kpiRow(c,base.filter(r=>r.customer===c),false)});
+  b+=kpiRow('OVERALL',base,true);
+  b+='</tbody>';
+  el.innerHTML=h+b;
+  /* attach tooltip events via delegation on the table */
+  el.querySelectorAll('[data-ctip]').forEach(btn=>{
+    btn.addEventListener('mouseenter',e=>{showTip(e,tipCache[btn.dataset.ctip])});
+    btn.addEventListener('mouseleave',()=>hideTip());
+    btn.addEventListener('mousemove',e=>{if(tip.style.display==='block'){tip.style.left=Math.min(e.clientX+14,window.innerWidth-tip.offsetWidth-20)+'px';tip.style.top=Math.max(10,Math.min(e.clientY-10,window.innerHeight-tip.offsetHeight-20))+'px'}});
+  });
+}
+
 /* ── Audit table ──────────────────────────────────── */
 let auditSortCol=0, auditSortAsc=true;
 
@@ -745,9 +795,10 @@ function perfClass(v){
 
 function renderAuditTable(){
   const rows=getAuditRows();
-  // Re-number after filter
   rows.forEach((r,i)=>r[0]=i+1);
-  // Sort
+  /* Columns to hide: 15=URL always, 8=Customer when Internal */
+  const hideCols=new Set([15]);
+  if(state.category==='Internal')hideCols.add(8);
   rows.sort((a,b)=>{
     let va=a[auditSortCol],vb=b[auditSortCol];
     if(typeof va==='string'&&typeof vb==='string'){va=va.toLowerCase();vb=vb.toLowerCase()}
@@ -759,7 +810,7 @@ function renderAuditTable(){
   const table=document.getElementById('auditTable');
   let thead='<thead><tr>';
   AUDIT_COLS.forEach((c,i)=>{
-    if(i===15)return; /* hide raw URL column in HTML */
+    if(hideCols.has(i))return;
     const arrow=i===auditSortCol?(auditSortAsc?'&#9650;':'&#9660;'):'';
     thead+=`<th data-col="${i}">${c}<span class="sort-arrow">${arrow}</span></th>`;
   });
@@ -769,9 +820,8 @@ function renderAuditTable(){
   rows.forEach(r=>{
     tbody+='<tr>';
     r.forEach((v,i)=>{
-      if(i===15)return; /* hide raw URL column in HTML */
+      if(hideCols.has(i))return;
       const cls=i===12?' class="'+perfClass(v)+'"':'';
-      /* Ticket col: link if URL exists */
       if(i===3&&r[15]){
         tbody+=`<td><a href="${r[15]}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">${v}</a></td>`;
       }else{
@@ -852,10 +902,11 @@ function render(){
   buildGrid('grid-velocity',calcVelocity,fmtDays,heatDays,tipVelocity);
   buildGrid('grid-reliability',calcReliability,fmtPct,heatPct,tipReliability);
   buildGrid('grid-activity',calcActivity,fmtCount,heatVol,tipActivity);
-  renderTrend('trend-accuracy',calcAccuracy,'ETA Accuracy','#3b82f6',.9,'Target 90%',false);
-  renderTrend('trend-velocity',calcVelocity,'Faster Implementations','#d97706',28,'Target 28d',true);
-  renderTrend('trend-reliability',calcReliability,'Implementation Reliability','#059669',.85,'Target 85%',false);
-  renderTrend('trend-activity',calcActivity,'Task Volume','#6366f1',5,'Avg 5/week',false);
+  renderTrend('trend-accuracy',calcAccuracy,'ETA Accuracy','#4f46e5',.9,'Target 90%',false);
+  renderTrend('trend-velocity',calcVelocity,'Faster Implementations','#b45309',28,'Target 28d',true);
+  renderTrend('trend-reliability',calcReliability,'Implementation Reliability','#047857',.85,'Target 85%',false);
+  renderTrend('trend-activity',calcActivity,'Task Volume','#4338ca',5,'Avg 5/week',false);
+  renderCustomerKPI();
   renderAuditTable();
 }
 
@@ -864,6 +915,12 @@ function init(){
   // Populate person filter
   const fp=document.getElementById('fPerson');
   PEOPLE_ALL.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;fp.appendChild(o)});
+
+  // Client KPI section tooltip (adapts to segment)
+  const cki=document.getElementById('clientKpiInfo');
+  cki.addEventListener('mouseenter',e=>showTip(e,state.category==='Internal'?CLIENT_TIP_INT:CLIENT_TIP_EXT));
+  cki.addEventListener('mouseleave',()=>hideTip());
+  cki.addEventListener('mousemove',e=>{if(tip.style.display==='block'){tip.style.left=Math.min(e.clientX+14,window.innerWidth-tip.offsetWidth-20)+'px';tip.style.top=Math.max(10,Math.min(e.clientY-10,window.innerHeight-tip.offsetHeight-20))+'px'}});
 
   // Filter events
   document.getElementById('fPerson').addEventListener('change',e=>{state.person=e.target.value;render()});

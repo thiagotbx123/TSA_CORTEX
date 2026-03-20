@@ -79,7 +79,57 @@ for r in data:
     if r.get('delivery', '').startswith('2019-'):
         r['delivery'] = '2025-' + r['delivery'][5:]
 
-    # 6. Clean corrupted ETA/delivery fields (sentences instead of dates)
+    # 6. Normalize customer names (consolidate duplicates)
+    CUSTOMER_MAP = {
+        'qbo': 'QuickBooks', 'quickbooks': 'QuickBooks',
+        'gong': 'Gong',
+        'gem': 'Gem',
+        'mailchimp': 'Mailchimp',
+        'people.ai': 'People.ai',
+        'siteimprove': 'Siteimprove',
+        'brevo': 'Brevo',
+        'archer': 'Archer',
+        'tropic': 'Tropic',
+        'apollo': 'Apollo',
+        'callrail': 'CallRail',
+        'hockeystack': 'HockeyStack',
+        'wfs': 'WFS',
+        'staircase': 'Staircase',
+        'coda': 'Coda',
+        'general': 'General',
+        'outreach': 'Outreach',
+        'gainsight': 'Staircase',
+        'tbx': 'TBX',
+    }
+    cust = r.get('customer', '').strip()
+    if cust:
+        cust_lower = cust.lower()
+        if cust_lower in CUSTOMER_MAP:
+            if r['customer'] != CUSTOMER_MAP[cust_lower]:
+                r['customer'] = CUSTOMER_MAP[cust_lower]
+                fixes.setdefault('customers_normalized', 0)
+                fixes['customers_normalized'] += 1
+
+    # 7. Fix category/demandType misclassifications
+    NOT_REAL_CLIENTS = {'Waki', 'TBX', 'Routine', 'General', 'Coda', 'All',
+                        'Internal', "Internal \u2013 Sam's Board Meeting"}
+    # Clients that were wrongly set to Internal by previous runs
+    FORCE_EXTERNAL = {'Tabs'}
+    cust2 = r.get('customer', '')
+    # Internal contexts wrongly tagged as External → fix to Internal
+    if cust2 in NOT_REAL_CLIENTS and r.get('category') == 'External':
+        r['category'] = 'Internal'
+        r['demandType'] = 'Internal'
+        fixes.setdefault('category_fixed', 0)
+        fixes['category_fixed'] += 1
+    # Tabs is a real client — always External
+    if cust2 in FORCE_EXTERNAL and r.get('category') == 'Internal':
+        r['category'] = 'External'
+        r['demandType'] = 'External(Customer)'
+        fixes.setdefault('category_fixed_to_ext', 0)
+        fixes['category_fixed_to_ext'] += 1
+
+    # 8. Clean corrupted ETA/delivery fields (sentences instead of dates)
     for field in ('eta', 'delivery'):
         val = r.get(field, '')
         if val and len(val) > 12 and not re.match(r'^\d{4}-\d{2}-\d{2}', val):

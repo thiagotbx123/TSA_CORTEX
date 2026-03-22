@@ -1,34 +1,37 @@
 """Merge Opossum + Raccoons Linear data for Thais & Yasmim into _dashboard_data.json.
 
 Sources:
-  - _opossum_raw.json: Cached Opossum team issues (Thais 44 + Yasmim 31)
-  - _raccoons_thais.json: Cached Raccoons team issues assigned to Thais (3)
-  - Spreadsheet data for other 5 TSA members stays untouched
+  - _opossum_raw.json: Cached Opossum team issues (Thais + Yasmim)
+  - _raccoons_thais.json: Cached Raccoons team issues assigned to Thais
+  - Spreadsheet data for other TSA members stays untouched (frozen backlog)
 
-Data quality notes:
-  - Thais: 80% of issues have NO dueDate → excluded from KPI1/KPI3
-  - Yasmim: 26% without dueDate → moderate sample
-  - Both parents and sub-issues counted (matches spreadsheet methodology)
-  - Week assigned from createdAt (spreadsheet uses manually assigned week)
+Usage: python kpi/merge_opossum_data.py
 """
 import sys
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import os, json, re
 from datetime import datetime, timedelta
+from collections import Counter
 
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
 OPOSSUM_CACHE = os.path.join(SCRIPT_DIR, '..', '_opossum_raw.json')
 RACCOONS_THAIS_CACHE = os.path.join(SCRIPT_DIR, '..', '_raccoons_thais.json')
-OUTPUT_PATH = DATA_PATH  # overwrite
+OUTPUT_PATH = DATA_PATH
+
 
 # ── Load existing dashboard data ──
 with open(DATA_PATH, 'r', encoding='utf-8') as f:
     existing = json.load(f)
 
+# H6: Count existing records before deleting
+old_thais = len([r for r in existing if r.get('tsa') == 'THAIS'])
+old_yasmim = len([r for r in existing if r.get('tsa') == 'YASMIM'])
+
 # Remove old THAIS/YASMIM records (will be rebuilt from Linear)
-existing = [r for r in existing if r['tsa'] not in ('THAIS', 'YASMIM')]
+existing = [r for r in existing if r.get('tsa') not in ('THAIS', 'YASMIM')]
 print(f"Existing records (without THAIS/YASMIM): {len(existing)}")
+print(f"  Removed: THAIS={old_thais}, YASMIM={old_yasmim}")
 
 # ── Load Opossum issues from local cache ──
 with open(OPOSSUM_CACHE, 'r', encoding='utf-8') as f:
@@ -61,7 +64,6 @@ def date_to_week(date_str):
         return None
     y = dt.year % 100
     m = dt.month
-    # Week number within month (1-based, starting from day 1)
     day = dt.day
     wn = (day - 1) // 7 + 1
     return f"{y:02d}-{m:02d} W.{wn}"
@@ -75,7 +77,6 @@ def week_range(date_str):
         dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
     except ValueError:
         return ""
-    # Find Monday of that week
     monday = dt - timedelta(days=dt.weekday())
     friday = monday + timedelta(days=4)
     return f"{monday.strftime('%m/%d')} - {friday.strftime('%m/%d/%Y')}"
@@ -86,17 +87,20 @@ def extract_customer(title):
     m = re.match(r'\[([^\]]+)\]', title)
     if m:
         cust = m.group(1).strip()
-        # Normalize known customers
+        # L3: Use exact match (==) instead of substring (in) to avoid false positives
         cust_map = {
-            'Archer': 'Archer', 'GONG': 'Gong', 'Gem': 'Gem',
-            'People AI': 'People.ai', 'People.ai': 'People.ai',
-            'Gainsight': 'Gainsight', 'Mailchimp': 'Mailchimp',
-            'QuickBooks': 'QuickBooks', 'DE Team': 'Internal',
-            'SPIKE': None,
+            'archer': 'Archer', 'gong': 'Gong', 'gem': 'Gem',
+            'people ai': 'People.ai', 'people.ai': 'People.ai',
+            'gainsight': 'Staircase',  # M6: unified to Staircase
+            'staircase': 'Staircase',
+            'mailchimp': 'Mailchimp',
+            'quickbooks': 'QuickBooks', 'qbo': 'QuickBooks',
+            'de team': 'Internal',
+            'spike': None,
         }
-        for key, val in cust_map.items():
-            if key.lower() in cust.lower():
-                return val or ''
+        cust_lower = cust.lower().strip()
+        if cust_lower in cust_map:
+            return cust_map[cust_lower] or ''
         return cust
     return ''
 
@@ -115,8 +119,9 @@ def map_status(linear_status):
     return mapping.get(linear_status, linear_status)
 
 
-def calc_perf(status, eta, delivery, date_add):
-    """Calculate performance label."""
+def calc_perf(status, eta, delivery):
+    """Calculate performance label.
+    L5: Removed unused date_add parameter."""
     if status == 'Canceled':
         return 'N/A'
     if not eta:
@@ -128,17 +133,16 @@ def calc_perf(status, eta, delivery, date_add):
             d_eta = datetime.strptime(eta, '%Y-%m-%d')
             d_del = datetime.strptime(delivery[:10], '%Y-%m-%d')
             diff = (d_del - d_eta).days
-            if diff <= 0:  # on time = delivered on or before ETA
+            if diff <= 0:
                 return 'On Time'
             else:
                 return 'Late'
         except ValueError:
             return 'N/A'
     else:
-        # Not done yet — check if overdue
         try:
-            d_eta = datetime.strptime(eta, '%Y-%m-%d')
-            if d_eta < datetime.now():
+            d_eta = datetime.strptime(eta, '%Y-%m-%d').date()
+            if d_eta < datetime.now().date():
                 return 'Overdue'
             else:
                 return 'On Track'
@@ -147,12 +151,12 @@ def calc_perf(status, eta, delivery, date_add):
 
 
 def determine_category(customer, title):
-    """Determine Internal vs External."""
+    """Determine Internal vs External.
+    M4/M5: If it has a real customer name, it's External.
+    Internal = improvements, standardizations, internal stuff."""
     if customer in ('Internal', ''):
-        # Check if it's a DE Team or internal task
         if 'DE Team' in title or 'Internal' in title or 'Spike' in title.lower():
             return 'Internal'
-        # If has a customer bracket, it's external work
         if re.match(r'\[', title):
             return 'External'
         return 'Internal'
@@ -170,30 +174,42 @@ for iss in issues:
     assignee = iss.get('assignee', '')
     tsa = PERSON_MAP.get(assignee)
     if not tsa:
-        continue  # skip unassigned or Diego's single issue
+        continue
 
     title = iss.get('title', '')
     created = iss.get('createdAt', '')[:10] if iss.get('createdAt') else ''
     due = iss.get('dueDate') or ''
     completed = iss.get('completedAt', '')[:10] if iss.get('completedAt') else ''
+    started_at = iss.get('startedAt', '')[:10] if iss.get('startedAt') else ''
     status = map_status(iss.get('status', ''))
     customer = extract_customer(title)
     category = determine_category(customer, title)
 
-    # Use createdAt for week assignment
-    week = date_to_week(created)
-    wrange = week_range(created)
+    # D.LIE6: Use startedAt for week assignment when available (more accurate)
+    # Falls back to createdAt if startedAt is not set
+    week_date = started_at if started_at else created
+    week = date_to_week(week_date)
+    wrange = week_range(week_date)
 
-    perf = calc_perf(status, due, completed, created)
+    perf = calc_perf(status, due, completed)
 
-    # Demand type
+    # M5: Customer work = External regardless of type
     if category == 'External' and customer:
-        demand = f"External(Customer)"
+        demand = "External(Customer)"
     else:
         demand = "Internal"
 
     ticket_id = iss.get('id', '')
     ticket_url = iss.get('url', '')
+    parent_id = iss.get('parentId', '') or ''
+    pm = iss.get('projectMilestone')
+    milestone = pm.get('name', '') if pm else ''
+
+    # Detect rework label
+    raw_labels = iss.get('labels', [])
+    label_names = [l.lower() if isinstance(l, str) else (l.get('name', '').lower() if isinstance(l, dict) else '') for l in raw_labels]
+    has_rework = 'yes' if 'rework:implementation' in label_names else ''
+
     # Construct URL from ID if missing
     if ticket_id and not ticket_url:
         slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')[:60]
@@ -215,13 +231,27 @@ for iss in issues:
         'ticketId': ticket_id,
         'ticketUrl': ticket_url,
         'source': 'linear',
+        'milestone': milestone,
+        'parentId': parent_id,
+        'rework': has_rework,
+        'startedAt': started_at,
     }
     new_records.append(record)
 
-print(f"\nNew Opossum records: {len(new_records)}")
+print(f"\nNew Linear records: {len(new_records)}")
+
+# H6: Validate count before merging — warn if replacement set is significantly smaller
+new_thais = len([r for r in new_records if r['tsa'] == 'THAIS'])
+new_yasmim = len([r for r in new_records if r['tsa'] == 'YASMIM'])
+print(f"  THAIS: {old_thais} → {new_thais}")
+print(f"  YASMIM: {old_yasmim} → {new_yasmim}")
+
+if old_thais > 0 and new_thais < old_thais * 0.5:
+    print(f"  WARNING: THAIS record count dropped >50% ({old_thais}→{new_thais}). Check data source.")
+if old_yasmim > 0 and new_yasmim < old_yasmim * 0.5:
+    print(f"  WARNING: YASMIM record count dropped >50% ({old_yasmim}→{new_yasmim}). Check data source.")
 
 # Stats
-from collections import Counter
 for tsa in ['THAIS', 'YASMIM']:
     recs = [r for r in new_records if r['tsa'] == tsa]
     perfs = Counter(r['perf'] for r in recs)
@@ -231,6 +261,9 @@ for tsa in ['THAIS', 'YASMIM']:
 merged = existing + new_records
 print(f"\nMerged total: {len(merged)}")
 
-with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
+# C3: Atomic write
+tmp_path = OUTPUT_PATH + '.tmp'
+with open(tmp_path, 'w', encoding='utf-8') as f:
     json.dump(merged, f, indent=2, ensure_ascii=False)
+os.replace(tmp_path, OUTPUT_PATH)
 print(f"Saved: {OUTPUT_PATH}")

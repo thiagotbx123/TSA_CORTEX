@@ -63,7 +63,6 @@ HTML = r"""<!DOCTYPE html>
 body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:28px 40px;min-height:100vh;font-size:15px;line-height:1.5}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;background:linear-gradient(135deg,#064e3b,#065f46,#047857);color:#fff;padding:18px 28px;border-radius:10px}
 .header h1{font-size:1.4em;font-weight:700;color:#fff}
-.header .sub{font-size:.82em;color:#a7f3d0;font-style:italic}
 .header .linear-link{display:inline-flex;align-items:center;gap:6px;color:#fff;font-size:.78em;text-decoration:none;padding:5px 12px;border-radius:6px;background:#5E6AD2;border:1px solid #7B83E8;transition:all .15s;margin-top:4px}
 .header .linear-link:hover{background:#4B55B8;color:#fff;border-color:#9BA1F0}
 .header .linear-link svg{width:14px;height:14px;fill:currentColor}
@@ -74,17 +73,18 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .filters select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:.82em;cursor:pointer}
 .filters select option{background:#064e3b;color:#fff}
 .filters select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.3)}
-.kpi-strip{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:18px;margin-top:18px}
-.kpi-pill{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px}
-.kpi-pill .icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1em;flex-shrink:0}
-.kpi-pill.k1 .icon{background:var(--blue-bg);color:var(--blue)}
-.kpi-pill.k2 .icon{background:var(--yellow-bg);color:var(--yellow)}
-.kpi-pill.k3 .icon{background:var(--gray-bg);color:var(--dim)}
-.kpi-pill .info{flex:1}
-.kpi-pill .info .name{font-size:.7em;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-.kpi-pill .info .val{font-size:1.3em;font-weight:800;line-height:1.2}
-.kpi-pill .info .meta{font-size:.68em;color:var(--dim)}
-.kpi-pill .badge{font-size:.6em;font-weight:700;padding:2px 7px;border-radius:20px}
+.top-strip{display:flex;gap:8px;margin-bottom:18px;align-items:stretch}
+.strip-group{display:flex;gap:6px;flex:1;padding:6px;border-radius:10px;background:var(--white);border:1px solid var(--border)}
+.strip-group.filters-group{flex:0 0 auto;background:#f0fdf4;border-color:#a7f3d0}
+.strip-group.filters-group::before{content:'FILTERS';position:absolute;top:-8px;left:12px;font-size:.5em;font-weight:700;color:#065f46;background:#f0fdf4;padding:0 4px;letter-spacing:1px;display:none}
+.strip-group.kpi-group{background:#eff6ff;border-color:#bfdbfe}
+.kpi-cell{flex:1;background:transparent;border:1px solid transparent;border-radius:8px;padding:10px 8px;text-align:center;position:relative;cursor:pointer;transition:all .15s}
+.kpi-cell:hover{background:#dbeafe;border-color:#93c5fd}
+.kpi-cell.kpi-active{border-color:var(--accent);border-width:2px;background:#dbeafe}
+.kpi-cell .kc-name{font-size:.65em;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:2px}
+.kpi-cell .kc-val{font-size:1.3em;font-weight:800;line-height:1.3}
+.kpi-cell .kc-meta{font-size:.6em;color:var(--dim);margin-top:1px}
+.kpi-cell .badge{font-size:.52em;font-weight:700;padding:1px 5px;border-radius:20px;display:inline-block;margin-top:4px}
 .badge-pass{background:var(--green-l);color:var(--green)}
 .badge-fail{background:var(--red-l);color:var(--red)}
 .badge-warn{background:var(--yellow-l);color:var(--yellow)}
@@ -122,15 +122,27 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .heat-terrible{background:#fecaca;color:#7f1d1d}
 .heat-na{background:var(--white);color:#d5d8dd;font-weight:300;font-size:.75em}
 .heat-zero{background:var(--gray-bg);color:var(--light);font-style:italic}
-.tooltip{position:fixed;background:#1e293b;color:#fff;padding:12px 16px;border-radius:8px;font-size:.82em;pointer-events:none;z-index:999;max-width:380px;line-height:1.6;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none}
+.tooltip{position:fixed;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:14px 18px;border-radius:10px;font-size:.82em;pointer-events:none;z-index:999;max-width:420px;line-height:1.6;box-shadow:0 8px 30px rgba(0,0,0,.4);display:none;border:1px solid rgba(255,255,255,.08)}
 .tooltip b{color:#93c5fd}
-.tooltip .tip-section{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.15)}
-.tooltip .tip-task{color:#d1d5db;font-size:.9em;padding-left:8px;text-indent:-8px}
-.tooltip .tip-task::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle}
-.tooltip .tip-late::before{background:#f87171}
-.tooltip .tip-ontime::before{background:#34d399}
-.tooltip .tip-overdue::before{background:#fbbf24}
-.tooltip .tip-label{color:#9ca3af;font-size:.85em;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.tooltip .tip-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.12)}
+.tooltip .tip-hdr b{font-size:1.05em;color:#60a5fa}
+.tooltip .tip-hdr .tip-pct{font-size:1.3em;font-weight:800;color:#fff}
+.tooltip .tip-hdr .tip-pct.good{color:#34d399}
+.tooltip .tip-hdr .tip-pct.bad{color:#f87171}
+.tooltip .tip-hdr .tip-pct.mid{color:#fbbf24}
+.tooltip .tip-stats{display:flex;gap:12px;margin:6px 0;font-size:.88em}
+.tooltip .tip-stat{text-align:center}
+.tooltip .tip-stat b{display:block;font-size:1.1em;color:#fff}
+.tooltip .tip-stat span{color:#94a3b8;font-size:.85em}
+.tooltip .tip-section{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)}
+.tooltip .tip-task{color:#e2e8f0;font-size:.88em;padding:4px 0 4px 10px;border-left:2px solid transparent;margin:2px 0}
+.tooltip .tip-task.tip-late{border-left-color:#f87171}
+.tooltip .tip-task.tip-ontime{border-left-color:#34d399}
+.tooltip .tip-task.tip-overdue{border-left-color:#fbbf24}
+.tooltip .tip-task .tip-cust{color:#a78bfa;font-size:.9em;font-weight:600}
+.tooltip .tip-task .tip-dates{color:#64748b;font-size:.85em}
+.tooltip .tip-task .tip-delay{color:#fbbf24;font-weight:700;font-size:.9em}
+.tooltip .tip-label{color:#94a3b8;font-size:.82em;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .detail-panel{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px}
 .detail-panel h3{font-size:.85em;font-weight:700;margin-bottom:8px;color:var(--text)}
 .detail-table{width:100%;border-collapse:collapse;font-size:.78em}
@@ -141,11 +153,10 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .trend-wrap{padding:16px 20px;border-bottom:1px solid var(--border)}
 .trend-wrap h4{font-size:.78em;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .trend-wrap canvas{width:100%!important;height:160px!important}
-.segment-bar{display:flex;gap:6px;margin-bottom:14px;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content}
-.segment-btn{padding:8px 20px;border-radius:6px;font-size:.82em;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s;border:none;background:transparent;letter-spacing:.2px}
-.segment-btn:hover{color:var(--text);background:var(--gray-bg)}
-.segment-btn.active{background:#065f46;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.segment-btn .seg-count{font-size:.78em;font-weight:400;opacity:.7;margin-left:4px}
+.segment-btn{flex:1;padding:10px 8px;border-radius:8px;font-size:.85em;font-weight:700;color:#065f46;cursor:pointer;transition:all .15s;border:1px solid transparent;background:transparent;letter-spacing:.2px;text-align:center}
+.segment-btn:hover{background:#d1fae5;border-color:#a7f3d0}
+.segment-btn.active{background:#065f46;color:#fff;border-color:#065f46;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.segment-btn .seg-count{display:block;font-size:.75em;font-weight:400;opacity:.7;margin-top:2px}
 .audit-section{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:20px}
 .audit-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
 .audit-header h3{font-size:.9em;font-weight:700;display:flex;align-items:center;gap:8px}
@@ -172,9 +183,6 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .member-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:18px}
 .member-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .member-card .mc-name{font-weight:700;font-size:.88em;margin-bottom:6px;color:var(--text)}
-.member-card .mc-source{font-size:.6em;font-weight:600;padding:1px 5px;border-radius:3px;margin-left:6px}
-.mc-source-linear{background:#dbeafe;color:#1d4ed8}
-.mc-source-spreadsheet{background:#fef3c7;color:#92400e}
 .member-card .mc-body{flex:1}
 .member-card .mc-row{display:flex;justify-content:space-between;font-size:.72em;color:var(--dim);padding:2px 0}
 .member-card .mc-row b{color:var(--text)}
@@ -191,15 +199,17 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .heat-vol-4{background:#93c5fd;color:#1e3a8a}
 .heat-vol-5{background:#3b82f6;color:#fff}
 .footer{text-align:center;margin-top:24px;padding:12px;color:var(--light);font-size:.7em}
-@media(max-width:900px){.kpi-strip{grid-template-columns:1fr}.heatmap{font-size:.7em}.segment-bar{flex-wrap:wrap}.audit-table{font-size:.65em}}
+@media(max-width:900px){.top-strip{flex-direction:column}.strip-group{flex-direction:row;flex-wrap:wrap}.heatmap{font-size:.7em}.audit-table{font-size:.65em}}
 </style>
 </head>
 <body>
 <div class="header">
   <div>
     <h1>TSA KPI Dashboard</h1>
-    <div class="sub" id="periodLabel">Loading...</div>
-    <a href="https://linear.app/testbox/team/RAC/projects" target="_blank" class="linear-link"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z"/></svg>View in Linear</a>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://linear.app/testbox/team/RAC/projects" target="_blank" class="linear-link"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z"/></svg>View in Linear</a>
+      <a href="javascript:void(0)" onclick="showGuide()" class="linear-link" style="background:linear-gradient(135deg,#1e293b,#334155);border-color:#475569"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Guide</a>
+    </div>
   </div>
   <img src="https://cdn.prod.website-files.com/62f1899cd374937577f36d5f/6529d8cb022a253f2009f59a_testbox.svg" alt="TestBox" class="tbx-logo">
   <div class="filters">
@@ -210,13 +220,19 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 
 <div id="stalenessBanner"></div>
 
-<div class="segment-bar" id="segmentBar">
-  <button class="segment-btn" data-seg="External">Clients &amp; Projects<span class="seg-count" id="segExt"></span></button>
-  <button class="segment-btn" data-seg="Internal">Internal<span class="seg-count" id="segInt"></span></button>
-  <button class="segment-btn active" data-seg="ALL">All<span class="seg-count" id="segAll"></span></button>
+<div class="top-strip" id="topStrip">
+  <div class="strip-group filters-group">
+    <button class="segment-btn active" data-seg="ALL">All<span class="seg-count" id="segAll"></span></button>
+    <button class="segment-btn" data-seg="Internal">Internal<span class="seg-count" id="segInt"></span></button>
+    <button class="segment-btn" data-seg="External">External<span class="seg-count" id="segExt"></span></button>
+  </div>
+  <div class="strip-group kpi-group">
+    <div class="kpi-cell kpi-active" id="kpiCell1" data-tab="accuracy"></div>
+    <div class="kpi-cell" id="kpiCell2" data-tab="velocity"></div>
+    <div class="kpi-cell" id="kpiCell3" data-tab="reliability"></div>
+    <div class="kpi-cell" id="kpiCell4" data-tab="activity"></div>
+  </div>
 </div>
-
-<div class="kpi-strip" id="kpiStrip"></div>
 
 <div class="member-cards" id="memberCards"></div>
 
@@ -320,11 +336,12 @@ function isCoreWeek(w){
 const CORE_WEEKS=[...new Set(RAW.map(r=>r.week).filter(w=>w&&isCoreWeek(w)))].sort(weekSort);
 const PEOPLE_ALL=[...new Set(RAW.map(r=>r.tsa))].sort();
 
-/* Update period label dynamically */
+/* Compute period label for staleness banner */
+let PERIOD_LABEL='';
 if(CORE_WEEKS.length>0){
   const first=CORE_WEEKS[0],last=CORE_WEEKS[CORE_WEEKS.length-1];
   const[fy,fm]=parseWeek(first),[ly,lm]=parseWeek(last);
-  document.getElementById('periodLabel').textContent=monthLabel(fy,fm)+' — '+monthLabel(ly,lm);
+  PERIOD_LABEL=monthLabel(fy,fm)+' — '+monthLabel(ly,lm);
 }
 
 /* Group weeks by month */
@@ -345,9 +362,10 @@ const MONTHS=groupByMonth(CORE_WEEKS);
   const ld=new Date(LATEST_DATA);const bd=new Date(BUILD_DATE);
   const diffDays=Math.round((bd-ld)/864e5);
   if(isNaN(diffDays)||diffDays<0){el.innerHTML='';return}
-  if(diffDays<=3){el.innerHTML='<div class="staleness-banner staleness-ok">Data refreshed: '+BUILD_DATE+' ('+diffDays+' day'+(diffDays!==1?'s':'')+' since latest record)</div>'}
-  else if(diffDays<=7){el.innerHTML='<div class="staleness-banner staleness-warn">Data may be stale: built '+BUILD_DATE+', latest record is '+LATEST_DATA+' ('+diffDays+' days ago)</div>'}
-  else{el.innerHTML='<div class="staleness-banner staleness-old">Data is stale: built '+BUILD_DATE+', latest record is '+LATEST_DATA+' ('+diffDays+' days ago). Run the pipeline to refresh.</div>'}
+  const pTag=PERIOD_LABEL?'<span style="font-style:italic;opacity:.85">'+PERIOD_LABEL+'</span> · ':'';
+  if(diffDays<=3){el.innerHTML='<div class="staleness-banner staleness-ok">'+pTag+'Data refreshed: '+BUILD_DATE+' ('+diffDays+' day'+(diffDays!==1?'s':'')+' since latest record)</div>'}
+  else if(diffDays<=7){el.innerHTML='<div class="staleness-banner staleness-warn">'+pTag+'Data may be stale: built '+BUILD_DATE+', latest record is '+LATEST_DATA+' ('+diffDays+' days ago)</div>'}
+  else{el.innerHTML='<div class="staleness-banner staleness-old">'+pTag+'Data is stale: built '+BUILD_DATE+', latest record is '+LATEST_DATA+' ('+diffDays+' days ago). Run the pipeline to refresh.</div>'}
 })();
 
 /* ── State — M12: default to ALL ──────────────────── */
@@ -508,49 +526,75 @@ function buildGrid(tableId, calcFn, fmtFn, heatFn, tipFn){
 }
 
 /* ── Tip helpers ───────────────────────────────────── */
+function fmtDate(d){if(!d||d.length<10)return'';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]}
 function tipAccuracy(person,week,calc,rows){
-  if(rows.length===0)return`<b>${person}</b> &middot; ${week}<br><span class="tip-label">No tasks this week</span>`;
-  let html=`<b>${person}</b> &middot; ${week}`;
-  html+=`<br><span class="tip-label">ETA Accuracy</span>: <b>${fmtPct(calc.val,calc.den)}</b> (n=${calc.den})`;
-  html+=`<br>${calc.num} on time + ${calc.den-calc.num} late = ${calc.den} measured`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
+  const pctCls=calc.val===null?'mid':calc.val>=.85?'good':calc.val>=.5?'mid':'bad';
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct ${pctCls}">${fmtPct(calc.val,calc.den)}</span></div>`;
+  html+=`<div class="tip-stats">`;
+  html+=`<div class="tip-stat"><b style="color:#34d399">${calc.num}</b><span>on time</span></div>`;
+  html+=`<div class="tip-stat"><b style="color:#f87171">${calc.den-calc.num}</b><span>late</span></div>`;
+  html+=`<div class="tip-stat"><b>${calc.den}</b><span>measured</span></div>`;
+  html+=`</div>`;
   const excluded=rows.filter(r=>r.perf!=='On Time'&&r.perf!=='Late');
-  if(excluded.length>0)html+=`<br>${excluded.length} excluded (${[...new Set(excluded.map(r=>r.perf))].join(', ')})`;
+  if(excluded.length>0)html+=`<div style="font-size:.8em;color:#64748b;margin-top:2px">${excluded.length} excluded (${[...new Set(excluded.map(r=>r.perf))].join(', ')})</div>`;
   const lateOnes=rows.filter(r=>r.perf==='Late');
   if(lateOnes.length>0){
-    html+=`<div class="tip-section"><span class="tip-label">Late tasks:</span>`;
+    html+=`<div class="tip-section"><span class="tip-label">Late deliveries</span>`;
     lateOnes.slice(0,5).forEach(r=>{
       const delay=r.eta&&r.delivery?daysBetween(r.eta,r.delivery):null;
-      const delayTxt=delay!==null&&delay>0?` (+${delay}d)`:'';
-      html+=`<div class="tip-task tip-late">${esc(r.focus.slice(0,45))}${delayTxt}</div>`;
+      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
+      const dates=r.eta?`<span class="tip-dates">ETA ${fmtDate(r.eta)}${r.delivery?' → '+fmtDate(r.delivery):''}</span>`:'';
+      const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d</span>`:'';
+      html+=`<div class="tip-task tip-late">${cust}${esc(r.focus.slice(0,50))}${delayTag}<br>${dates}</div>`;
     });
-    if(lateOnes.length>5)html+=`<div class="tip-task">... +${lateOnes.length-5} more</div>`;
+    if(lateOnes.length>5)html+=`<div style="color:#64748b;font-size:.85em;padding-left:10px">+ ${lateOnes.length-5} more</div>`;
+    html+=`</div>`;
+  }
+  const onTimeOnes=rows.filter(r=>r.perf==='On Time');
+  if(onTimeOnes.length>0&&onTimeOnes.length<=3){
+    html+=`<div class="tip-section"><span class="tip-label">On time</span>`;
+    onTimeOnes.forEach(r=>{
+      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
+      html+=`<div class="tip-task tip-ontime">${cust}${esc(r.focus.slice(0,50))}</div>`;
+    });
     html+=`</div>`;
   }
   return html;
 }
 function tipVelocity(person,week,calc,rows){
-  if(rows.length===0)return`<b>${person}</b> &middot; ${week}<br><span class="tip-label">No tasks this week</span>`;
-  if(calc.n===0)return`<b>${person}</b> &middot; ${week}<br>${rows.length} tasks, none with delivery dates`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
+  if(calc.n===0)return`<div class="tip-hdr"><b>${person} &middot; ${week}</b></div>${rows.length} tasks, none with delivery dates`;
   const sorted=[...calc.durs].sort((a,b)=>a-b);
   const med=sorted[Math.floor(sorted.length/2)];
   const min=sorted[0],max=sorted[sorted.length-1];
-  let html=`<b>${person}</b> &middot; ${week}`;
-  html+=`<br><span class="tip-label">Execution Time</span>: <b>${fmtDays(calc.val)}</b> avg (n=${calc.n})`;
-  html+=`<br>Median: ${med}d &middot; Min: ${min}d &middot; Max: ${max}d`;
-  const slow=rows.filter(r=>r.delivery&&(r.startedAt||r.dateAdd)&&r.status==='Done').map(r=>({f:r.focus,d:daysBetween(r.startedAt||r.dateAdd,r.delivery)})).filter(x=>x.d!==null&&x.d>=0).sort((a,b)=>b.d-a.d);
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct">${fmtDays(calc.val)}</span></div>`;
+  html+=`<div class="tip-stats">`;
+  html+=`<div class="tip-stat"><b>${med}d</b><span>median</span></div>`;
+  html+=`<div class="tip-stat"><b>${min}d</b><span>fastest</span></div>`;
+  html+=`<div class="tip-stat"><b>${max}d</b><span>slowest</span></div>`;
+  html+=`<div class="tip-stat"><b>${calc.n}</b><span>tasks</span></div>`;
+  html+=`</div>`;
+  const slow=rows.filter(r=>r.delivery&&(r.startedAt||r.dateAdd)&&r.status==='Done').map(r=>({f:r.focus,c:r.customer||'',d:daysBetween(r.startedAt||r.dateAdd,r.delivery),eta:r.eta,del:r.delivery,start:r.startedAt||r.dateAdd})).filter(x=>x.d!==null&&x.d>=0).sort((a,b)=>b.d-a.d);
   if(slow.length>0&&slow[0].d>14){
-    html+=`<div class="tip-section"><span class="tip-label">Slowest:</span>`;
-    slow.slice(0,3).forEach(x=>{html+=`<div class="tip-task tip-late">${x.d}d — ${esc(x.f.slice(0,45))}</div>`});
+    html+=`<div class="tip-section"><span class="tip-label">Slowest deliveries</span>`;
+    slow.slice(0,4).forEach(x=>{
+      const cust=x.c?`<span class="tip-cust">${esc(x.c)}</span> &middot; `:'';
+      html+=`<div class="tip-task tip-late">${cust}${esc(x.f.slice(0,45))} <span class="tip-delay">${x.d}d</span><br><span class="tip-dates">${fmtDate(x.start)} → ${fmtDate(x.del)}</span></div>`;
+    });
     html+=`</div>`;
   }
   return html;
 }
 function tipReliability(person,week,calc,rows){
-  if(rows.length===0)return`<b>${person}</b> &middot; ${week}<br><span class="tip-label">No tasks this week</span>`;
-  let html=`<b>${person}</b> &middot; ${week}`;
-  html+=`<br><span class="tip-label">Reliability</span>: <b>${fmtPct(calc.val,calc.den)}</b> (n=${calc.den})`;
-  html+=`<br>${calc.num} clean + ${calc.reworked} rework = ${calc.den} done`;
-  if(calc.reworked===0&&calc.den>0)html+=`<br><span style="color:#fbbf24">No rework labels applied yet</span>`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct">${fmtPct(calc.val,calc.den)}</span></div>`;
+  html+=`<div class="tip-stats">`;
+  html+=`<div class="tip-stat"><b style="color:#34d399">${calc.num}</b><span>clean</span></div>`;
+  html+=`<div class="tip-stat"><b style="color:#f87171">${calc.reworked}</b><span>rework</span></div>`;
+  html+=`<div class="tip-stat"><b>${calc.den}</b><span>done</span></div>`;
+  html+=`</div>`;
+  if(calc.reworked===0&&calc.den>0)html+=`<div style="color:#fbbf24;font-size:.85em;margin-top:4px">No rework labels applied yet</div>`;
   return html;
 }
 
@@ -564,25 +608,26 @@ function renderKPIStrip(){
   /* C1: Check if rework labels are actually in use */
   const hasReworkData=data.some(x=>x.rework==='yes');
 
-  const strip=document.getElementById('kpiStrip');
+  /* Activity KPI */
+  const act=calcActivity(data);
+  const doneAct=data.filter(x=>x.status==='Done').length;
+  const openAct=data.filter(x=>x.status!=='Done'&&x.status!=='Canceled').length;
+
   const items=[
-    {cls:'k1',icon:'&#9201;',name:'ETA Accuracy',val:a.val,fmt:v=>fmtPct(v,a.den),target:'>90%',pass:a.val!==null&&a.val>=.9,meta:`${a.num}/${a.den} on time (n=${a.den})`},
-    {cls:'k2',icon:'&#9889;',name:'Avg Execution Time',val:v.val,fmt:fmtDays,target:'<28 days',pass:v.val!==null&&v.val<=28,meta:`${v.n} tasks measured`},
-    {cls:'k3',icon:'&#10003;',name:'Implementation Reliability',val:hasReworkData?r.val:null,fmt:v=>fmtPct(v,r.den),target:'>90%',pass:hasReworkData&&r.val!==null&&r.val>=.9,inactive:!hasReworkData,meta:hasReworkData?`${r.num}/${r.den} done (${r.reworked} rework)`:'NOT ACTIVE — no rework labels in use'},
+    {el:'kpiCell1',name:'ETA Accuracy',val:a.val,fmt:v=>fmtPct(v,a.den),target:'>90%',pass:a.val!==null&&a.val>=.9,meta:`${a.num}/${a.den} on time`},
+    {el:'kpiCell2',name:'Avg Execution Time',val:v.val,fmt:fmtDays,target:'<28 days',pass:v.val!==null&&v.val<=28,meta:`${v.n} tasks measured`},
+    {el:'kpiCell3',name:'Reliability',val:hasReworkData?r.val:null,fmt:v=>fmtPct(v,r.den),target:'>90%',pass:hasReworkData&&r.val!==null&&r.val>=.9,inactive:!hasReworkData,meta:hasReworkData?`${r.num}/${r.den} clean`:'NOT ACTIVE'},
+    {el:'kpiCell4',name:'Team Activity',val:act.val,fmt:fmtCount,pass:true,isActivity:true,meta:`${doneAct} done · ${openAct} open`},
   ];
-  strip.innerHTML=items.map(i=>{
-    const badge=i.inactive?'badge-inactive':(i.val===null?'badge-warn':(i.pass?'badge-pass':'badge-fail'));
-    const badgeTxt=i.inactive?'NOT ACTIVE':(i.val===null?'—':(i.pass?'ON TARGET':'BELOW'));
-    return`<div class="kpi-pill ${i.cls}">
-      <div class="icon">${i.icon}</div>
-      <div class="info">
-        <div class="name">${i.name}</div>
-        <div class="val">${i.inactive?'—':(i.val!==null?i.fmt(i.val):'—')}</div>
-        <div class="meta">${i.meta} · Target: ${i.target}</div>
-      </div>
-      <div class="badge ${badge}">${badgeTxt}</div>
-    </div>`;
-  }).join('');
+  items.forEach(i=>{
+    const cell=document.getElementById(i.el);
+    const badge=i.inactive?'badge-inactive':i.isActivity?'badge-pass':(i.val===null?'badge-warn':(i.pass?'badge-pass':'badge-fail'));
+    const badgeTxt=i.inactive?'N/A':i.isActivity?`${doneAct}`:( i.val===null?'—':(i.pass?'ON TARGET':'BELOW'));
+    cell.innerHTML=`<div class="kc-name">${i.name}</div>
+      <div class="kc-val">${i.inactive?'—':(i.val!==null?i.fmt(i.val):'—')}</div>
+      <div class="kc-meta">${i.meta}</div>
+      <div class="badge ${badge}">${i.isActivity?'&#10003; '+badgeTxt:badgeTxt}</div>`;
+  });
 }
 
 /* ── Trend charts — M7: tab-specific bars ──────────── */
@@ -628,6 +673,18 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
     }
   });
 
+  /* Build weekly task lookup for rich tooltips */
+  const weekTaskDetail={};
+  CORE_WEEKS.forEach((w,i)=>{
+    const rows=data.filter(r=>r.week===w);
+    weekTaskDetail[i]={
+      onTime:rows.filter(r=>r.perf==='On Time').map(r=>({f:r.focus,c:r.customer||''})),
+      late:rows.filter(r=>r.perf==='Late').map(r=>({f:r.focus,c:r.customer||'',d:r.eta&&r.delivery?daysBetween(r.eta,r.delivery):null})),
+      overdue:rows.filter(r=>r.perf==='Overdue').map(r=>({f:r.focus,c:r.customer||'',eta:r.eta||''})),
+      noEta:rows.filter(r=>r.perf==='No ETA'||r.perf==='No Delivery Date').map(r=>({f:r.focus,c:r.customer||''})),
+    };
+  });
+
   const datasets=[];
   datasets.push({type:'bar',label:bar1Label,data:bar1,backgroundColor:bar1Color,borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
   datasets.push({type:'bar',label:bar2Label,data:bar2,backgroundColor:bar2Color,borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
@@ -635,7 +692,7 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
   if(bar4Label)datasets.push({type:'bar',label:bar4Label,data:bar4,backgroundColor:bar4Color,borderRadius:2,yAxisID:'yBar',stack:'comp',order:2});
 
   datasets.push({type:'line',label:fmtLabel,data:teamVals,borderColor:color,backgroundColor:color+'22',borderWidth:1.5,fill:false,tension:.3,pointRadius:2,pointHoverRadius:5,pointBackgroundColor:color,yAxisID:'yLine',order:1,spanGaps:true});
-  datasets.push({type:'line',label:targetLabel,data:CORE_WEEKS.map(()=>targetVal),borderColor:'#ef444466',borderDash:[4,3],borderWidth:1,pointRadius:0,pointHoverRadius:0,yAxisID:'yLine',order:1,fill:false});
+  /* Target line removed — target is visible in KPI pill badges */
 
   const mNames=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const weekLabels=CORE_WEEKS.map(w=>{const[,m,wn]=parseWeek(w);return mNames[m]+' W'+wn});
@@ -663,10 +720,34 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
               if(name===targetLabel)return null;
               if(name===fmtLabel){
                 const val=ctx.raw;
-                const fmtVal=isInverse?val.toFixed(0)+'d':(val*100).toFixed(0)+'%';
+                const fmtVal=isInverse?val.toFixed(0)+'d':barMode==='activity'?val:(val*100).toFixed(0)+'%';
                 return ` ${fmtLabel}: ${fmtVal}`;
               }
               return ' '+name+': '+ctx.raw;
+            },
+            afterBody:function(items){
+              if(!items[0]||barMode==='velocity'||barMode==='reliability')return'';
+              const idx=items[0].dataIndex;
+              const wt=weekTaskDetail[idx];if(!wt)return'';
+              const lines=[];
+              if(wt.late.length>0){
+                lines.push('','Late:');
+                wt.late.slice(0,4).forEach(t=>{
+                  const delay=t.d!==null&&t.d>0?' (+'+t.d+'d)':'';
+                  const cust=t.c?' ['+t.c+']':'';
+                  lines.push('  '+t.f.slice(0,40)+cust+delay);
+                });
+                if(wt.late.length>4)lines.push('  ... +'+(wt.late.length-4)+' more');
+              }
+              if(wt.overdue.length>0){
+                lines.push('','Overdue:');
+                wt.overdue.slice(0,3).forEach(t=>{
+                  const cust=t.c?' ['+t.c+']':'';
+                  lines.push('  '+t.f.slice(0,40)+cust);
+                });
+                if(wt.overdue.length>3)lines.push('  ... +'+(wt.overdue.length-3)+' more');
+              }
+              return lines.join('\n');
             }
           }
         }
@@ -694,14 +775,20 @@ function heatVol(val){
   if(val<=7)return'heat-vol-3';if(val<=12)return'heat-vol-4';return'heat-vol-5';
 }
 function tipActivity(person,week,calc,rows){
-  if(rows.length===0)return`<b>${person}</b> &middot; ${week}<br><span class="tip-label">No tasks this week</span>`;
-  let html=`<b>${person}</b> &middot; ${week}`;
-  html+=`<br><span class="tip-label">Tasks</span>: <b>${calc.n}</b>`;
-  html+=`<br>Done: ${calc.done} &middot; Open: ${calc.open}`;
-  if(calc.canceled>0)html+=` &middot; Canceled: ${calc.canceled}`;
-  if(rows.length<=5){
-    html+=`<div class="tip-section"><span class="tip-label">Tasks:</span>`;
-    rows.forEach(r=>{const cls=r.status==='Done'?'tip-ontime':'tip-late';html+=`<div class="tip-task ${cls}">${esc(r.focus.slice(0,50))}</div>`});
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct">${calc.n}</span></div>`;
+  html+=`<div class="tip-stats">`;
+  html+=`<div class="tip-stat"><b style="color:#34d399">${calc.done}</b><span>done</span></div>`;
+  html+=`<div class="tip-stat"><b style="color:#60a5fa">${calc.open}</b><span>open</span></div>`;
+  if(calc.canceled>0)html+=`<div class="tip-stat"><b style="color:#94a3b8">${calc.canceled}</b><span>canceled</span></div>`;
+  html+=`</div>`;
+  if(rows.length<=8){
+    html+=`<div class="tip-section"><span class="tip-label">Tasks</span>`;
+    rows.forEach(r=>{
+      const cls=r.status==='Done'?'tip-ontime':r.status==='Canceled'?'':'tip-late';
+      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
+      html+=`<div class="tip-task ${cls}">${cust}${esc(r.focus.slice(0,50))}</div>`;
+    });
     html+=`</div>`;
   }
   return html;
@@ -732,10 +819,6 @@ function renderMemberCards(){
     const withEta=pr.filter(r=>r.eta&&r.eta.length>=10).length;
     const etaCov=total>0?Math.round(withEta/total*100):0;
 
-    /* Data source badge */
-    const sources=new Set(pr.map(r=>r.source));
-    const srcBadge=sources.has('linear')?'<span class="mc-source mc-source-linear">Linear</span>':'<span class="mc-source mc-source-spreadsheet">Spreadsheet</span>';
-
     const recent=pr.filter(r=>{const lw=CORE_WEEKS.slice(-2);return lw.includes(r.week)}).length;
 
     let alert='';
@@ -746,14 +829,14 @@ function renderMemberCards(){
     const barColor=donePct>=80?'var(--green)':donePct>=50?'var(--yellow)':'var(--red)';
 
     return`<div class="member-card">${alert}
-      <div class="mc-name">${p} ${srcBadge}</div>
+      <div class="mc-name">${p}</div>
       <div class="mc-body">
         <div class="mc-row"><span>Total</span><b>${total}</b></div>
         <div class="mc-row"><span>Done</span><b>${done} (${donePct}%)</b></div>
         <div class="mc-row"><span>Open</span><b>${open}</b></div>
         <div class="mc-row"><span>On Time</span><b style="color:var(--green)">${onTime}</b></div>
         <div class="mc-row"><span>Late/Overdue</span><b style="color:${late+overdue>0?'var(--red)':'var(--dim)'}">${late+overdue}</b></div>
-        <div class="mc-row"><span>Accuracy</span><b>${accPct!==null?accPct+'% (n='+measured+')':'—'}</b></div>
+        <div class="mc-row"><span>Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b></div>
         <div class="mc-row"><span>ETA Coverage</span><b style="color:${etaCov<50?'var(--yellow)':'var(--dim)'}">${etaCov}% (${withEta}/${total})</b></div>
       </div>
       <div class="mc-bar"><div class="mc-bar-track"><div class="mc-bar-inner" style="width:${donePct}%;background:${barColor}"></div></div></div>
@@ -919,6 +1002,280 @@ function copyTSV(){
   });
 }
 
+/* ── Dashboard Guide ────────────────────────────────── */
+function showGuide(){
+  const ov=document.createElement('div');
+  ov.id='guideOverlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=e=>{if(e.target===ov)ov.remove()};
+  const box=document.createElement('div');
+  box.style.cssText='background:#fff;border-radius:16px;max-width:860px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,.35);font-family:Inter,Segoe UI,sans-serif;color:#1e293b;line-height:1.7;font-size:14px';
+  const S=`
+    .g-hdr{background:linear-gradient(135deg,#064e3b,#065f46,#047857);color:#fff;padding:32px 40px 28px;border-radius:16px 16px 0 0;position:relative;overflow:hidden}
+    .g-hdr::after{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)}
+    .g-hdr::before{content:'';position:absolute;bottom:-60px;left:-20px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+    .g-hdr h1{font-size:1.6em;font-weight:800;margin:0 0 4px;position:relative}
+    .g-hdr p{font-size:.88em;opacity:.8;margin:0;position:relative}
+    .g-close{position:absolute;top:16px;right:20px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.3em;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+    .g-close:hover{background:rgba(255,255,255,.3)}
+    .g-body{padding:28px 40px 36px}
+    .g-section{margin-bottom:28px;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden}
+    .g-section-hdr{display:flex;align-items:center;gap:12px;padding:14px 20px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-bottom:1px solid #e2e8f0;cursor:default}
+    .g-section-hdr .g-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1em;flex-shrink:0}
+    .g-section-hdr h2{font-size:1em;font-weight:700;color:#0f172a;margin:0;flex:1}
+    .g-section-hdr .g-tag{font-size:.6em;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+    .g-section-body{padding:16px 20px}
+    .g-section-body p{margin:0 0 10px;color:#334155}
+    .g-section-body ul,.g-section-body ol{margin:6px 0 12px 20px;color:#475569}
+    .g-section-body li{margin-bottom:6px}
+    .g-section-body li b{color:#0f172a}
+    .g-section-body code{background:#f1f5f9;color:#6366f1;padding:1px 6px;border-radius:4px;font-size:.9em;font-weight:600}
+    .g-formula{background:linear-gradient(135deg,#eff6ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:8px;padding:12px 16px;margin:10px 0;font-family:monospace;font-size:.92em;color:#4338ca;font-weight:600;text-align:center}
+    .g-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+    .g-grid-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px}
+    .g-grid-item b{display:block;font-size:.92em;color:#0f172a;margin-bottom:2px}
+    .g-grid-item span{font-size:.8em;color:#64748b}
+    .g-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:20px;font-size:.78em;font-weight:700;margin:0 3px}
+    .g-pipe{display:flex;align-items:center;gap:0;margin:12px 0}
+    .g-pipe-step{flex:1;text-align:center;padding:10px 6px;background:#f8fafc;border:1px solid #e2e8f0;position:relative;font-size:.78em}
+    .g-pipe-step:first-child{border-radius:8px 0 0 8px}
+    .g-pipe-step:last-child{border-radius:0 8px 8px 0}
+    .g-pipe-step b{display:block;color:#0f172a;font-size:.95em;margin-bottom:2px}
+    .g-pipe-step::after{content:"\\2192";position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:1.1em;z-index:1}
+    .g-pipe-step:last-child::after{display:none}
+    .g-color{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.1)}
+    .g-footer{padding:20px 40px;background:#f8fafc;border-top:1px solid #e2e8f0;border-radius:0 0 16px 16px;text-align:center;font-size:.78em;color:#94a3b8}
+  `;
+  box.innerHTML=`<style>${S}</style>
+    <div class="g-hdr">
+      <button class="g-close" onclick="document.getElementById('guideOverlay').remove()">&times;</button>
+      <h1>TSA KPI Dashboard</h1>
+      <p>Complete reference guide — every screen, metric, and interaction explained.</p>
+    </div>
+    <div class="g-body">
+
+      <!-- 1. CONTROL STRIP -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#ecfdf5;color:#059669">&#9881;</div>
+          <h2>Control Strip</h2>
+          <span class="g-tag" style="background:#ecfdf5;color:#065f46">Filters + KPIs</span>
+        </div>
+        <div class="g-section-body">
+          <p>The top strip is divided into two groups:</p>
+          <div class="g-grid">
+            <div class="g-grid-item" style="border-left:3px solid #059669">
+              <b>Filters (green group)</b>
+              <span><b>All</b> / <b>Internal</b> / <b>External</b> — click to filter every chart, heatmap, member card, and KPI by category. Counts update in real time.</span>
+            </div>
+            <div class="g-grid-item" style="border-left:3px solid #2563eb">
+              <b>KPI Indicators (blue group)</b>
+              <span>4 metrics that summarize team performance. <b>Click any KPI to jump to its detailed tab</b> below. The active KPI has a blue highlight.</span>
+            </div>
+          </div>
+          <div class="g-grid" style="grid-template-columns:repeat(4,1fr)">
+            <div class="g-grid-item" style="text-align:center">
+              <b style="color:#2563eb">ETA Accuracy</b>
+              <span>% delivered on or before ETA</span>
+            </div>
+            <div class="g-grid-item" style="text-align:center">
+              <b style="color:#d97706">Execution Time</b>
+              <span>Avg days from start to delivery</span>
+            </div>
+            <div class="g-grid-item" style="text-align:center">
+              <b style="color:#6b7280">Reliability</b>
+              <span>% without rework needed</span>
+            </div>
+            <div class="g-grid-item" style="text-align:center">
+              <b style="color:#7c3aed">Team Activity</b>
+              <span>Total tasks in period</span>
+            </div>
+          </div>
+          <div class="g-formula">ETA Accuracy = On Time / (On Time + Late)<br><span style="font-size:.85em;color:#6366f1;font-weight:400">Excludes: On Track, No ETA, Blocked (B.B.C), Canceled</span></div>
+        </div>
+      </div>
+
+      <!-- 2. STALENESS BANNER -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#ecfdf5;color:#059669">&#128337;</div>
+          <h2>Data Freshness</h2>
+          <span class="g-tag" style="background:#dbeafe;color:#1e40af">Auto-detected</span>
+        </div>
+        <div class="g-section-body">
+          <p>The banner below the header shows how recent the data is:</p>
+          <div style="display:flex;gap:8px;margin:8px 0 12px">
+            <div style="flex:1;padding:8px 12px;border-radius:6px;background:#ecfdf5;border:1px solid #a7f3d0;text-align:center"><b style="color:#065f46;font-size:.85em"><span class="g-color" style="background:#059669"></span>Fresh</b><br><span style="font-size:.72em;color:#065f46">0-3 days</span></div>
+            <div style="flex:1;padding:8px 12px;border-radius:6px;background:#fffbeb;border:1px solid #fde68a;text-align:center"><b style="color:#92400e;font-size:.85em"><span class="g-color" style="background:#d97706"></span>Aging</b><br><span style="font-size:.72em;color:#92400e">3-7 days</span></div>
+            <div style="flex:1;padding:8px 12px;border-radius:6px;background:#fef2f2;border:1px solid #fecaca;text-align:center"><b style="color:#991b1b;font-size:.85em"><span class="g-color" style="background:#dc2626"></span>Stale</b><br><span style="font-size:.72em;color:#991b1b">&gt; 7 days</span></div>
+          </div>
+          <p>The <i>period label</i> (e.g. Nov 2025 — Mar 2026) is a <b>rolling 4-month window</b> computed automatically from today's date. No manual configuration needed — it always shows the most relevant time range.</p>
+        </div>
+      </div>
+
+      <!-- 3. MEMBER CARDS -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#ede9fe;color:#7c3aed">&#128100;</div>
+          <h2>Member Cards</h2>
+          <span class="g-tag" style="background:#ede9fe;color:#6d28d9">Per-person</span>
+        </div>
+        <div class="g-section-body">
+          <p>One card per team member, showing individual performance at a glance:</p>
+          <div class="g-grid">
+            <div class="g-grid-item"><b>Total / Done / Open</b><span>Task counts with completion %</span></div>
+            <div class="g-grid-item"><b>On Time <span style="color:#059669">(green)</span></b><span>Delivered on or before ETA</span></div>
+            <div class="g-grid-item"><b>Late/Overdue <span style="color:#dc2626">(red)</span></b><span>Delivered after ETA or past due and still open</span></div>
+            <div class="g-grid-item"><b>Accuracy</b><span>Same formula as KPI1. Hover heatmap cells for detail</span></div>
+            <div class="g-grid-item"><b>ETA Coverage</b><span>% of tasks with ETA set. <span style="color:#d97706">Yellow</span> if &lt; 50%</span></div>
+            <div class="g-grid-item"><b>Progress Bar</b><span>Visual completion rate — green &ge; 80%, yellow &ge; 50%, red &lt; 50%</span></div>
+          </div>
+          <p style="margin-top:12px"><b>Badges:</b>
+            <span class="g-badge" style="background:#d1fae5;color:#065f46">ON TRACK</span> accuracy &ge; 85%
+            <span class="g-badge" style="background:#fef3c7;color:#92400e">NO RECENT</span> no tasks in last 2 weeks
+            <span class="g-badge" style="background:#fef3c7;color:#92400e">X NO ETA</span> &gt; 50% tasks lack ETA
+          </p>
+        </div>
+      </div>
+
+      <!-- 4. TABS -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#dbeafe;color:#2563eb">&#128200;</div>
+          <h2>Analysis Tabs</h2>
+          <span class="g-tag" style="background:#dbeafe;color:#1e40af">4 views</span>
+        </div>
+        <div class="g-section-body">
+          <p>Each tab provides two synchronized views of the same metric:</p>
+          <div class="g-grid">
+            <div class="g-grid-item" style="border-left:3px solid #4f46e5">
+              <b>Weekly Trend Chart</b>
+              <span>Stacked bars show the breakdown per week (On Time vs Late vs Overdue vs No ETA). A line traces the overall metric value across weeks.</span>
+              <br><span style="font-size:.78em;color:#6366f1;font-weight:600;margin-top:4px;display:inline-block">Hover any bar for task-level detail: task name, customer, and delay days.</span>
+            </div>
+            <div class="g-grid-item" style="border-left:3px solid #059669">
+              <b>Heatmap Grid</b>
+              <span>Person x Week matrix with color-coded cells. Hover any cell for full breakdown including individual task names and statuses.</span>
+              <br><span style="font-size:.78em;color:#059669;font-weight:600;margin-top:4px;display:inline-block">Colors: green = good, yellow = warning, red = needs attention.</span>
+            </div>
+          </div>
+          <div class="g-grid" style="grid-template-columns:repeat(4,1fr);margin-top:10px">
+            <div class="g-grid-item" style="text-align:center;background:#eef2ff"><b style="color:#4f46e5;font-size:.85em">ETA Accuracy</b><br><span style="font-size:.72em">On Time vs Late vs Overdue</span></div>
+            <div class="g-grid-item" style="text-align:center;background:#fffbeb"><b style="color:#b45309;font-size:.85em">Execution Time</b><br><span style="font-size:.72em">&lt;14d / 14-28d / 28-60d / &gt;60d</span></div>
+            <div class="g-grid-item" style="text-align:center;background:#ecfdf5"><b style="color:#047857;font-size:.85em">Reliability</b><br><span style="font-size:.72em">Clean vs Rework</span></div>
+            <div class="g-grid-item" style="text-align:center;background:#f5f3ff"><b style="color:#7c3aed;font-size:.85em">Team Activity</b><br><span style="font-size:.72em">Task volume per week</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. KPI BY CUSTOMER -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#fef3c7;color:#d97706">&#127970;</div>
+          <h2>KPI by Customer</h2>
+          <span class="g-tag" style="background:#fef3c7;color:#92400e">Drill-down</span>
+        </div>
+        <div class="g-section-body">
+          <p>Table showing per-customer metrics: <b>accuracy</b>, <b>avg execution time</b>, <b>reliability</b>, and <b>task count</b>. Color-coded cells use the same heat scale as the main heatmaps.</p>
+          <p>The table automatically switches between <b>External customers</b> and <b>Internal contexts</b> based on the active segment filter.</p>
+        </div>
+      </div>
+
+      <!-- 6. AUDIT TABLE -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#f1f5f9;color:#475569">&#128203;</div>
+          <h2>Audit Data Table</h2>
+          <span class="g-tag" style="background:#f1f5f9;color:#475569">Expandable</span>
+        </div>
+        <div class="g-section-body">
+          <p>Click to expand. Full record-level table with <b>19 columns</b>. Click any column header to sort. Two export options in the header:</p>
+          <div class="g-grid">
+            <div class="g-grid-item"><b>XLSX Export</b><span>Downloads a formatted Excel file with all visible records, hyperlinked ticket IDs</span></div>
+            <div class="g-grid-item"><b>Copy TSV</b><span>Copies tab-separated data to clipboard for pasting into spreadsheets</span></div>
+          </div>
+          <p style="margin-top:10px"><b>Performance Labels:</b></p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">
+            <span class="g-badge" style="background:#d1fae5;color:#065f46">On Time</span>
+            <span class="g-badge" style="background:#fee2e2;color:#991b1b">Late</span>
+            <span class="g-badge" style="background:#fef3c7;color:#92400e">Overdue</span>
+            <span class="g-badge" style="background:#f3f4f6;color:#6b7280">No ETA</span>
+            <span class="g-badge" style="background:#dbeafe;color:#1e40af">On Track</span>
+            <span class="g-badge" style="background:#fce7f3;color:#9d174d">Blocked (B.B.C)</span>
+            <span class="g-badge" style="background:#f3f4f6;color:#9ca3af">Canceled (N/A)</span>
+          </div>
+          <p style="margin-top:8px;font-size:.88em;color:#64748b"><b>B.B.C</b> = Blocked By Customer — excluded from accuracy calculations. <b>Canceled</b> tasks are excluded from all KPIs.</p>
+        </div>
+      </div>
+
+      <!-- 7. REWORK LOG -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#fef2f2;color:#dc2626">&#128260;</div>
+          <h2>Rework Log</h2>
+          <span class="g-tag" style="background:#fef2f2;color:#991b1b">Quality</span>
+        </div>
+        <div class="g-section-body">
+          <p>Lists tickets flagged with the <code>rework:implementation</code> label in Linear. Shows ticket link, person, customer, and delivery date.</p>
+          <p>This section feeds the <b>Reliability KPI</b>. When rework labels are applied in Linear, the KPI3 pill activates automatically and starts tracking the clean delivery rate.</p>
+        </div>
+      </div>
+
+      <!-- 8. DATA PIPELINE -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#e0e7ff;color:#4338ca">&#9881;</div>
+          <h2>Data Pipeline</h2>
+          <span class="g-tag" style="background:#e0e7ff;color:#3730a3">Technical</span>
+        </div>
+        <div class="g-section-body">
+          <p>The dashboard is generated by a <b>4-step Python pipeline</b>, each step feeding the next:</p>
+          <div class="g-pipe">
+            <div class="g-pipe-step" style="background:#eef2ff"><b>1. Refresh</b>Linear API &rarr; cache</div>
+            <div class="g-pipe-step" style="background:#ecfdf5"><b>2. Merge</b>Linear + spreadsheet</div>
+            <div class="g-pipe-step" style="background:#fffbeb"><b>3. Normalize</b>Clean &amp; fix data</div>
+            <div class="g-pipe-step" style="background:#fce7f3"><b>4. Build</b>Generate HTML</div>
+          </div>
+          <p>Run the full pipeline:</p>
+          <div class="g-formula" style="background:#1e293b;color:#a5f3fc;border-color:#334155;text-align:left;font-size:.88em">
+            <span style="color:#94a3b8">$</span> python kpi/orchestrate.py<br>
+            <span style="color:#94a3b8">$</span> python kpi/orchestrate.py --skip-refresh &nbsp;<span style="color:#64748b"># reuse cached API data</span><br>
+            <span style="color:#94a3b8">$</span> python kpi/orchestrate.py --build-only &nbsp;&nbsp;<span style="color:#64748b"># rebuild HTML only</span>
+          </div>
+          <p style="font-size:.85em;color:#64748b">All writes are <b>atomic</b> (write to .tmp, then replace). Pipeline stops on first error. Each step has a 120s timeout.</p>
+        </div>
+      </div>
+
+      <!-- 9. GLOSSARY -->
+      <div class="g-section">
+        <div class="g-section-hdr">
+          <div class="g-icon" style="background:#f0fdf4;color:#16a34a">&#128218;</div>
+          <h2>Glossary</h2>
+          <span class="g-tag" style="background:#f0fdf4;color:#166534">Reference</span>
+        </div>
+        <div class="g-section-body">
+          <div class="g-grid">
+            <div class="g-grid-item"><b>ETA</b><span>Estimated Time of Arrival — due date set in Linear</span></div>
+            <div class="g-grid-item"><b>Core Week</b><span>A week within the rolling 4-month window, excluding future weeks</span></div>
+            <div class="g-grid-item"><b>B.B.C</b><span>Blocked By Customer — task waiting on client action</span></div>
+            <div class="g-grid-item"><b>Rework</b><span>Task that needed re-implementation after delivery</span></div>
+            <div class="g-grid-item"><b>startedAt</b><span>When Linear status first moved to "In Progress"</span></div>
+            <div class="g-grid-item"><b>Velocity</b><span>Days between startedAt (or dateAdd) and delivery</span></div>
+            <div class="g-grid-item"><b>Source: Linear</b><span>Data fetched from Linear API (current, live)</span></div>
+            <div class="g-grid-item"><b>Source: Spreadsheet</b><span>Legacy data from CODA/sheets (frozen backlog)</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="g-footer">
+      TSA KPI Dashboard v3 &middot; Built ${BUILD_DATE} &middot; Team Raccoons &middot; Powered by Linear + Python + Chart.js
+    </div>
+  `;
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+}
+
 /* ── Render all ─────────────────────────────────────── */
 function render(){
   updateSegmentCounts();
@@ -984,13 +1341,20 @@ function init(){
     render();
   });
 
+  function switchTab(tabName){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabName));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+tabName).classList.add('active');
+    document.querySelectorAll('.kpi-cell').forEach(c=>c.classList.toggle('kpi-active',c.dataset.tab===tabName));
+  }
+
   document.querySelectorAll('.tab').forEach(tab=>{
-    tab.addEventListener('click',()=>{
-      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
-    });
+    tab.addEventListener('click',()=>switchTab(tab.dataset.tab));
+  });
+
+  /* KPI cells click → switch tab */
+  document.querySelectorAll('.kpi-cell').forEach(cell=>{
+    cell.addEventListener('click',()=>switchTab(cell.dataset.tab));
   });
 
   document.getElementById('auditToggle').addEventListener('click',()=>{

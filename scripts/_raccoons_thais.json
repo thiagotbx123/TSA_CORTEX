@@ -1,61 +1,121 @@
 [
   {
-    "id": "RAC-174",
-    "title": "[GEM] Generate resumes for candidates",
-    "assignee": "Thaís Linzmaier",
-    "status": "Triage",
-    "createdAt": "2026-02-03T16:10:58.702Z",
-    "updatedAt": "2026-02-17T17:49:34.654Z",
+    "id": "RAC-175",
+    "title": "[GEM] Create applications",
+    "description": "Job assignment, initial stage, source, recruiter assignment.\n\nSA to validate and provide details, devs reverse engineer.\n\n**From Taufer's Engineering Plan**\n\nPoints: 3",
+    "projectMilestone": {
+      "id": "b6458079-9372-4185-9a1f-4bbe82dbef84",
+      "name": "4. Data Gen & Validation"
+    },
+    "estimate": {
+      "value": 3,
+      "name": "3 Points"
+    },
+    "url": "https://linear.app/testbox/issue/RAC-175/gem-create-applications",
+    "gitBranchName": "rac-175",
+    "createdAt": "2026-02-05T16:57:57.046Z",
+    "updatedAt": "2026-03-20T18:23:36.830Z",
+    "archivedAt": null,
     "completedAt": null,
     "dueDate": null,
+    "startedAt": null,
+    "slaStartedAt": null,
+    "slaMediumRiskAt": null,
+    "slaHighRiskAt": null,
+    "slaBreachesAt": null,
+    "slaType": "all",
+    "status": "Canceled",
+    "labels": [],
+    "createdBy": "Thiago Rodrigues",
+    "createdById": "a6063009-d822-49f1-a638-6cebfe59e89e",
+    "assignee": "Thaís Linzmaier",
+    "assigneeId": "0879df15-56d6-477f-944d-df033121641a",
+    "project": "[Gem]",
+    "projectId": "f3f44bea-be65-49c6-b37c-07007696f1b7",
     "parentId": null,
-    "labels": [
-      {
-        "name": "gem-project"
-      },
-      {
-        "name": "data-gen"
-      },
-      {
-        "name": "new-scope"
-      }
-    ],
-    "project": "[Gem] Implementation"
+    "team": "Raccoons",
+    "teamId": "5a021b9f-bb1a-49fa-ad3b-83422c46c357"
   },
   {
     "id": "RAC-133",
     "title": "[GEM] Add notes and emails to candidates",
-    "assignee": "Thaís Linzmaier",
-    "status": "Triage",
+    "description": "## 🎯 Objective\n\nAdd notes and email history to candidates in later pipeline stages. This makes candidates look actively worked - recruiters leave notes, emails are exchanged.\n\n---\n\n## 📋 Overview\n\nSOW Section 3.2 lists **\"Candidate notes/emails\"** as required synthetic data. Focus on candidates in advanced stages (Screening, Interview, Offer) where activity is expected.\n\n---\n\n## ✅ Key Tasks\n\n| Task | Owner | Why |\n| -- | -- | -- |\n| Check API endpoints for notes and emails | **DATA** | Need to kn",
+    "projectMilestone": {
+      "id": "b6458079-9372-4185-9a1f-4bbe82dbef84",
+      "name": "4. Data Gen & Validation"
+    },
+    "estimate": {
+      "value": 3,
+      "name": "3 Points"
+    },
+    "url": "https://linear.app/testbox/issue/RAC-133/gem-add-notes-and-emails-to-candidates",
+    "gitBranchName": "rac-133",
     "createdAt": "2026-02-03T16:10:59.629Z",
-    "updatedAt": "2026-02-17T17:49:34.468Z",
+    "updatedAt": "2026-03-20T18:17:07.137Z",
+    "archivedAt": null,
     "completedAt": null,
     "dueDate": null,
-    "parentId": null,
+    "startedAt": null,
+    "slaStartedAt": null,
+    "slaMediumRiskAt": null,
+    "slaHighRiskAt": null,
+    "slaBreachesAt": null,
+    "slaType": "all",
+    "status": "Canceled",
     "labels": [
-      {
-        "name": "gem-project"
-      },
-      {
-        "name": "data-gen"
-      },
-      {
-        "name": "new-scope"
-      }
+      "gem-project",
+      "data-gen",
+      "new-scope"
     ],
-    "project": "[Gem] Implementation"
+    "createdBy": "Thiago Rodrigues",
+    "createdById": "a6063009-d822-49f1-a638-6cebfe59e89e",
+    "assignee": "Thaís Linzmaier",
+    "assigneeId": "0879df15-56d6-477f-944d-df033121641a",
+    "project": "[Gem]",
+    "projectId": "f3f44bea-be65-49c6-b37c-07007696f1b7",
+    "parentId": null,
+    "team": "Raccoons",
+    "teamId": "5a021b9f-bb1a-49fa-ad3b-83422c46c357"
   },
   {
-    "id": "RAC-175",
-    "title": "[GEM] Create applications",
-    "assignee": "Thaís Linzmaier",
-    "status": "Triage",
-    "createdAt": "2026-02-05T16:57:57.046Z",
-    "updatedAt": "2026-02-17T17:46:50.805Z",
+    "id": "RAC-174",
+    "title": "[GEM] Generate resumes for candidates",
+    "description": "## 🎯 Objective\n\nGenerate resume PDFs for candidates and attach them to applications. Real candidates have resumes - without them, applications look incomplete.\n\n---\n\n## 📋 Overview\n\nSOW Section 3.2 lists **\"Applications (with attachments/resumes)\"** as required synthetic data. Each of the \\~500 candidates needs a realistic-looking resume PDF.\n\n---\n\n## ✅ Key Tasks\n\n| Task | Owner | Why |\n| -- | -- | -- |\n| Create professional resume PDF template | **CE** | Resumes need consistent, realistic format",
+    "projectMilestone": {
+      "id": "b6458079-9372-4185-9a1f-4bbe82dbef84",
+      "name": "4. Data Gen & Validation"
+    },
+    "estimate": {
+      "value": 5,
+      "name": "5 Points"
+    },
+    "url": "https://linear.app/testbox/issue/RAC-174/gem-generate-resumes-for-candidates",
+    "gitBranchName": "rac-174",
+    "createdAt": "2026-02-03T16:10:58.702Z",
+    "updatedAt": "2026-03-20T18:23:37.526Z",
+    "archivedAt": null,
     "completedAt": null,
     "dueDate": null,
+    "startedAt": null,
+    "slaStartedAt": null,
+    "slaMediumRiskAt": null,
+    "slaHighRiskAt": null,
+    "slaBreachesAt": null,
+    "slaType": "all",
+    "status": "Canceled",
+    "labels": [
+      "gem-project",
+      "data-gen",
+      "new-scope"
+    ],
+    "createdBy": "Thiago Rodrigues",
+    "createdById": "a6063009-d822-49f1-a638-6cebfe59e89e",
+    "assignee": "Thaís Linzmaier",
+    "assigneeId": "0879df15-56d6-477f-944d-df033121641a",
+    "project": "[Gem]",
+    "projectId": "f3f44bea-be65-49c6-b37c-07007696f1b7",
     "parentId": null,
-    "labels": [],
-    "project": "[Gem] Implementation"
+    "team": "Raccoons",
+    "teamId": "5a021b9f-bb1a-49fa-ad3b-83422c46c357"
   }
 ]

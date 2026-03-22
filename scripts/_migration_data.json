@@ -528,7 +528,9 @@
       "focus": "Deals history refactor",
       "date_add": "5-Dec",
       "eta": "8-Dec",
-      "last_update": "Goals: \nRecreate the Sandbox deal history to better match customer needs, implementing all the features implemented in the demo account and having an event time period of at least 1 month.\nFix the call metrics in the sandbox dataset\nDeliver the custom metrics feature\n\nIssues: SFDC dev accounts has a limit of 5MB of storage\n\nPlan:\n\nUnderstand the average storage spent for each of the main objects (contacts, opportunities and accounts) \nChange the deals using the new proportions\nIngest and test the new format\nFix errors, reingest and validate key features\nShowcase the new sandbox environment to the customer\nImprove with the customer feedback\nCreate a new version of the call generator that allow us to create calls with self healing to better achieve the results expected"
+      "last_update": "Goals: \nRecreate the Sandbox deal history to better match customer needs, implementing all the features implemented in the demo account and having an event time period of at least 1 month.\nFix the call metrics in the sandbox dataset\nDeliver the custom metrics feature\n\nIssues: SFDC dev accounts has a limit of 5MB of storage\n\nPlan:\n\nUnderstand the average storage spent for each of the main objects (contacts, opportunities and accounts) \nChange the deals using the new proportions\nIngest and test the new format\nFix errors, reingest and validate key features\nShowcase the new sandbox environment to the customer\nImprove with the customer feedback\nCreate a new version of the call generator that allow us to create calls with self healing to better achieve the results expected",
+      "delivery_date": "8-Dec",
+      "eta_reason": ""
     },
     {
       "row": 2,
@@ -540,7 +542,9 @@
       "focus": "Dataset creation",
       "date_add": "12-Dec",
       "eta": "12-Dec",
-      "last_update": "N/A"
+      "last_update": "N/A",
+      "delivery_date": "12-Dec",
+      "eta_reason": ""
     },
     {
       "row": 3,
@@ -552,7 +556,9 @@
       "focus": "Sandbox improvements",
       "date_add": "10-Dec",
       "eta": "15-Dec",
-      "last_update": "N/A"
+      "last_update": "N/A",
+      "delivery_date": "15-Dec",
+      "eta_reason": ""
     },
     {
       "row": 4,
@@ -564,7 +570,9 @@
       "focus": "Gong sandbox improvements and custom metrics are in progress with strong state on calls/deals; main risk is production deploy being delayed by freeze and previous deploy failure.",
       "date_add": "8-Dec",
       "eta": "17-Dec",
-      "last_update": "Gong sandbox improvements & custom metrics; continue calls regeneration; coordinate new deals schema validation and timeline with Gong; fix Bitforge deal; follow deploy of changes to production; deploy blocked until Thursday due to internal and customer problems plus freezing."
+      "last_update": "Gong sandbox improvements & custom metrics; continue calls regeneration; coordinate new deals schema validation and timeline with Gong; fix Bitforge deal; follow deploy of changes to production; deploy blocked until Thursday due to internal and customer problems plus freezing.",
+      "delivery_date": "17-Dec",
+      "eta_reason": ""
     },
     {
       "row": 5,
@@ -576,7 +584,9 @@
       "focus": "Open tickets for the CE team",
       "date_add": "10-Dec",
       "eta": "12-Dec",
-      "last_update": "Open tickets for the CE team"
+      "last_update": "Open tickets for the CE team",
+      "delivery_date": "12-Dec",
+      "eta_reason": ""
     },
     {
       "row": 6,
@@ -588,7 +598,9 @@
       "focus": "Fix the AI Trackers",
       "date_add": "15-Dec",
       "eta": "16-Jan",
-      "last_update": "Soranzo discovered why the AI trackers are not working on Hubspot accounts, but couldn't find a way to automate it, I'll open a ticket for that"
+      "last_update": "Soranzo discovered why the AI trackers are not working on Hubspot accounts, but couldn't find a way to automate it, I'll open a ticket for that",
+      "delivery_date": "16-Jan",
+      "eta_reason": ""
     },
     {
       "row": 7,
@@ -600,7 +612,9 @@
       "focus": "Alinhar ticket mais objetivos",
       "date_add": "10-Dec",
       "eta": "11-Dec",
-      "last_update": "Ticket muito densos, completos e ainda sim nao sufientes para resolver a demanda junto ao cliente"
+      "last_update": "Ticket muito densos, completos e ainda sim nao sufientes para resolver a demanda junto ao cliente",
+      "delivery_date": "11-Dec",
+      "eta_reason": ""
     },
     {
       "row": 8,
@@ -612,7 +626,9 @@
       "focus": "Add screenshots and records for the siteimprove tickets",
       "date_add": "15-Dec",
       "eta": "15-Dec",
-      "last_update": "Tickets already created using Linear MCP, I just need to make some adjustments and add some media for the CE team to get a better understanding of the feature"
+      "last_update": "Tickets already created using Linear MCP, I just need to make some adjustments and add some media for the CE team to get a better understanding of the feature",
+      "delivery_date": "15-Dec",
+      "eta_reason": ""
     },
     {
       "row": 9,
@@ -624,7 +640,9 @@
       "focus": "Improve the user simulator script",
       "date_add": "15-Dec",
       "eta": "16-Dec",
-      "last_update": "Siteimprove needs a MVP showcase for their board, I'm working on improving the user simulator script to have more users in parallel and a longer time window of simulation (minimum of 30 minutes)"
+      "last_update": "Siteimprove needs a MVP showcase for their board, I'm working on improving the user simulator script to have more users in parallel and a longer time window of simulation (minimum of 30 minutes)",
+      "delivery_date": "16-Dec",
+      "eta_reason": ""
     },
     {
       "row": 10,
@@ -636,7 +654,9 @@
       "focus": "Fix the Deals Score ingestion step",
       "date_add": "15-Dec",
       "eta": "16-Jan",
-      "last_update": "Waiting for Alan validation on the current demo account, fixed in the dev account"
+      "last_update": "Waiting for Alan validation on the current demo account, fixed in the dev account",
+      "delivery_date": "16-Jan",
+      "eta_reason": ""
     },
     {
       "row": 11,
@@ -648,7 +668,9 @@
       "focus": "Open Spike ticket for the Workspace disconnection issue",
       "date_add": "15-Dec",
       "eta": "12/17/2025",
-      "last_update": "I want to ask the CE team to investigate that issue one more time before trying a different approach"
+      "last_update": "I want to ask the CE team to investigate that issue one more time before trying a different approach",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 12,
@@ -660,7 +682,9 @@
       "focus": "Understand how the Deals Score field works",
       "date_add": "15-Dec",
       "eta": "19-Dec",
-      "last_update": "Deals scores are not being properly loaded into the accounts and when manually added are not matching the current deals existing in the account"
+      "last_update": "Deals scores are not being properly loaded into the accounts and when manually added are not matching the current deals existing in the account",
+      "delivery_date": "19-Dec",
+      "eta_reason": ""
     },
     {
       "row": 13,
@@ -672,7 +696,9 @@
       "focus": "Work on the Gong Visualizer platform",
       "date_add": "15-Dec",
       "eta": "11-Feb",
-      "last_update": "I'm working on a platform where Gong team will be able to visualize build informations from the sandbox accounts, this is a complaing that they have for a long time, so we are addressing it using the forwarded-deployed engineer method while the main solution is still being discussed"
+      "last_update": "I'm working on a platform where Gong team will be able to visualize build informations from the sandbox accounts, this is a complaing that they have for a long time, so we are addressing it using the forwarded-deployed engineer method while the main solution is still being discussed",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 14,
@@ -684,7 +710,9 @@
       "focus": "Fix the New Business ~Generated and Forecast values for Sandbox accounts",
       "date_add": "22-Dec",
       "eta": "12/23/2025",
-      "last_update": "Records created, still waiting for a new Sandbox to validate the improvements"
+      "last_update": "Records created, still waiting for a new Sandbox to validate the improvements",
+      "delivery_date": "01/09/2026",
+      "eta_reason": ""
     },
     {
       "row": 15,
@@ -696,7 +724,9 @@
       "focus": "Ingest the Test Account using the Salesforce account provided by Gong",
       "date_add": "8-Jan",
       "eta": "9-Jan",
-      "last_update": "(1/8) - Gong's team asked us to ingest a dev account with demo data using a salesforce account providedd by them, so their time could do some tests using the account powered with our data, this request was made on 6 Jan and is being treated with the max priority, we are already ingesting the account with some data."
+      "last_update": "(1/8) - Gong's team asked us to ingest a dev account with demo data using a salesforce account providedd by them, so their time could do some tests using the account powered with our data, this request was made on 6 Jan and is being treated with the max priority, we are already ingesting the account with some data.",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 16,
@@ -708,7 +738,9 @@
       "focus": "Analyze the New Business dashboard intermittent behavior",
       "date_add": "15-Dec",
       "eta": "16-Jan",
-      "last_update": "Some of the Sandbox are properly loaded with the New Business view in the Deals Pipeline page and some not, we need to understando why this is happening and fix it so we can have more reproducibility and less manual action in the sandbox accounts provisioning"
+      "last_update": "Some of the Sandbox are properly loaded with the New Business view in the Deals Pipeline page and some not, we need to understando why this is happening and fix it so we can have more reproducibility and less manual action in the sandbox accounts provisioning",
+      "delivery_date": "16-Jan",
+      "eta_reason": ""
     },
     {
       "row": 17,
@@ -720,7 +752,9 @@
       "focus": "Siteimprove work is centered on the activity plan dataset and a new SEO search feature to surface improvement opportunities.",
       "date_add": "8-Dec",
       "eta": "12/18/2025",
-      "last_update": "Shifting more focus to Siteimprove to advance the activity plan dataset and SEO search feature; working on dataset that rotates website versions and content; designing SEO search feature; no blockers."
+      "last_update": "Shifting more focus to Siteimprove to advance the activity plan dataset and SEO search feature; working on dataset that rotates website versions and content; designing SEO search feature; no blockers.",
+      "delivery_date": "01/09/2026",
+      "eta_reason": ""
     },
     {
       "row": 18,
@@ -732,7 +766,9 @@
       "focus": "Add VPN or proxy to the simulator script",
       "date_add": "15-Dec",
       "eta": "16-Dec",
-      "last_update": "Siteimprove needs to see users being simulated from the USA for the MVP presentation Tuesday, so I need to work on the implementation of the VPN so they can see traffic from USA"
+      "last_update": "Siteimprove needs to see users being simulated from the USA for the MVP presentation Tuesday, so I need to work on the implementation of the VPN so they can see traffic from USA",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 19,
@@ -744,7 +780,9 @@
       "focus": "Open ticket for adding Keywords monitored to the activity plan",
       "date_add": "15-Dec",
       "eta": "18-Dec",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Dec",
+      "eta_reason": ""
     },
     {
       "row": 20,
@@ -756,7 +794,9 @@
       "focus": "Fix Hubspot accounts to show the MEDDICC AI fields properly",
       "date_add": "22-Dec",
       "eta": "12/23/2025",
-      "last_update": "Soranzo found the issue with the synchronization between SFDC and Hubspot, fixing it manually"
+      "last_update": "Soranzo found the issue with the synchronization between SFDC and Hubspot, fixing it manually",
+      "delivery_date": "01/02/2026",
+      "eta_reason": ""
     },
     {
       "row": 21,
@@ -768,7 +808,9 @@
       "focus": "Create the tables in the Siteimprove Dataset for the website version rotation",
       "date_add": "15-Dec",
       "eta": "20-Dec",
-      "last_update": "Already created the documentation flow for the website rotation, just need to model the tables"
+      "last_update": "Already created the documentation flow for the website rotation, just need to model the tables",
+      "delivery_date": "20-Dec",
+      "eta_reason": ""
     },
     {
       "row": 22,
@@ -780,7 +822,9 @@
       "focus": "Open Spike ticket to investigate how can we simulate traffic on siteimprove without fully using browser automations",
       "date_add": "15-Dec",
       "eta": "18-Dec",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Dec",
+      "eta_reason": ""
     },
     {
       "row": 23,
@@ -792,7 +836,9 @@
       "focus": "Open ticket to add monitored keywords to activity plan",
       "date_add": "5-Jan",
       "eta": "1/12/2026",
-      "last_update": "(1/8) - We already have tickets for creating activity plans and monitored keywords, now I need to open a ticket for the CE team to add the keywords inside the activity plan"
+      "last_update": "(1/8) - We already have tickets for creating activity plans and monitored keywords, now I need to open a ticket for the CE team to add the keywords inside the activity plan",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 24,
@@ -804,7 +850,9 @@
       "focus": "Customer Call",
       "date_add": "12-Jan",
       "eta": "12-Jan",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "30-Jan",
+      "eta_reason": ""
     },
     {
       "row": 25,
@@ -816,7 +864,9 @@
       "focus": "Create ticket for the dataset rotation strategy",
       "date_add": "12-Jan",
       "eta": "12-Jan",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "2026-01-30",
+      "eta_reason": ""
     },
     {
       "row": 26,
@@ -828,7 +878,9 @@
       "focus": "Demo Account Refresh",
       "date_add": "8-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/8) - Refresh 18 month old data; move toward annual refresh cadence. We are waiting for Alan feedback from dev51 account\n(1/12) - Gong's team gave us some inputs that will lead to more tasks, the overall feeling is that these changes shouldn't delay the timeline, but will be harder than expected"
+      "last_update": "(1/8) - Refresh 18 month old data; move toward annual refresh cadence. We are waiting for Alan feedback from dev51 account\n(1/12) - Gong's team gave us some inputs that will lead to more tasks, the overall feeling is that these changes shouldn't delay the timeline, but will be harder than expected",
+      "delivery_date": "21-Jan",
+      "eta_reason": ""
     },
     {
       "row": 27,
@@ -840,7 +892,9 @@
       "focus": "Customer Call",
       "date_add": "14-Jan",
       "eta": "14-Jan",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "2026-01-14",
+      "eta_reason": ""
     },
     {
       "row": 28,
@@ -852,7 +906,9 @@
       "focus": "Historical Data model",
       "date_add": "8-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/8) - Still waiting for proper definition from customer\n(1/12) - Customer said that the time range between the old and current data versions should be dynamic, that means that each object should have a date column with possible different values. The focus is on creating the format and the database schema to support this feature rather than make the data looks great."
+      "last_update": "(1/8) - Still waiting for proper definition from customer\n(1/12) - Customer said that the time range between the old and current data versions should be dynamic, that means that each object should have a date column with possible different values. The focus is on creating the format and the database schema to support this feature rather than make the data looks great.",
+      "delivery_date": "14-Jan",
+      "eta_reason": ""
     },
     {
       "row": 29,
@@ -864,7 +920,9 @@
       "focus": "Sandbox mirrors demo",
       "date_add": "8-Jan",
       "eta": "6-Feb",
-      "last_update": "(1/8) - Gong's team wants to have all the features implemented in the demo account on sandbox too, like deals dashboards, AI trainer, AI populated CRM fields and others. These changes do not seens to be related to salesforce, so in theory we should be able to implement them."
+      "last_update": "(1/8) - Gong's team wants to have all the features implemented in the demo account on sandbox too, like deals dashboards, AI trainer, AI populated CRM fields and others. These changes do not seens to be related to salesforce, so in theory we should be able to implement them.",
+      "delivery_date": "14-Jan",
+      "eta_reason": ""
     },
     {
       "row": 30,
@@ -876,7 +934,9 @@
       "focus": "Automate the MEDDICC AI trackers for Hubspot accounts",
       "date_add": "5-Jan",
       "eta": "TBD",
-      "last_update": "Still need to talk with Soranzo to understand the difficulty on automating that"
+      "last_update": "Still need to talk with Soranzo to understand the difficulty on automating that",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 31,
@@ -888,7 +948,9 @@
       "focus": "Sandbox ingestion visibility",
       "date_add": "8-Jan",
       "eta": "TBD",
-      "last_update": "(1/8) - Gong's team is unsatisfied with the current redash dashboard to see accounts ingestion completion status, so we though of creating a system for them to be able to check these type of status"
+      "last_update": "(1/8) - Gong's team is unsatisfied with the current redash dashboard to see accounts ingestion completion status, so we though of creating a system for them to be able to check these type of status",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 32,
@@ -900,7 +962,9 @@
       "focus": "Gmail token disconnect",
       "date_add": "8-Jan",
       "eta": "TBD",
-      "last_update": "(1/8) - Gong's team is complaining about an error that we couldn't find the root cause yet, some of the sandbox randomly disconnects our workspace account and we need to reconnect it manually, so we though of creating some type of platform where the customer can see some ingestion status and also trigger some actions (self serving)"
+      "last_update": "(1/8) - Gong's team is complaining about an error that we couldn't find the root cause yet, some of the sandbox randomly disconnects our workspace account and we need to reconnect it manually, so we though of creating some type of platform where the customer can see some ingestion status and also trigger some actions (self serving)",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 33,
@@ -912,7 +976,9 @@
       "focus": "Automate the entire Hubspot Gong account creation",
       "date_add": "8-Jan",
       "eta": "TBD",
-      "last_update": "(1/8) - Currently there are many steps from the Hubspot Sandbox accounts that are manual, we couldn't find time to automate these steps yet, so we need to automate them, as each hubspot account takes approximately 1h30 minutes of manual time."
+      "last_update": "(1/8) - Currently there are many steps from the Hubspot Sandbox accounts that are manual, we couldn't find time to automate these steps yet, so we need to automate them, as each hubspot account takes approximately 1h30 minutes of manual time.",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 34,
@@ -924,7 +990,9 @@
       "focus": "Deals Forecast Hiding team members",
       "date_add": "8-Jan",
       "eta": "14-Jan",
-      "last_update": "(1/8) - We have a step in the ingestion proccess where some of the team members with forecasts set to 0 are hided in the UI, this is causing problems because as the amount of forecast got increased, Gong is taking more time to load the forecast pages, what causes the step to hide all team members. We are going to temporarely disable that step (Customer approved)"
+      "last_update": "(1/8) - We have a step in the ingestion proccess where some of the team members with forecasts set to 0 are hided in the UI, this is causing problems because as the amount of forecast got increased, Gong is taking more time to load the forecast pages, what causes the step to hide all team members. We are going to temporarely disable that step (Customer approved)",
+      "delivery_date": "14-Jan",
+      "eta_reason": ""
     },
     {
       "row": 35,
@@ -936,7 +1004,9 @@
       "focus": "Add the missing custom fields in the dev51 account",
       "date_add": "8-Jan",
       "eta": "9-Jan",
-      "last_update": "(1/8) - Gong team has added some custom fields to the demo salesforce account manually and some of the metrics depends on these custom fields, so for us to copy the metrics, we need to first add these custom fields to the dev51 account"
+      "last_update": "(1/8) - Gong team has added some custom fields to the demo salesforce account manually and some of the metrics depends on these custom fields, so for us to copy the metrics, we need to first add these custom fields to the dev51 account",
+      "delivery_date": "9-Jan",
+      "eta_reason": ""
     },
     {
       "row": 36,
@@ -948,7 +1018,9 @@
       "focus": "Create Website rotation Logic",
       "date_add": "-",
       "eta": "8-Jan",
-      "last_update": "(1/8) - Logic created and validated with Thais, soon I'll document on Coda and Open a ticket for the actual implementation"
+      "last_update": "(1/8) - Logic created and validated with Thais, soon I'll document on Coda and Open a ticket for the actual implementation",
+      "delivery_date": "8-Jan",
+      "eta_reason": ""
     },
     {
       "row": 37,
@@ -960,7 +1032,9 @@
       "focus": "Align with Soranzo resource alocation for Gong tasks",
       "date_add": "8-Jan",
       "eta": "9-Jan",
-      "last_update": "(1/8) - Due to the customer long time to give feedback, some of the ETA we agreed with them are too short, to try to mitigate that I'm going to talk to soranzo to see if we can have other developers working on some new features"
+      "last_update": "(1/8) - Due to the customer long time to give feedback, some of the ETA we agreed with them are too short, to try to mitigate that I'm going to talk to soranzo to see if we can have other developers working on some new features",
+      "delivery_date": "1/21/2026",
+      "eta_reason": ""
     },
     {
       "row": 38,
@@ -972,7 +1046,9 @@
       "focus": "Fix forecast page to have forecast in all different sections",
       "date_add": "14-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/14) - Currently the Forecast page does not have data for all forecast sections from all demo users, we need to fix that to ensure that all users have predictions for all periods (Current quarter, Last Quarter, Q2, Q3, Current Month, Last Month and all the other months)\n(1/26) - There is a problem with the Forecast for the 2 - CS Retention board, for some reason the values do not work for any time range different than the current month and quarter\n(1/26) - For some reason the Gong API responded with success for the Forecast submission, but the data is empty in the account dev51. We also tried with account dev58 and it gave us a fail status, but surprisingly the account shows the data present in the dataset in the ingestion time, we need to discuss that with Gong team"
+      "last_update": "(1/14) - Currently the Forecast page does not have data for all forecast sections from all demo users, we need to fix that to ensure that all users have predictions for all periods (Current quarter, Last Quarter, Q2, Q3, Current Month, Last Month and all the other months)\n(1/26) - There is a problem with the Forecast for the 2 - CS Retention board, for some reason the values do not work for any time range different than the current month and quarter\n(1/26) - For some reason the Gong API responded with success for the Forecast submission, but the data is empty in the account dev51. We also tried with account dev58 and it gave us a fail status, but surprisingly the account shows the data present in the dataset in the ingestion time, we need to discuss that with Gong team",
+      "delivery_date": "2026-01-21",
+      "eta_reason": ""
     },
     {
       "row": 39,
@@ -984,7 +1060,9 @@
       "focus": "Change the dataset table for key metrics",
       "date_add": "13-Jan",
       "eta": "13-Jan",
-      "last_update": "The siteimprove_key_metrics had a big design issue due to the siteimprove platforms having bugs while the features was being studied, that lead to the table to be created with only two possible triggers. Changes were made to allow many types of triggers as well as multiple triggers for the same key metric"
+      "last_update": "The siteimprove_key_metrics had a big design issue due to the siteimprove platforms having bugs while the features was being studied, that lead to the table to be created with only two possible triggers. Changes were made to allow many types of triggers as well as multiple triggers for the same key metric",
+      "delivery_date": "2026-02-04",
+      "eta_reason": ""
     },
     {
       "row": 40,
@@ -996,7 +1074,9 @@
       "focus": "Create the dataset table for siteimprove dashboards",
       "date_add": "8-Jan",
       "eta": "1/16/2026",
-      "last_update": "(1/8) - Siteimprove have a dashboards page that allow users to create their own dashboards showcasing different metrics from the platform, Matt already created some dashboards for us and now we need to create a table in the dataset to store the dashboard data and to be used in the future to recreate these dashboards automatically.\n(2/4) - As the Siteimprove integration will have only 4 demo accounts and no possibility for Sandbox, due to the low amount of dashboards, it doens't make sense to create them automatically as this would require more engineering effort them the effor to create it manually for the 4 verticals, so instead we are going to create them manually"
+      "last_update": "(1/8) - Siteimprove have a dashboards page that allow users to create their own dashboards showcasing different metrics from the platform, Matt already created some dashboards for us and now we need to create a table in the dataset to store the dashboard data and to be used in the future to recreate these dashboards automatically.\n(2/4) - As the Siteimprove integration will have only 4 demo accounts and no possibility for Sandbox, due to the low amount of dashboards, it doens't make sense to create them automatically as this would require more engineering effort them the effor to create it manually for the 4 verticals, so instead we are going to create them manually",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 41,
@@ -1008,7 +1088,9 @@
       "focus": "Move or Create more deals between the end of the last Quarter and the beggining of the new one",
       "date_add": "14-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/14) - Gong has a feature that allows the users to see the value predictions for some month/Quarter, although the feature is working for the last quarter, it isn't working for the current one, because we don't have enough deals on the time frame, so we need to move/create deals between the end of the last quarter and the first week of the current one so their AI can have enough data to calculate the predictions.\n(1/27) - Deals moved with inactivity over 14 days or single threaded. All of them were moved to the first week of the current quarter to ensure the graph behavior, now we need to ingest the account to check the data\n(2/9) - Worked perfectly"
+      "last_update": "(1/14) - Gong has a feature that allows the users to see the value predictions for some month/Quarter, although the feature is working for the last quarter, it isn't working for the current one, because we don't have enough deals on the time frame, so we need to move/create deals between the end of the last quarter and the first week of the current one so their AI can have enough data to calculate the predictions.\n(1/27) - Deals moved with inactivity over 14 days or single threaded. All of them were moved to the first week of the current quarter to ensure the graph behavior, now we need to ingest the account to check the data\n(2/9) - Worked perfectly",
+      "delivery_date": "9-Jan",
+      "eta_reason": ""
     },
     {
       "row": 42,
@@ -1020,7 +1102,9 @@
       "focus": "Adjust the values from the Forecast page to be more story accurate",
       "date_add": "14-Jan",
       "eta": "18-Feb",
-      "last_update": "(1/14) - Currently the Forecast page does not have accurate values for the Forecast of each of the team members, we need to recreate them to ensure that the right team members are closer to the predicted values. Some of the values are too far away from the acquirable values (Elizabeth predicting 1.2M when she only have 700k total deals). We also need to have some people going too low and too high, so Gong team can show this rare cases."
+      "last_update": "(1/14) - Currently the Forecast page does not have accurate values for the Forecast of each of the team members, we need to recreate them to ensure that the right team members are closer to the predicted values. Some of the values are too far away from the acquirable values (Elizabeth predicting 1.2M when she only have 700k total deals). We also need to have some people going too low and too high, so Gong team can show this rare cases.",
+      "delivery_date": "9-Jan",
+      "eta_reason": ""
     },
     {
       "row": 43,
@@ -1032,7 +1116,9 @@
       "focus": "Add the \"Pushed Out\" category to the Deals Analytics Changes page",
       "date_add": "14-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/14) - Apparantely the \"Pushed Out\" is one of the most important sections in the Changes page so we need to ensure that this category exists and has data on it. Pushed Out deals are deals that the expected time to close has passed the expected time to close and jumped to another Quarter (Last Quarter > Current Quarter). Story wise we need to show some type of specific behavior for these deals to have the same type of warnings (single threaded can be a type of warning)\n(1/26) - This forecas category is created automatically by the platform, we don't need to add this manually or via automation, the work beeing done is to move some of the deals that are closing in the last quartert to the current quarter\n(2/9) - Worked perfectly"
+      "last_update": "(1/14) - Apparantely the \"Pushed Out\" is one of the most important sections in the Changes page so we need to ensure that this category exists and has data on it. Pushed Out deals are deals that the expected time to close has passed the expected time to close and jumped to another Quarter (Last Quarter > Current Quarter). Story wise we need to show some type of specific behavior for these deals to have the same type of warnings (single threaded can be a type of warning)\n(1/26) - This forecas category is created automatically by the platform, we don't need to add this manually or via automation, the work beeing done is to move some of the deals that are closing in the last quartert to the current quarter\n(2/9) - Worked perfectly",
+      "delivery_date": "13-Jan",
+      "eta_reason": ""
     },
     {
       "row": 44,
@@ -1044,7 +1130,9 @@
       "focus": "Create the data to power the dashboards table",
       "date_add": "8-Jan",
       "eta": "1/16/2026",
-      "last_update": "(1/8) - Siteimprove have a dashboards page that allow users to create their own dashboards showcasing different metrics from the platform, Matt already created some dashboards for us and now we need to create a table in the dataset to store the dashboard data and to be used in the future to recreate these dashboards automatically.\n(2/4) - As the Siteimprove integration will have only 4 demo accounts and no possibility for Sandbox, due to the low amount of dashboards, it doens't make sense to create them automatically as this would require more engineering effort them the effor to create it manually for the 4 verticals, so instead we are going to create them manually"
+      "last_update": "(1/8) - Siteimprove have a dashboards page that allow users to create their own dashboards showcasing different metrics from the platform, Matt already created some dashboards for us and now we need to create a table in the dataset to store the dashboard data and to be used in the future to recreate these dashboards automatically.\n(2/4) - As the Siteimprove integration will have only 4 demo accounts and no possibility for Sandbox, due to the low amount of dashboards, it doens't make sense to create them automatically as this would require more engineering effort them the effor to create it manually for the 4 verticals, so instead we are going to create them manually",
+      "delivery_date": "12-Jan",
+      "eta_reason": ""
     },
     {
       "row": 45,
@@ -1056,7 +1144,9 @@
       "focus": "Fix the Deals Analytics Accuracy Page",
       "date_add": "14-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/14) - The Accuracy page from Deals Analytics is completely empty right now, we need to understand why this is happening and how to fix as we had data on that page before. Still on that one we also need to fix the display to show the Month view instead of the quarter one. We also need to ensure that this page is story consistent, that means that the team members should match the expected performances (Alex doing great and Elizabeth awfull)\n(1/22) - As we noticed before, it seens that the gong API for the forecast submissions are not working for old dates, this means that we are only able to send forecast for current periords (month and quarter), what unables us to fix the deals analytics accuracy page as it depends on values from prior dates. I'm checking if this is the case and if so I'll ask Gabriel Vieira do generate the forecast JSON file with the prior periods to have a artifact to show that the integration is failing because of that.\n(1/26) - It is confirmed that there is an error in the ingestion of historical data for the forecast and as this page depends on historical data it will not work properly, maybe we can do something with the Surfae Editor. We'll talk with the customer about this behavior"
+      "last_update": "(1/14) - The Accuracy page from Deals Analytics is completely empty right now, we need to understand why this is happening and how to fix as we had data on that page before. Still on that one we also need to fix the display to show the Month view instead of the quarter one. We also need to ensure that this page is story consistent, that means that the team members should match the expected performances (Alex doing great and Elizabeth awfull)\n(1/22) - As we noticed before, it seens that the gong API for the forecast submissions are not working for old dates, this means that we are only able to send forecast for current periords (month and quarter), what unables us to fix the deals analytics accuracy page as it depends on values from prior dates. I'm checking if this is the case and if so I'll ask Gabriel Vieira do generate the forecast JSON file with the prior periods to have a artifact to show that the integration is failing because of that.\n(1/26) - It is confirmed that there is an error in the ingestion of historical data for the forecast and as this page depends on historical data it will not work properly, maybe we can do something with the Surfae Editor. We'll talk with the customer about this behavior",
+      "delivery_date": "12-Jan",
+      "eta_reason": ""
     },
     {
       "row": 46,
@@ -1068,7 +1158,9 @@
       "focus": "Change the Engage To-Dos Page to display different types of flows using the same filter",
       "date_add": "14-Jan",
       "eta": "18-Feb",
-      "last_update": "(1/14) - Currently in the Engage To-Dos page we can see some of the tasks inside Engage Flows and Engage Templates (The task comes from a Engage Template but the task is inside a Engage Flow) or generated from the Gong AI (Gong AI To-do flows) and we need to adjust the page so they can see the different types of engages with the same filter, instead of havind a lot of the same ones one after the other.\n(1/28) - This task needs to be validated after we finish the ingestion from a dev account from zero, so this will be on validating until the other tasks are finished\n(2/10) - The database changes didn't help with this item, we'll need to create another strategy to try to present the desired view for the customer"
+      "last_update": "(1/14) - Currently in the Engage To-Dos page we can see some of the tasks inside Engage Flows and Engage Templates (The task comes from a Engage Template but the task is inside a Engage Flow) or generated from the Gong AI (Gong AI To-do flows) and we need to adjust the page so they can see the different types of engages with the same filter, instead of havind a lot of the same ones one after the other.\n(1/28) - This task needs to be validated after we finish the ingestion from a dev account from zero, so this will be on validating until the other tasks are finished\n(2/10) - The database changes didn't help with this item, we'll need to create another strategy to try to present the desired view for the customer",
+      "delivery_date": "12-Jan",
+      "eta_reason": ""
     },
     {
       "row": 47,
@@ -1080,7 +1172,9 @@
       "focus": "Create new versions from the Government website",
       "date_add": "19-Dec",
       "eta": "1/09/2026",
-      "last_update": "(1/8) - We need to create at least 5 more website versions of the government website so we can rotate these versions inside siteimprove platform"
+      "last_update": "(1/8) - We need to create at least 5 more website versions of the government website so we can rotate these versions inside siteimprove platform",
+      "delivery_date": "13-Jan",
+      "eta_reason": ""
     },
     {
       "row": 48,
@@ -1092,7 +1186,9 @@
       "focus": "Fix the Engage Analytics page",
       "date_add": "14-Jan",
       "eta": "18-Feb",
-      "last_update": "(1/14) - Currently in the Engage Analytics page, we have some of the sections doing well but the last 4 isn't showing Alex as the best seller neither Elizabeth as the worst, we need to adjust the date to make at least Jessica Lee more accurate to the story that we are creating. This means Alex having all the crowns and Elizabeth none and the other spread according to each category of team member\n(1/28) - engage_analytics_crown_distribution.sql file created to fix some of the engage problems, need to validarte with Gabriel tomorrow to see if the strategy is right"
+      "last_update": "(1/14) - Currently in the Engage Analytics page, we have some of the sections doing well but the last 4 isn't showing Alex as the best seller neither Elizabeth as the worst, we need to adjust the date to make at least Jessica Lee more accurate to the story that we are creating. This means Alex having all the crowns and Elizabeth none and the other spread according to each category of team member\n(1/28) - engage_analytics_crown_distribution.sql file created to fix some of the engage problems, need to validarte with Gabriel tomorrow to see if the strategy is right",
+      "delivery_date": "14-Jan",
+      "eta_reason": ""
     },
     {
       "row": 49,
@@ -1104,7 +1200,9 @@
       "focus": "New Salesforce Custom fields",
       "date_add": "14-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/14) - Gong team has added some custom fields to Salesforce and we need to adapt the tables schema to support these new custom fields and also generate data for them (This Month's Consumption it's an example of custom field that were already copied to dev51 and added to the code, but we didn't created data for them)\n(1/26) - Thais is generating/ copying the data for the custom fields\n(1/28) - A lot of the accounts names were changed from 2024 to 2026 so Thais is taking a little bit longer than the expected to generate the entire data"
+      "last_update": "(1/14) - Gong team has added some custom fields to Salesforce and we need to adapt the tables schema to support these new custom fields and also generate data for them (This Month's Consumption it's an example of custom field that were already copied to dev51 and added to the code, but we didn't created data for them)\n(1/26) - Thais is generating/ copying the data for the custom fields\n(1/28) - A lot of the accounts names were changed from 2024 to 2026 so Thais is taking a little bit longer than the expected to generate the entire data",
+      "delivery_date": "14-Jan",
+      "eta_reason": ""
     },
     {
       "row": 50,
@@ -1116,7 +1214,9 @@
       "focus": "Engage templates with inline prompts",
       "date_add": "8-Jan",
       "eta": "14-Jan",
-      "last_update": "(1/12) - Added the missing engage flows to the dev51 account and dataset, now we need to validate with the customer if one engage flow is enough\n(1/15) - Found the missing engage templates with inline prompts they are in the personal templates for Alex, I'll now copy to the dataset and dev51 and test on dev56. I already copied them, for some reason it didn't work in the dev account, Gabriel will have a look on it\n(1/26) - Waiting for dataset release, development work is done\n(1/28) - Waiting for the PR be approved so the code can start using the new dataset version with the chanegs"
+      "last_update": "(1/12) - Added the missing engage flows to the dev51 account and dataset, now we need to validate with the customer if one engage flow is enough\n(1/15) - Found the missing engage templates with inline prompts they are in the personal templates for Alex, I'll now copy to the dataset and dev51 and test on dev56. I already copied them, for some reason it didn't work in the dev account, Gabriel will have a look on it\n(1/26) - Waiting for dataset release, development work is done\n(1/28) - Waiting for the PR be approved so the code can start using the new dataset version with the chanegs",
+      "delivery_date": "30-Jan",
+      "eta_reason": ""
     },
     {
       "row": 51,
@@ -1128,7 +1228,9 @@
       "focus": "Remove some of the deal pipeline dashboards",
       "date_add": "8-Jan",
       "eta": "30-Jan",
-      "last_update": "(1/8) - Already removed the dashboards from the dataset, now we need to test the changes using a dev account"
+      "last_update": "(1/8) - Already removed the dashboards from the dataset, now we need to test the changes using a dev account",
+      "delivery_date": "2026-01-16",
+      "eta_reason": ""
     },
     {
       "row": 52,
@@ -1140,7 +1242,9 @@
       "focus": "Custom dashboards and metrics",
       "date_add": "8-Jan",
       "eta": "14-Jan",
-      "last_update": "(1/8) - Some of the dashboards and metrics relies on custom fields added by the Gong team in the current demo account, so we need to add these custom fields to the dev51 account to check the implementation and after that add these new custom fields to the code as this is hardcoded rather than stored in the database\n(1/15) - Gabriel is done with the Dashboards, all of them should be working now, I'll check that\n(1/15) - Dashboards are great, some missing values due to us not havind mapped some new custom fields, this will be solved soon, but it's a data issue rather than implementation"
+      "last_update": "(1/8) - Some of the dashboards and metrics relies on custom fields added by the Gong team in the current demo account, so we need to add these custom fields to the dev51 account to check the implementation and after that add these new custom fields to the code as this is hardcoded rather than stored in the database\n(1/15) - Gabriel is done with the Dashboards, all of them should be working now, I'll check that\n(1/15) - Dashboards are great, some missing values due to us not havind mapped some new custom fields, this will be solved soon, but it's a data issue rather than implementation",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 53,
@@ -1152,7 +1256,9 @@
       "focus": "AI Trainer",
       "date_add": "8-Jan",
       "eta": "14-Jan",
-      "last_update": "(1/14) - They need to turn o this feature on the accounts that we have to start working on. The feature is like a training bot where the users can test their seling skills with an AI agent."
+      "last_update": "(1/14) - They need to turn o this feature on the accounts that we have to start working on. The feature is like a training bot where the users can test their seling skills with an AI agent.",
+      "delivery_date": "30-Jan",
+      "eta_reason": ""
     },
     {
       "row": 54,
@@ -1164,7 +1270,9 @@
       "focus": "AI populated CRM fields (AI Data Extractor)",
       "date_add": "8-Jan",
       "eta": "21-Jan",
-      "last_update": "(1/14) - AI Data Extractor is a feature under Admin Center > Agent Studio that allows users to extract data from different source of data inside Gong and can even add data to custom fields in the linked CRM account (Salesforce, Hubspot and others)\n(1/15) - Ticket opened"
+      "last_update": "(1/14) - AI Data Extractor is a feature under Admin Center > Agent Studio that allows users to extract data from different source of data inside Gong and can even add data to custom fields in the linked CRM account (Salesforce, Hubspot and others)\n(1/15) - Ticket opened",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 55,
@@ -1176,7 +1284,9 @@
       "focus": "Post Customer Call Alignment with Shivani",
       "date_add": "14-Jan",
       "eta": "14-Jan",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "30-Jan",
+      "eta_reason": ""
     },
     {
       "row": 56,
@@ -1188,7 +1298,9 @@
       "focus": "AI Builder",
       "date_add": "14-Jan",
       "eta": "TBD",
-      "last_update": "(1/14) - We need the Gong team to install the extension and the SDK so we can switch to noFrame"
+      "last_update": "(1/14) - We need the Gong team to install the extension and the SDK so we can switch to noFrame",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 57,
@@ -1200,7 +1312,9 @@
       "focus": "Add missing deals pipeline board to the dataset",
       "date_add": "12-Jan",
       "eta": "13-Jan",
-      "last_update": "(1/12) - Gong team has requested us to change some of the deals boards in the deals pipeline page, after removed the required ones we need to create a new one called NA: Forecast and add it to the dataset so we can reproduce it for other accounts"
+      "last_update": "(1/12) - Gong team has requested us to change some of the deals boards in the deals pipeline page, after removed the required ones we need to create a new one called NA: Forecast and add it to the dataset so we can reproduce it for other accounts",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 58,
@@ -1212,7 +1326,9 @@
       "focus": "Post Customer Call Alignment with Shivani",
       "date_add": "12-Jan",
       "eta": "12-Jan",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 59,
@@ -1224,7 +1340,9 @@
       "focus": "Update the Forecast column named \"Commit\" to \"Forecast\"",
       "date_add": "14-Jan",
       "eta": "1/16/2026",
-      "last_update": "(1/14) - Gong team changed the Commit column name to Forecast, we need to alter our data to match this new pattern, this can be time consuming as we have Commit in different parts of the dataset, so this would affect many different columns and may also require code update of our codebase."
+      "last_update": "(1/14) - Gong team changed the Commit column name to Forecast, we need to alter our data to match this new pattern, this can be time consuming as we have Commit in different parts of the dataset, so this would affect many different columns and may also require code update of our codebase.",
+      "delivery_date": "30-Jan",
+      "eta_reason": ""
     },
     {
       "row": 60,
@@ -1236,7 +1354,9 @@
       "focus": "Create the logic to schedule userflows during the activity plan and Open the ticket for the CE team",
       "date_add": "14-Jan",
       "eta": "16-Jan",
-      "last_update": "(1/14) - The engineering team is implementing the website rotation and user flow tickets, after that the only missing piece to the implementation will be how we are going to schedule the the userflows from which location, time, in which time delta's and other behavior aspects."
+      "last_update": "(1/14) - The engineering team is implementing the website rotation and user flow tickets, after that the only missing piece to the implementation will be how we are going to schedule the the userflows from which location, time, in which time delta's and other behavior aspects.",
+      "delivery_date": "16-Jan",
+      "eta_reason": ""
     },
     {
       "row": 61,
@@ -1248,7 +1368,9 @@
       "focus": "Change the forecast page view to show the right Forecast Board and always show Current Quarter",
       "date_add": "14-Jan",
       "eta": "18-Feb",
-      "last_update": "(1/14) - Currently in the Forecast page we are displaying the wrong Forecast board, we need to copy the right one from the Current Demo account and display this one as the default one. We also need to change the time range to show the Current Quarter instead of the current option.\n(1/29) - We don't have an automation for that, we will need to do it manually."
+      "last_update": "(1/14) - Currently in the Forecast page we are displaying the wrong Forecast board, we need to copy the right one from the Current Demo account and display this one as the default one. We also need to change the time range to show the Current Quarter instead of the current option.\n(1/29) - We don't have an automation for that, we will need to do it manually.",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 62,
@@ -1260,7 +1382,9 @@
       "focus": "Create Metadata table and open the ticket",
       "date_add": "26-Jab",
       "eta": "26-Jan",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "26-Jan",
+      "eta_reason": ""
     },
     {
       "row": 63,
@@ -1272,7 +1396,9 @@
       "focus": "Investigate empty values for the Deals Analytics page on Sandbox accounts",
       "date_add": "26-Jan",
       "eta": "29-Jan",
-      "last_update": "(1/26) - For some reason the Deals Analytics page for the Sandbox accounts are empty, even tough the forecast page has data"
+      "last_update": "(1/26) - For some reason the Deals Analytics page for the Sandbox accounts are empty, even tough the forecast page has data",
+      "delivery_date": "29-Jan",
+      "eta_reason": ""
     },
     {
       "row": 64,
@@ -1284,7 +1410,9 @@
       "focus": "Ingest the dev59 account with the new demo data",
       "date_add": "28-Jan",
       "eta": "29-Jan",
-      "last_update": "(1/28) - This is the account that we are going to use to validate the data for the new demo account, to start the ingestion we need to finish all the changes into the data (besides forecast as this module can be easily overided)"
+      "last_update": "(1/28) - This is the account that we are going to use to validate the data for the new demo account, to start the ingestion we need to finish all the changes into the data (besides forecast as this module can be easily overided)",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 65,
@@ -1296,7 +1424,9 @@
       "focus": "Sandbox Login error",
       "date_add": "28-Jan",
       "eta": "28-Jan",
-      "last_update": "(1/28) - Today morning the customer complained about some of the sandbox post 23 Jan beeing unaccessable, a ticket was opened to the Wombats team so the error can be treated, the priority given was urgent and we are waiting for updates"
+      "last_update": "(1/28) - Today morning the customer complained about some of the sandbox post 23 Jan beeing unaccessable, a ticket was opened to the Wombats team so the error can be treated, the priority given was urgent and we are waiting for updates",
+      "delivery_date": "28-Jan",
+      "eta_reason": ""
     },
     {
       "row": 66,
@@ -1308,7 +1438,9 @@
       "focus": "Check dev60 Ingestion",
       "date_add": "2-Feb",
       "eta": "2-Feb",
-      "last_update": "(2/2) - Gong had an outage on January 30 which prevent us from finishing the ingestion of the test account for the new demo instance and also may have corrupted the account team members, we need to validate if the account can still be used and if not jump to a new one or try to create the team members manually (customer approved).\nStill not working, let's jump to the next one (import manually)"
+      "last_update": "(2/2) - Gong had an outage on January 30 which prevent us from finishing the ingestion of the test account for the new demo instance and also may have corrupted the account team members, we need to validate if the account can still be used and if not jump to a new one or try to create the team members manually (customer approved).\nStill not working, let's jump to the next one (import manually)",
+      "delivery_date": "2-Feb",
+      "eta_reason": ""
     },
     {
       "row": 67,
@@ -1320,7 +1452,9 @@
       "focus": "Import team members manually to dev60 account",
       "date_add": "2-Feb",
       "eta": "2-Feb",
-      "last_update": "(2/2) - In case of the account being corrupted"
+      "last_update": "(2/2) - In case of the account being corrupted",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 68,
@@ -1332,7 +1466,9 @@
       "focus": "Start ingestion for the dev61 account",
       "date_add": "2-Feb",
       "eta": "3-Feb",
-      "last_update": "(2/2) - In case we need an entirrely new account\n(23) - Presenting the User syncing error again"
+      "last_update": "(2/2) - In case we need an entirrely new account\n(23) - Presenting the User syncing error again",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 69,
@@ -1344,7 +1480,9 @@
       "focus": "Check Userflows schedules",
       "date_add": "2-Feb",
       "eta": "2-Feb",
-      "last_update": "(2/2) - Validate with Taufer if all userflows created in the database worked fine. Running fine. We now need to validate with the behavior maps too"
+      "last_update": "(2/2) - Validate with Taufer if all userflows created in the database worked fine. Running fine. We now need to validate with the behavior maps too",
+      "delivery_date": "2-Feb",
+      "eta_reason": ""
     },
     {
       "row": 70,
@@ -1356,7 +1494,9 @@
       "focus": "Check Userflows distribution",
       "date_add": "2-Feb",
       "eta": "5-Feb",
-      "last_update": "(2/2) - Validate if the userflows distribution is following the normal distribution as required in the ticket;\n(2/3) - Waiting the CE team to run the ingestion steps in the staging2 account so we can start validating it"
+      "last_update": "(2/2) - Validate if the userflows distribution is following the normal distribution as required in the ticket;\n(2/3) - Waiting the CE team to run the ingestion steps in the staging2 account so we can start validating it",
+      "delivery_date": "5-Feb",
+      "eta_reason": ""
     },
     {
       "row": 71,
@@ -1368,7 +1508,9 @@
       "focus": "Fill the routine spreadsheet (initial work)",
       "date_add": "2-Feb",
       "eta": "3-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "3-Feb",
+      "eta_reason": ""
     },
     {
       "row": 72,
@@ -1380,7 +1522,9 @@
       "focus": "Generate the userflows for the government website v2",
       "date_add": "3-Feb",
       "eta": "4-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "4-Feb",
+      "eta_reason": ""
     },
     {
       "row": 73,
@@ -1392,7 +1536,9 @@
       "focus": "Generate the usersteps for the government website v2",
       "date_add": "3-Feb",
       "eta": "4-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "4-Feb",
+      "eta_reason": ""
     },
     {
       "row": 74,
@@ -1404,7 +1550,9 @@
       "focus": "Generate the funnels for the government website v2",
       "date_add": "3-Feb",
       "eta": "4-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "4-Feb",
+      "eta_reason": ""
     },
     {
       "row": 75,
@@ -1416,7 +1564,9 @@
       "focus": "Generate the events for the government website v2",
       "date_add": "3-Feb",
       "eta": "5-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "5-Feb",
+      "eta_reason": ""
     },
     {
       "row": 76,
@@ -1428,7 +1578,9 @@
       "focus": "Generate the key metrics for the government website v2",
       "date_add": "3-Feb",
       "eta": "5-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "5-Feb",
+      "eta_reason": ""
     },
     {
       "row": 77,
@@ -1440,7 +1592,9 @@
       "focus": "Generate the keywords for the government website v2",
       "date_add": "3-Feb",
       "eta": "5-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "5-Feb",
+      "eta_reason": ""
     },
     {
       "row": 78,
@@ -1452,7 +1606,9 @@
       "focus": "Open ticket for the elements update for the different versions",
       "date_add": "3-Feb",
       "eta": "2/4/2026",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "2/9/2026",
+      "eta_reason": ""
     },
     {
       "row": 79,
@@ -1464,7 +1620,9 @@
       "focus": "Increase the ammount of simulated users accross all userflows in all website versions for the Government website",
       "date_add": "9-Mar",
       "eta": "11-Mar",
-      "last_update": "The amount of userflows being simulated looks too small (at least for me), to get ahead of future complains I'm going to change the database values to increase the amount of userflows"
+      "last_update": "The amount of userflows being simulated looks too small (at least for me), to get ahead of future complains I'm going to change the database values to increase the amount of userflows",
+      "delivery_date": "12-Mar",
+      "eta_reason": "Repriorization"
     },
     {
       "row": 80,
@@ -1476,7 +1634,9 @@
       "focus": "Make the final adjustments on dev64",
       "date_add": "9-Mar",
       "eta": "11-Mar",
-      "last_update": "(3/9) - Fix to-dos page to have Alex with different to-dos types (Done)\nFix the Alex Forecast overdues (Done)\nFix the Forecast trends page (Done)\nMake the C level bar lower and increase VP and Director (The fix didn't work, we'll need to unfreeze and refreeze the account)\nGet 3rd competitor recognized (Done)"
+      "last_update": "(3/9) - Fix to-dos page to have Alex with different to-dos types (Done)\nFix the Alex Forecast overdues (Done)\nFix the Forecast trends page (Done)\nMake the C level bar lower and increase VP and Director (The fix didn't work, we'll need to unfreeze and refreeze the account)\nGet 3rd competitor recognized (Done)",
+      "delivery_date": "12-Mar",
+      "eta_reason": "Repriorization"
     },
     {
       "row": 81,
@@ -1488,7 +1648,9 @@
       "focus": "Migrate the Siteimprove dataset to the new dataset system and also create a new release",
       "date_add": "9-Mar",
       "eta": "16-Mar",
-      "last_update": "Migrate the Siteimprove dataset to the new version and also change the integration code to use that new version instead of the old one."
+      "last_update": "Migrate the Siteimprove dataset to the new version and also change the integration code to use that new version instead of the old one.",
+      "delivery_date": "12-Mar",
+      "eta_reason": "Repriorization"
     },
     {
       "row": 82,
@@ -1500,7 +1662,9 @@
       "focus": "Finish the V1 for the Financial Story website",
       "date_add": "9-Mar",
       "eta": "13-Mar",
-      "last_update": "Finish the missing sections and add the missing folder images to the website"
+      "last_update": "Finish the missing sections and add the missing folder images to the website",
+      "delivery_date": "11-Mar",
+      "eta_reason": ""
     },
     {
       "row": 83,
@@ -1512,7 +1676,9 @@
       "focus": "Customer Call",
       "date_add": "3-Feb",
       "eta": "3-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "3-Feb",
+      "eta_reason": ""
     },
     {
       "row": 84,
@@ -1524,7 +1690,9 @@
       "focus": "Generate the userflows for the government website v3",
       "date_add": "4-Feb",
       "eta": "9-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "9-Feb",
+      "eta_reason": ""
     },
     {
       "row": 85,
@@ -1536,7 +1704,9 @@
       "focus": "Generate the usersteps for the government website v3",
       "date_add": "4-Feb",
       "eta": "9-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "9-Feb",
+      "eta_reason": ""
     },
     {
       "row": 86,
@@ -1548,7 +1718,9 @@
       "focus": "Generate the funnels for the government website v3",
       "date_add": "4-Feb",
       "eta": "9-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "9-Feb",
+      "eta_reason": ""
     },
     {
       "row": 87,
@@ -1560,7 +1732,9 @@
       "focus": "Generate the events for the government website v3",
       "date_add": "4-Feb",
       "eta": "9-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "9-Feb",
+      "eta_reason": ""
     },
     {
       "row": 88,
@@ -1572,7 +1746,9 @@
       "focus": "Generate the key metrics for the government website v3",
       "date_add": "4-Feb",
       "eta": "10-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "10-Feb",
+      "eta_reason": ""
     },
     {
       "row": 89,
@@ -1584,7 +1760,9 @@
       "focus": "Generate the keywords for the government website v3",
       "date_add": "4-Feb",
       "eta": "10-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "10-Feb",
+      "eta_reason": ""
     },
     {
       "row": 90,
@@ -1596,7 +1774,9 @@
       "focus": "Customer Call",
       "date_add": "4-Feb",
       "eta": "4-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "4-Feb",
+      "eta_reason": ""
     },
     {
       "row": 91,
@@ -1608,7 +1788,9 @@
       "focus": "Ingest account dev62 creating team members manually and then syncing the salesforce account",
       "date_add": "4-Feb",
       "eta": "6-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "6-Feb",
+      "eta_reason": ""
     },
     {
       "row": 92,
@@ -1620,7 +1802,9 @@
       "focus": "Fix flow branches for v1, v2 and v3",
       "date_add": "6-Feb",
       "eta": "10-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "10-Feb",
+      "eta_reason": ""
     },
     {
       "row": 93,
@@ -1632,7 +1816,9 @@
       "focus": "Add the A tier accounts into two different engage flows",
       "date_add": "14-Jan",
       "eta": "18-Feb",
-      "last_update": "(2/18) - There are some flows that are not perfectly right, I'll fix the values in the database but most of them are perfect"
+      "last_update": "(2/18) - There are some flows that are not perfectly right, I'll fix the values in the database but most of them are perfect",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 94,
@@ -1644,7 +1830,9 @@
       "focus": "Create the bank website",
       "date_add": "17-Jan",
       "eta": "2/24/2026",
-      "last_update": "Create the bank website for the financial story"
+      "last_update": "Create the bank website for the financial story",
+      "delivery_date": "3/4/2026",
+      "eta_reason": ""
     },
     {
       "row": 95,
@@ -1656,7 +1844,9 @@
       "focus": "Generate the userflows for the government website v4",
       "date_add": "9-Feb",
       "eta": "13-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Feb",
+      "eta_reason": ""
     },
     {
       "row": 96,
@@ -1668,7 +1858,9 @@
       "focus": "Generate the usersteps for the government website v4",
       "date_add": "9-Feb",
       "eta": "13-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Feb",
+      "eta_reason": ""
     },
     {
       "row": 97,
@@ -1680,7 +1872,9 @@
       "focus": "Generate the funnels for the government website v4",
       "date_add": "9-Feb",
       "eta": "13-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Feb",
+      "eta_reason": ""
     },
     {
       "row": 98,
@@ -1692,7 +1886,9 @@
       "focus": "Generate the events for the government website v4",
       "date_add": "9-Feb",
       "eta": "13-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Feb",
+      "eta_reason": ""
     },
     {
       "row": 99,
@@ -1704,7 +1900,9 @@
       "focus": "Generate the key metrics for the government website v4",
       "date_add": "9-Feb",
       "eta": "13-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Feb",
+      "eta_reason": ""
     },
     {
       "row": 100,
@@ -1716,7 +1914,9 @@
       "focus": "Generate the keywords for the government website v4",
       "date_add": "9-Feb",
       "eta": "13-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Feb",
+      "eta_reason": ""
     },
     {
       "row": 101,
@@ -1728,7 +1928,9 @@
       "focus": "Generate the userflows for the government website v5",
       "date_add": "9-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 102,
@@ -1740,7 +1942,9 @@
       "focus": "Generate the usersteps for the government website v5",
       "date_add": "9-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 103,
@@ -1752,7 +1956,9 @@
       "focus": "Generate the funnels for the government website v5",
       "date_add": "9-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 104,
@@ -1764,7 +1970,9 @@
       "focus": "Generate the events for the government website v5",
       "date_add": "9-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 105,
@@ -1776,7 +1984,9 @@
       "focus": "Generate the key metrics for the government website v5",
       "date_add": "9-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 106,
@@ -1788,7 +1998,9 @@
       "focus": "Generate the keywords for the government website v5",
       "date_add": "9-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 107,
@@ -1800,7 +2012,9 @@
       "focus": "Generate the userflows for the government website v6",
       "date_add": "9-Feb",
       "eta": "24-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 108,
@@ -1812,7 +2026,9 @@
       "focus": "Generate the usersteps for the government website v6",
       "date_add": "9-Feb",
       "eta": "24-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 109,
@@ -1824,7 +2040,9 @@
       "focus": "Generate the funnels for the government website v6",
       "date_add": "9-Feb",
       "eta": "24-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 110,
@@ -1836,7 +2054,9 @@
       "focus": "Generate the events for the government website v6",
       "date_add": "9-Feb",
       "eta": "24-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 111,
@@ -1848,7 +2068,9 @@
       "focus": "Generate the key metrics for the government website v6",
       "date_add": "9-Feb",
       "eta": "24-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 112,
@@ -1860,7 +2082,9 @@
       "focus": "Generate the keywords for the government website v6",
       "date_add": "9-Feb",
       "eta": "24-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 113,
@@ -1872,7 +2096,9 @@
       "focus": "Study the Apollo documentation to get on par with the project",
       "date_add": "17-Feb",
       "eta": "18-Feb",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 114,
@@ -1884,7 +2110,9 @@
       "focus": "Adjust Siteimprove data to ensure that all funnels, events, metrics and other elements are showing actual data properly",
       "date_add": "17-Feb",
       "eta": "24-Feb",
-      "last_update": "(2/17) - Need Taufer to point one of the staging accounts to unstable so I can fix the values faster\n(2/18) - Fixed, but will reflect only on a new account"
+      "last_update": "(2/17) - Need Taufer to point one of the staging accounts to unstable so I can fix the values faster\n(2/18) - Fixed, but will reflect only on a new account",
+      "delivery_date": "24-Feb",
+      "eta_reason": ""
     },
     {
       "row": 115,
@@ -1896,7 +2124,9 @@
       "focus": "Configure Hubspot 18 account",
       "date_add": "17-Feb",
       "eta": "18-Feb",
-      "last_update": "(2/18) - Waiting for Soranzo to create the account on Hubspot"
+      "last_update": "(2/18) - Waiting for Soranzo to create the account on Hubspot",
+      "delivery_date": "18-Feb",
+      "eta_reason": ""
     },
     {
       "row": 116,
@@ -1908,7 +2138,9 @@
       "focus": "Create the Story generation framework for the New Gong demo story",
       "date_add": "9-Mar",
       "eta": "20-Mar",
-      "last_update": "Gong's team is negotiating a new demo story, before the deal is closed, it's important to have a framework to generate the story according to the major metrics like power in deal, contacts and others"
+      "last_update": "Gong's team is negotiating a new demo story, before the deal is closed, it's important to have a framework to generate the story according to the major metrics like power in deal, contacts and others",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 117,
@@ -1920,7 +2152,9 @@
       "focus": "Create Slack Workflow to deliver Sandbox accounts credentials",
       "date_add": "9-Mar",
       "eta": "18-Mar",
-      "last_update": "Customer needs a way to get Sandbox accounts via Slack automatically or using some type of google forms"
+      "last_update": "Customer needs a way to get Sandbox accounts via Slack automatically or using some type of google forms",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 118,
@@ -1932,7 +2166,9 @@
       "focus": "Reorganize Gong Drive",
       "date_add": "9-Mar",
       "eta": "10-Mar",
-      "last_update": "Organize the current folder from the Gong shared Testbox Drive and migrate what's on my Drive to there"
+      "last_update": "Organize the current folder from the Gong shared Testbox Drive and migrate what's on my Drive to there",
+      "delivery_date": "10-Mar",
+      "eta_reason": ""
     },
     {
       "row": 119,
@@ -1944,7 +2180,9 @@
       "focus": "Reorganize Siteimprove Drive",
       "date_add": "9-Mar",
       "eta": "11-Mar",
-      "last_update": "Organize the current folder from the Sireimprove shared Testbox Drive and migrate what's on my Drive to there"
+      "last_update": "Organize the current folder from the Sireimprove shared Testbox Drive and migrate what's on my Drive to there",
+      "delivery_date": "10-Mar",
+      "eta_reason": ""
     },
     {
       "row": 120,
@@ -1956,7 +2194,9 @@
       "focus": "Generate Funnels, Key metrics, Events, Userflows and other data elements for the V1 Financial website",
       "date_add": "9-Mar",
       "eta": "24-Mar",
-      "last_update": "Generate all data structures for the Financial Website using the created framework"
+      "last_update": "Generate all data structures for the Financial Website using the created framework",
+      "delivery_date": "2026-03-20",
+      "eta_reason": ""
     },
     {
       "row": 121,
@@ -1968,7 +2208,9 @@
       "focus": "Ingest the partner demo account",
       "date_add": "9-Mar",
       "eta": "TBD",
-      "last_update": "Gong is currently negotiating to use the Partner platform services from Testbox, to showcase our capabilities, we are goign to give them a trial using a demo account (without the engagement section metrics). We are waiting for them to share with us the credentials for the Gong account that is going to be used for that and also the Salesforce account. We already know the email that's going to be used (demo-partners@tbxofficial.com)."
+      "last_update": "Gong is currently negotiating to use the Partner platform services from Testbox, to showcase our capabilities, we are goign to give them a trial using a demo account (without the engagement section metrics). We are waiting for them to share with us the credentials for the Gong account that is going to be used for that and also the Salesforce account. We already know the email that's going to be used (demo-partners@tbxofficial.com).",
+      "delivery_date": "",
+      "eta_reason": ""
     },
     {
       "row": 122,
@@ -1980,7 +2222,9 @@
       "focus": "Work on a new date format for the Gong tables",
       "date_add": "9-Mar",
       "eta": "3-Apr",
-      "last_update": "Currently the time interval method being used in the integration does not fully suit our requirements as it can't recreate the events on a reliable way when changing ingestiond day, because of that I'm trying to think on a more efficient way to represent the events dates"
+      "last_update": "Currently the time interval method being used in the integration does not fully suit our requirements as it can't recreate the events on a reliable way when changing ingestiond day, because of that I'm trying to think on a more efficient way to represent the events dates",
+      "delivery_date": "12-Mar",
+      "eta_reason": ""
     },
     {
       "row": 123,
@@ -1992,7 +2236,9 @@
       "focus": "Document the story elements for the Siteimprove Government Vertical",
       "date_add": "3-Feb",
       "eta": "2/27/2026",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "11-Mar",
+      "eta_reason": ""
     },
     {
       "row": 124,
@@ -2004,7 +2250,9 @@
       "focus": "Document the Siteimprove platform workflow and capabilities",
       "date_add": "3-Feb",
       "eta": "2/27/2026",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "2026-03-16",
+      "eta_reason": ""
     },
     {
       "row": 125,
@@ -2016,7 +2264,9 @@
       "focus": "Document the Siteimprove technical implementation details",
       "date_add": "3-Feb",
       "eta": "2/27/2026",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "17-Mar",
+      "eta_reason": ""
     },
     {
       "row": 126,
@@ -2028,7 +2278,9 @@
       "focus": "Document the Gong platform workflow and capabilities",
       "date_add": "3-Feb",
       "eta": "2/27/2026",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "13-Mar",
+      "eta_reason": ""
     },
     {
       "row": 127,
@@ -2040,7 +2292,9 @@
       "focus": "Get timelines on the website rotation fix",
       "date_add": "16-Mar",
       "eta": "16-Mar",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "16-Mar",
+      "eta_reason": ""
     },
     {
       "row": 128,
@@ -2052,7 +2306,9 @@
       "focus": "Document Apollo Platform Usage and Workflows",
       "date_add": "16-Mar",
       "eta": "20-Mar",
-      "last_update": "I tested the agnostic documentation playbook and the final outcomes appear to be good, still validating so it may be necessary to have another task to fix"
+      "last_update": "I tested the agnostic documentation playbook and the final outcomes appear to be good, still validating so it may be necessary to have another task to fix",
+      "delivery_date": "17-Mar",
+      "eta_reason": ""
     },
     {
       "row": 129,
@@ -2064,7 +2320,9 @@
       "focus": "Plan Apollo Implementation Improvements",
       "date_add": "16-Mar",
       "eta": "18-Mar",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "17-Mar",
+      "eta_reason": ""
     },
     {
       "row": 130,
@@ -2076,7 +2334,9 @@
       "focus": "Customer Call",
       "date_add": "16-Mar",
       "eta": "16-Mar",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "16-Mar",
+      "eta_reason": ""
     },
     {
       "row": 131,
@@ -2088,7 +2348,9 @@
       "focus": "Fix dataset values to work with the current Infrastructure limitations (30 parallel user sessions)",
       "date_add": "16-Mar",
       "eta": "17-Mar",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "17-Mar",
+      "eta_reason": ""
     },
     {
       "row": 132,
@@ -2100,7 +2362,9 @@
       "focus": "Release new dataset version and monitore engineering team to check the dataset version change on code",
       "date_add": "16-Mar",
       "eta": "3/17/2026",
-      "last_update": ""
+      "last_update": "",
+      "delivery_date": "",
+      "eta_reason": "The dataset release routine changed without previous notification and now it occurs only on Wednesday for the old dataset management model.\nhttps://testbox-talk.slack.com/archives/C01LL9ZCGF3/p1773768196753189?thread_ts=1773764249.010679&cid=C01LL9ZCGF3"
     }
   ],
   "thiago": [

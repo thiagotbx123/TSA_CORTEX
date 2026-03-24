@@ -391,6 +391,21 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
           <option value="ALL">All Tasks</option>
           <option value="implementing">Active Implementations</option>
         </select>
+        <label style="font-size:.72em;color:var(--dim);font-weight:600">Customer</label>
+        <select id="gtCustomer" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
+          <option value="ALL">All Customers</option>
+        </select>
+        <label style="font-size:.72em;color:var(--dim);font-weight:600">Demand</label>
+        <select id="gtDemand" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
+          <option value="ALL">All</option>
+          <option value="External">External</option>
+          <option value="Internal">Internal</option>
+        </select>
+        <label style="font-size:.72em;color:var(--dim);font-weight:600">Status</label>
+        <select id="gtStatus" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
+          <option value="ALL">All</option>
+          <option value="active">Active Only</option>
+        </select>
         <label style="font-size:.72em;color:var(--dim);font-weight:600">Period</label>
         <select id="gtPeriod" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
           <option value="3m">Last 3 Months</option>
@@ -1552,11 +1567,13 @@ const gtCollapsed={};
 
 function gtGetFiltered(){
   const view=document.getElementById('gtView').value;
+  const customer=document.getElementById('gtCustomer').value;
+  const demand=document.getElementById('gtDemand').value;
+  const gtStatus=document.getElementById('gtStatus').value;
   const period=document.getElementById('gtPeriod').value;
   let cutoff=null;
   if(period!=='all'){const d=new Date();d.setMonth(d.getMonth()-(period==='1m'?1:period==='3m'?3:6));cutoff=d.toISOString().slice(0,10)}
 
-  /* For "implementing" view: find customers that have active tasks, then show ALL tasks for those customers */
   let activeCustomers=null;
   if(view==='implementing'){
     activeCustomers=new Set();
@@ -1570,6 +1587,10 @@ function gtGetFiltered(){
     if(!s||s<'2025-01-01')return false;
     if(r.status==='Canceled')return false;
     if(state.person!=='ALL'&&r.tsa!==state.person)return false;
+    if(customer!=='ALL'&&r.customer!==customer)return false;
+    if(demand!=='ALL'&&r.category!==demand)return false;
+    if(gtStatus==='active'&&(r.status==='Done'||r.status==='Canceled'))return false;
+    if(gtStatus!=='ALL'&&gtStatus!=='active'&&r.status!==gtStatus)return false;
     if(view==='implementing'&&activeCustomers&&!activeCustomers.has(r.customer))return false;
     const e=r.delivery||r.eta||'';
     if(cutoff&&(s||'9999')<cutoff&&(e||'9999')<cutoff)return false;
@@ -1754,8 +1775,22 @@ function renderGantt(){
   wrap.addEventListener('scroll',hideTip);
 }
 
+/* Gantt: populate Customer filter dynamically + Status filter */
+(function(){
+  const gtCustEl=document.getElementById('gtCustomer');
+  const gtStatusEl=document.getElementById('gtStatus');
+  if(gtCustEl){
+    const custs=[...new Set(RAW.map(r=>r.customer).filter(Boolean))].sort();
+    custs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;gtCustEl.appendChild(o)});
+  }
+  if(gtStatusEl){
+    const sts=[...new Set(RAW.map(r=>r.status).filter(Boolean))].sort();
+    sts.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;gtStatusEl.appendChild(o)});
+  }
+})();
+
 /* Gantt-specific filter change handlers */
-['gtView','gtPeriod'].forEach(id=>{
+['gtView','gtPeriod','gtCustomer','gtDemand','gtStatus'].forEach(id=>{
   const el=document.getElementById(id);
   if(el)el.addEventListener('change',function(){renderGantt()});
 });
@@ -1952,8 +1987,13 @@ function init(){
   function switchTab(tabName){
     document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabName));
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    document.getElementById('panel-'+tabName).classList.add('active');
+    const panel=document.getElementById('panel-'+tabName);
+    panel.classList.add('active');
     document.querySelectorAll('.kpi-cell').forEach(c=>c.classList.toggle('kpi-active',c.dataset.tab===tabName));
+    /* Auto-open the collapse inside the active tab */
+    const hdr=panel.querySelector('.audit-header');
+    const body=panel.querySelector('.audit-body');
+    if(hdr&&body&&!body.classList.contains('open')){hdr.classList.add('open');body.classList.add('open')}
   }
 
   document.querySelectorAll('.tab').forEach(tab=>{

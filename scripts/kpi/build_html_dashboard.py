@@ -386,6 +386,10 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
     </div>
     <div id="ganttCollapseBody" style="display:none">
       <div id="ganttControls" style="padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:.72em;color:var(--dim);font-weight:600">Person</label>
+        <select id="gtPerson" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
+          <option value="ALL">All People</option>
+        </select>
         <label style="font-size:.72em;color:var(--dim);font-weight:600">View</label>
         <select id="gtView" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
           <option value="ALL">All Tasks</option>
@@ -1566,6 +1570,7 @@ const GT_DAY_W=6;
 const gtCollapsed={};
 
 function gtGetFiltered(){
+  const gtPerson=document.getElementById('gtPerson').value;
   const view=document.getElementById('gtView').value;
   const customer=document.getElementById('gtCustomer').value;
   const demand=document.getElementById('gtDemand').value;
@@ -1586,7 +1591,8 @@ function gtGetFiltered(){
     const s=r.startedAt||r.dateAdd||'';
     if(!s||s<'2025-01-01')return false;
     if(r.status==='Canceled')return false;
-    if(state.person!=='ALL'&&r.tsa!==state.person)return false;
+    const pf=gtPerson!=='ALL'?gtPerson:state.person;
+    if(pf!=='ALL'&&r.tsa!==pf)return false;
     if(customer!=='ALL'&&r.customer!==customer)return false;
     if(demand!=='ALL'&&r.category!==demand)return false;
     if(gtStatus==='active'&&(r.status==='Done'||r.status==='Canceled'))return false;
@@ -1779,6 +1785,10 @@ function renderGantt(){
 (function(){
   const gtCustEl=document.getElementById('gtCustomer');
   const gtStatusEl=document.getElementById('gtStatus');
+  const gtPersonEl=document.getElementById('gtPerson');
+  if(gtPersonEl){
+    PEOPLE_ALL.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;gtPersonEl.appendChild(o)});
+  }
   if(gtCustEl){
     const custs=[...new Set(RAW.map(r=>r.customer).filter(Boolean))].sort();
     custs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;gtCustEl.appendChild(o)});
@@ -1790,7 +1800,7 @@ function renderGantt(){
 })();
 
 /* Gantt-specific filter change handlers */
-['gtView','gtPeriod','gtCustomer','gtDemand','gtStatus'].forEach(id=>{
+['gtPerson','gtView','gtPeriod','gtCustomer','gtDemand','gtStatus'].forEach(id=>{
   const el=document.getElementById(id);
   if(el)el.addEventListener('change',function(){renderGantt()});
 });

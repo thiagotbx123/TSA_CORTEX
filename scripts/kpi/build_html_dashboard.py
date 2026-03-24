@@ -1998,9 +1998,14 @@ function init(){
     const gBody=document.getElementById('ganttCollapseBody');
     const gHdr=document.getElementById('ganttCollapseHdr');
     if(tabName==='gantt'&&gBody&&gHdr){gBody.style.display='';gHdr.classList.add('open')}
-    /* Hide KPI by Customer on Gantt and Scrum tabs — not relevant there */
+    /* Hide summary sections on Gantt/Scrum — show only on KPI tabs */
+    const isFullscreen=tabName==='gantt'||tabName==='scrum';
     const custSection=document.getElementById('customerKPISection');
-    if(custSection)custSection.style.display=(tabName==='gantt'||tabName==='scrum')?'none':'';
+    const topStrip=document.getElementById('topStrip');
+    const memberCards=document.getElementById('memberCards');
+    if(custSection)custSection.style.display=isFullscreen?'none':'';
+    if(topStrip)topStrip.style.display=isFullscreen?'none':'';
+    if(memberCards)memberCards.style.display=isFullscreen?'none':'';
   }
 
   document.querySelectorAll('.tab').forEach(tab=>{

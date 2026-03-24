@@ -379,12 +379,12 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 </div>
 
 <div class="tab-panel" id="panel-gantt">
-  <div class="audit-section" style="margin-top:0">
-    <div class="audit-header collapse-toggle">
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;margin-top:0">
+    <div class="audit-header collapse-toggle" style="cursor:pointer" id="ganttCollapseHdr">
       <span class="toggle">&#9660;</span>
       <h3><span class="dot" style="background:#0ea5e9;position:relative;top:0"></span>Gantt Chart <span style="font-size:.6em;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-weight:700">WIP</span></h3>
     </div>
-    <div class="audit-body">
+    <div id="ganttCollapseBody" style="display:none">
       <div id="ganttControls" style="padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <label style="font-size:.72em;color:var(--dim);font-weight:600">View</label>
         <select id="gtView" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
@@ -1994,6 +1994,13 @@ function init(){
     const hdr=panel.querySelector('.audit-header');
     const body=panel.querySelector('.audit-body');
     if(hdr&&body&&!body.classList.contains('open')){hdr.classList.add('open');body.classList.add('open')}
+    /* Gantt collapse uses display:none (sticky needs no overflow:hidden in ancestors) */
+    const gBody=document.getElementById('ganttCollapseBody');
+    const gHdr=document.getElementById('ganttCollapseHdr');
+    if(tabName==='gantt'&&gBody&&gHdr){gBody.style.display='';gHdr.classList.add('open')}
+    /* Hide KPI by Customer on Gantt and Scrum tabs — not relevant there */
+    const custSection=document.getElementById('customerKPISection');
+    if(custSection)custSection.style.display=(tabName==='gantt'||tabName==='scrum')?'none':'';
   }
 
   document.querySelectorAll('.tab').forEach(tab=>{
@@ -2011,6 +2018,8 @@ function init(){
       header.classList.toggle('open');
       const body=header.nextElementSibling;
       if(body&&body.classList.contains('audit-body'))body.classList.toggle('open');
+      /* Gantt uses display:none instead of max-height (sticky needs no overflow:hidden) */
+      if(body&&body.id==='ganttCollapseBody'){body.style.display=header.classList.contains('open')?'':'none'}
     });
   });
 

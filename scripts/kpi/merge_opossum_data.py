@@ -1,9 +1,9 @@
-"""Merge Opossum + Raccoons Linear data for Thais & Yasmim into _dashboard_data.json.
+"""Merge Linear data (Opossum + Raccoons) for ALL KPI team members into _dashboard_data.json.
 
 Sources:
-  - _opossum_raw.json: Cached Opossum team issues (Thais + Yasmim)
-  - _raccoons_thais.json: Cached Raccoons team issues assigned to Thais
-  - Spreadsheet data for other TSA members stays untouched (frozen backlog)
+  - _opossum_raw.json: Opossum team issues (Thais + Yasmim)
+  - _raccoons_kpi.json: Raccoons team issues for all KPI members (Thiago, Carlos, Alexandra, Diego, Gabi + Thais cross-team)
+  - Spreadsheet data stays as historical backlog (not replaced for members now in Linear)
 
 Usage: python kpi/merge_opossum_data.py
 """
@@ -16,41 +16,180 @@ from collections import Counter
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
 OPOSSUM_CACHE = os.path.join(SCRIPT_DIR, '..', '_opossum_raw.json')
-RACCOONS_THAIS_CACHE = os.path.join(SCRIPT_DIR, '..', '_raccoons_thais.json')
+RACCOONS_KPI_CACHE = os.path.join(SCRIPT_DIR, '..', '_raccoons_kpi.json')
+RACCOONS_THAIS_CACHE = os.path.join(SCRIPT_DIR, '..', '_raccoons_thais.json')  # backward compat
 OUTPUT_PATH = DATA_PATH
+
+# Workflow State IDs → Names (for decoding history entries)
+STATE_NAMES = {
+    # Opossum team states
+    'c88c5a3a-2203-4a15-9801-51befb603c39': 'Triage',
+    '828cf5f3-d5f2-40d7-bc5b-4512e37171f0': 'Backlog',
+    '7d5ad714-3623-4ebf-8a6b-fb6cca398643': 'Todo',
+    'c867261b-81c1-4b69-8f2b-0bfc836a3407': 'In Progress',
+    '3f6d0e12-8224-4329-954f-e9146816732f': 'In Review',
+    '9315b082-63b4-4e74-a759-1c7b1403a2f8': 'Done',
+    'e3d6167b-3328-42cd-9e22-d6ca18f003f3': 'Canceled',
+    'fe43e265-1b90-4dc1-b8c5-bc6946dc6545': 'Duplicate',
+    # Raccoons team states
+    'ccc98f62-bc2a-475a-bcc8-0cdf0c81f8fc': 'Triage',
+    '0a00ef8b-f3e2-4b1b-8413-1961c91fe495': 'Backlog',
+    'ab5844ed-4edd-4d84-99fc-34ab37859486': 'Todo',
+    '8fd63b1a-1ec5-460f-b0c9-605ac0d6e04b': 'In Progress',
+    '89e4c72d-57aa-4774-8cf0-b00ee103d17c': 'In Review',
+    '6e10418c-81fe-467d-aed3-d4c75577d16e': 'Done',
+    '97ef043e-ccb7-4e2a-b75b-7542ef198abc': 'Canceled',
+    'bfe7e0e1-d403-4897-996a-5f839305e9e8': 'Duplicate',
+    'c7a6728a-dee7-4e2b-a60f-476e699d4b54': 'Paused',
+}
+
+# Terminal/delivery states
+DELIVERY_STATES = {'In Review', 'Done'}
+
+
+def extract_history_fields(issue):
+    """Extract activity-based dates from issue history.
+
+    Returns dict with:
+      deliveryDate: date when status FIRST moved to In Review or Done
+      originalEta: first dueDate ever set (from history)
+      finalEta: current/last dueDate
+      reviewerDelay: days between In Review → Done (if applicable)
+      etaChanges: number of times dueDate was changed
+      inReviewDate: date when status moved to In Review (if applicable)
+    """
+    history = issue.get('history', [])
+    result = {
+        'deliveryDate': None,
+        'originalEta': None,
+        'finalEta': issue.get('dueDate') or None,
+        'reviewerDelay': None,
+        'etaChanges': 0,
+        'inReviewDate': None,
+        'reworkDetected': False,
+        'reassignedInReview': False,
+        'reviewAssignee': None,
+        'originalAssigneeId': None,    # First person assigned to this ticket
+        'originalAssigneeName': None,
+    }
+
+    if not history:
+        return result
+
+    # Sort history by createdAt ascending
+    sorted_history = sorted(history, key=lambda h: h.get('createdAt', ''))
+
+    # Track first delivery date (In Review or Done)
+    first_delivery_date = None
+    in_review_date = None
+    done_date = None
+
+    for h in sorted_history:
+        to_state = STATE_NAMES.get(h.get('toStateId', ''), '')
+        ts = h.get('createdAt', '')[:10]
+
+        # Track first time moved to In Review or Done
+        if to_state in DELIVERY_STATES and first_delivery_date is None and ts:
+            first_delivery_date = ts
+
+        if to_state == 'In Review' and in_review_date is None and ts:
+            in_review_date = ts
+
+        if to_state == 'Done' and ts:
+            done_date = ts  # last Done date
+
+        # D.LIE20: Detect rework — Done → In Progress means task was reopened
+        from_state = STATE_NAMES.get(h.get('fromStateId', ''), '')
+        if from_state == 'Done' and to_state in ('In Progress', 'Todo', 'Backlog'):
+            result['reworkDetected'] = True
+
+        # D.LIE23: Track original assignee (first person ever assigned)
+        if h.get('toAssigneeId') and result['originalAssigneeId'] is None:
+            # The first assignment event: fromAssignee is the original if exists, else toAssignee
+            if h.get('fromAssigneeId'):
+                result['originalAssigneeId'] = h['fromAssigneeId']
+                result['originalAssigneeName'] = h.get('fromAssigneeName', '')
+            else:
+                result['originalAssigneeId'] = h['toAssigneeId']
+                result['originalAssigneeName'] = h.get('toAssigneeName', '')
+
+        # D.LIE21: Detect reassignment at/after In Review
+        # When person A moves to In Review and reassigns to person B,
+        # person A delivered (delivery = In Review date), person B is now the reviewer
+        if h.get('toAssigneeId') and h.get('fromAssigneeId') and h['toAssigneeId'] != h['fromAssigneeId']:
+            # Was this reassignment after In Review?
+            if in_review_date and ts >= in_review_date:
+                result['reassignedInReview'] = True
+                result['reviewAssignee'] = h['toAssigneeId']
+
+        # Track dueDate changes
+        if h.get('toDueDate') is not None:
+            result['etaChanges'] += 1
+            # The first toDueDate in history is the original ETA
+            if result['originalEta'] is None:
+                # fromDueDate of the first change = original, or toDueDate if no from
+                if h.get('fromDueDate'):
+                    result['originalEta'] = h['fromDueDate']
+                else:
+                    result['originalEta'] = h['toDueDate']
+
+    result['deliveryDate'] = first_delivery_date
+    result['inReviewDate'] = in_review_date
+
+    # If no originalEta found in history, use current dueDate
+    if result['originalEta'] is None:
+        result['originalEta'] = result['finalEta']
+
+    # Calculate reviewer delay (days between In Review → Done)
+    if in_review_date and done_date:
+        try:
+            d_review = datetime.strptime(in_review_date, '%Y-%m-%d')
+            d_done = datetime.strptime(done_date, '%Y-%m-%d')
+            delay = (d_done - d_review).days
+            if delay > 0:
+                result['reviewerDelay'] = delay
+        except ValueError:
+            pass
+
+    return result
 
 
 # ── Load existing dashboard data ──
 with open(DATA_PATH, 'r', encoding='utf-8') as f:
     existing = json.load(f)
 
-# H6: Count existing records before deleting
-old_thais = len([r for r in existing if r.get('tsa') == 'THAIS'])
-old_yasmim = len([r for r in existing if r.get('tsa') == 'YASMIM'])
+# H6: Count existing Linear-sourced records before removing
+old_linear = {}
+for r in existing:
+    if r.get('source') == 'linear':
+        tsa = r.get('tsa', '?')
+        old_linear[tsa] = old_linear.get(tsa, 0) + 1
 
-# Remove old THAIS/YASMIM records (will be rebuilt from Linear)
-existing = [r for r in existing if r.get('tsa') not in ('THAIS', 'YASMIM')]
-print(f"Existing records (without THAIS/YASMIM): {len(existing)}")
-print(f"  Removed: THAIS={old_thais}, YASMIM={old_yasmim}")
+# Keep spreadsheet records for ALL members (historical backlog)
+# Remove ONLY Linear-sourced records (will be rebuilt from fresh API data)
+existing = [r for r in existing if r.get('source') != 'linear']
+print(f"Existing records (spreadsheet backlog): {len(existing)}")
+if old_linear:
+    print(f"  Removed Linear records: {old_linear}")
 
-# ── Load Opossum issues from local cache ──
-with open(OPOSSUM_CACHE, 'r', encoding='utf-8') as f:
-    issues = json.load(f)
-print(f"Opossum issues loaded: {len(issues)}")
-
-# ── Load Raccoons issues for Thais (if cache exists) ──
-raccoons_thais = []
-if os.path.exists(RACCOONS_THAIS_CACHE):
-    with open(RACCOONS_THAIS_CACHE, 'r', encoding='utf-8') as f:
-        raccoons_thais = json.load(f)
-    print(f"Raccoons/Thais issues loaded: {len(raccoons_thais)}")
-    # Deduplicate by id (in case any issue appears in both teams)
-    seen_ids = {i.get('id') for i in issues}
-    for ri in raccoons_thais:
-        if ri.get('id') not in seen_ids:
-            issues.append(ri)
-            seen_ids.add(ri.get('id'))
-    print(f"Combined issues after dedup: {len(issues)}")
+# ── Load unified KPI issues (all members, all teams) ──
+KPI_ALL_PATH = os.path.join(SCRIPT_DIR, '..', '_kpi_all_members.json')
+issues = []
+for cache_path in [KPI_ALL_PATH, RACCOONS_KPI_CACHE, OPOSSUM_CACHE]:
+    if os.path.exists(cache_path):
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            loaded = json.load(f)
+        print(f"Linear issues loaded: {len(loaded)} from {os.path.basename(cache_path)}")
+        # Deduplicate
+        seen_ids = {i.get('id') for i in issues}
+        for iss in loaded:
+            if iss.get('id') not in seen_ids:
+                issues.append(iss)
+                seen_ids.add(iss.get('id'))
+        break
+if not issues:
+    print(f"No Linear cache found — skipping")
+print(f"Total Linear issues: {len(issues)}")
 
 
 # ── Helper: compute week string from date ──
@@ -106,15 +245,17 @@ def extract_customer(title):
 
 
 def map_status(linear_status):
-    """Map Linear status to spreadsheet status."""
+    """Map Linear status — preserve original names for accurate KPI calculation."""
     mapping = {
         'Done': 'Done',
         'In Progress': 'In Progress',
         'In Review': 'In Progress',
-        'Todo': 'To do',
-        'Backlog': 'To do',
+        'Todo': 'Todo',
+        'Backlog': 'Backlog',
         'Canceled': 'Canceled',
-        'Triage': 'To do',
+        'Triage': 'Triage',
+        'Paused': 'Paused',
+        'Duplicate': 'Canceled',
     }
     return mapping.get(linear_status, linear_status)
 
@@ -163,16 +304,84 @@ def determine_category(customer, title):
     return 'External'
 
 
-# ── Convert Opossum issues to dashboard records ──
+# ── Convert Linear issues to dashboard records ──
 PERSON_MAP = {
     'Tha\u00eds Linzmaier': 'THAIS',
     'Yasmim Arsego': 'YASMIM',
+    'Thiago Rodrigues': 'THIAGO',
+    'Carlos Guilherme Matos de Almeida da Silva': 'CARLOS',
+    'Alexandra Lacerda': 'ALEXANDRA',
+    'Diego Cavalli': 'DIEGO',
+    'Gabrielle Cupello': 'GABI',
 }
+PERSON_MAP_BY_ID = {
+    'a6063009-d822-49f1-a638-6cebfe59e89e': 'THIAGO',
+    'b13ca864-e0f4-4ff6-b020-ec3f4491643e': 'CARLOS',
+    '19b6975e-3026-450b-bc01-f468ad543028': 'ALEXANDRA',
+    '717e7b13-d840-41c0-baeb-444354c8ff91': 'DIEGO',
+    'd9745bdb-7138-4345-9303-516aa6e4ec39': 'GABI',
+    '0879df15-56d6-477f-944d-df033121641a': 'THAIS',
+    'df4a6bcf-c519-469d-bb40-b1a0e93d0041': 'YASMIM',
+}
+LINEAR_TSA_NAMES = set(PERSON_MAP.values())
+
+# D.LIE19: Identify parent tickets (have subtasks) — exclude from KPI
+# Only count subtasks (the real work), not the parent (coordination)
+parent_ids_with_children = set()
+for iss in issues:
+    pid = iss.get('parentId')
+    if pid:
+        parent_ids_with_children.add(pid)
+print(f"Parents with subtasks (excluded from KPI): {len(parent_ids_with_children)}")
 
 new_records = []
+skipped_parents = 0
+reassigned_to_original = 0
+review_delivery_adjusted = 0
 for iss in issues:
-    assignee = iss.get('assignee', '')
-    tsa = PERSON_MAP.get(assignee)
+    # Skip parent tickets that have subtasks
+    if iss.get('id') in parent_ids_with_children:
+        skipped_parents += 1
+        continue
+
+    # Extract history fields first (need originalAssigneeId)
+    hist_fields = extract_history_fields(iss)
+
+    # D.LIE23: Ownership logic — who does this ticket belong to?
+    # Rule: The OWNER is determined at creation time:
+    #   1. If creator == first assignee → creator owns it forever (even if "lent" to others)
+    #   2. If creator != first assignee → first assignee owns it (creator made it for someone else)
+    #   3. If no history → fall back to current assignee
+    creator_id = iss.get('createdById', '')
+    current_assignee = iss.get('assignee', '')
+    current_id = iss.get('assigneeId', '')
+    original_id = hist_fields.get('originalAssigneeId')
+
+    owner_id = None
+    if original_id:
+        # We know who the first assignee was
+        if creator_id == original_id:
+            # Creator assigned to themselves → it's theirs forever
+            owner_id = creator_id
+        else:
+            # Creator assigned to someone else → that someone else owns it
+            owner_id = original_id
+    else:
+        # No reassignment history — check if creator is current assignee
+        if creator_id == current_id:
+            owner_id = creator_id
+        else:
+            # Creator made it for current assignee
+            owner_id = current_id
+
+    if owner_id and owner_id in PERSON_MAP_BY_ID:
+        tsa = PERSON_MAP_BY_ID[owner_id]
+        if owner_id != current_id:
+            reassigned_to_original += 1
+    else:
+        # Owner not in KPI team — try current assignee as fallback
+        tsa = PERSON_MAP.get(current_assignee)
+
     if not tsa:
         continue
 
@@ -183,15 +392,55 @@ for iss in issues:
     started_at = iss.get('startedAt', '')[:10] if iss.get('startedAt') else ''
     status = map_status(iss.get('status', ''))
     customer = extract_customer(title)
+    # D.LIE18: Fallback to Linear project name when title has no [bracket] customer
+    if not customer and iss.get('project'):
+        proj = iss['project']
+        proj_map = {
+            'qbo': 'QuickBooks', '[quickbook] data gen': 'QuickBooks',
+            'archer': 'Archer', 'gong implementation': 'Gong', '[gong]': 'Gong',
+            '[gem]': 'Gem', '[tabs] integration': 'Tabs',
+            '[tropic] implementation': 'Tropic', '[brevo] integration': 'Brevo',
+            '[mailchimp] integration': 'Mailchimp', 'mailchimp': 'Mailchimp',
+            '[people.ai] integration': 'People.ai',
+            '[wfs] workforce solutions': 'WFS',
+            '[gainsight] staircase ai integration': 'Staircase',
+            'gainsight staircase': 'Staircase',
+            '[siteimprove] integration': 'Siteimprove', 'siteimprove': 'Siteimprove',
+            '[apollo] integration': 'Apollo', 'apollo': 'Apollo',
+            'de team': 'Internal',
+        }
+        proj_lower = proj.lower().strip()
+        customer = proj_map.get(proj_lower, proj)
+    # Also check labels for customer hints
+    if not customer:
+        labels = iss.get('labels', [])
+        label_map = {'QBO': 'QuickBooks', 'WFS': 'WFS', 'Gong': 'Gong', 'Archer': 'Archer',
+                     'Gem': 'Gem', 'Mailchimp': 'Mailchimp', 'Tropic': 'Tropic', 'Brevo': 'Brevo',
+                     'Tabs': 'Tabs', 'Siteimprove': 'Siteimprove', 'Apollo': 'Apollo'}
+        for lbl in labels:
+            if lbl in label_map:
+                customer = label_map[lbl]
+                break
     category = determine_category(customer, title)
 
-    # D.LIE6: Use startedAt for week assignment when available (more accurate)
-    # Falls back to createdAt if startedAt is not set
-    week_date = started_at if started_at else created
+    # D.LIE16: Use ETA (dueDate) for week assignment — places the task in the week
+    # it was supposed to be delivered, which is what the KPI measures.
+    # Falls back to startedAt, then createdAt if no ETA is set.
+    week_date = due[:10] if due and len(due) >= 10 else (started_at if started_at else created)
     week = date_to_week(week_date)
     wrange = week_range(week_date)
 
-    perf = calc_perf(status, due, completed)
+    # D.LIE24: When ticket was reassigned at In Review, the implementor's
+    # delivery date is when they moved it to In Review (not when reviewer marked Done).
+    # This separates implementor execution time from reviewer delay.
+    effective_delivery = completed
+    if hist_fields.get('reassignedInReview') and hist_fields.get('inReviewDate'):
+        effective_delivery = hist_fields['inReviewDate']
+        review_delivery_adjusted += 1
+
+    perf = calc_perf(status, due, effective_delivery)
+
+    # hist_fields already extracted above (for originalAssigneeId)
 
     # M5: Customer work = External regardless of type
     if category == 'External' and customer:
@@ -205,10 +454,12 @@ for iss in issues:
     pm = iss.get('projectMilestone')
     milestone = pm.get('name', '') if pm else ''
 
-    # Detect rework label
+    # Detect rework: via label OR via history (Done → In Progress)
     raw_labels = iss.get('labels', [])
     label_names = [l.lower() if isinstance(l, str) else (l.get('name', '').lower() if isinstance(l, dict) else '') for l in raw_labels]
-    has_rework = 'yes' if 'rework:implementation' in label_names else ''
+    has_rework_label = 'rework:implementation' in label_names
+    has_rework_history = hist_fields.get('reworkDetected', False)
+    has_rework = 'yes' if (has_rework_label or has_rework_history) else ''
 
     # Construct URL from ID if missing
     if ticket_id and not ticket_url:
@@ -226,7 +477,7 @@ for iss in issues:
         'customer': customer if customer != 'Internal' else '',
         'dateAdd': created,
         'eta': due,
-        'delivery': completed,
+        'delivery': effective_delivery,
         'perf': perf,
         'ticketId': ticket_id,
         'ticketUrl': ticket_url,
@@ -235,27 +486,45 @@ for iss in issues:
         'parentId': parent_id,
         'rework': has_rework,
         'startedAt': started_at,
+        'deliveryDate': hist_fields['deliveryDate'] or '',
+        'originalEta': hist_fields['originalEta'] or '',
+        'finalEta': hist_fields['finalEta'] or '',
+        'reviewerDelay': hist_fields['reviewerDelay'],
+        'etaChanges': hist_fields['etaChanges'],
+        'inReviewDate': hist_fields['inReviewDate'] or '',
+        'reassignedInReview': hist_fields.get('reassignedInReview', False),
+        'reviewAssignee': hist_fields.get('reviewAssignee', ''),
     }
     new_records.append(record)
 
-print(f"\nNew Linear records: {len(new_records)}")
+print(f"\nNew Linear records: {len(new_records)} (skipped {skipped_parents} parents, {reassigned_to_original} attributed to original assignee, {review_delivery_adjusted} delivery adjusted to In Review date)")
 
-# H6: Validate count before merging — warn if replacement set is significantly smaller
-new_thais = len([r for r in new_records if r['tsa'] == 'THAIS'])
-new_yasmim = len([r for r in new_records if r['tsa'] == 'YASMIM'])
-print(f"  THAIS: {old_thais} → {new_thais}")
-print(f"  YASMIM: {old_yasmim} → {new_yasmim}")
+# H6: Validate counts per person
+for tsa_name in sorted(LINEAR_TSA_NAMES):
+    new_count = len([r for r in new_records if r['tsa'] == tsa_name])
+    old_count = old_linear.get(tsa_name, 0)
+    print(f"  {tsa_name}: {old_count} → {new_count}")
+    if old_count > 0 and new_count < old_count * 0.5:
+        print(f"    WARNING: {tsa_name} count dropped >50%! Check data source.")
 
-if old_thais > 0 and new_thais < old_thais * 0.5:
-    print(f"  WARNING: THAIS record count dropped >50% ({old_thais}→{new_thais}). Check data source.")
-if old_yasmim > 0 and new_yasmim < old_yasmim * 0.5:
-    print(f"  WARNING: YASMIM record count dropped >50% ({old_yasmim}→{new_yasmim}). Check data source.")
+# Stats per person
+for tsa_name in sorted(LINEAR_TSA_NAMES):
+    recs = [r for r in new_records if r['tsa'] == tsa_name]
+    if recs:
+        perfs = Counter(r['perf'] for r in recs)
+        print(f"  {tsa_name}: {len(recs)} records — {dict(perfs)}")
 
-# Stats
-for tsa in ['THAIS', 'YASMIM']:
-    recs = [r for r in new_records if r['tsa'] == tsa]
-    perfs = Counter(r['perf'] for r in recs)
-    print(f"  {tsa}: {len(recs)} records — {dict(perfs)}")
+# History analysis summary
+has_delivery = [r for r in new_records if r.get('deliveryDate')]
+has_eta_changes = [r for r in new_records if r.get('etaChanges', 0) > 0]
+has_reviewer_delay = [r for r in new_records if r.get('reviewerDelay') is not None]
+print(f"\n  History analysis:")
+print(f"    Issues with deliveryDate (In Review/Done from history): {len(has_delivery)}")
+print(f"    Issues with ETA changes: {len(has_eta_changes)}")
+print(f"    Issues with reviewer delay (In Review → Done gap): {len(has_reviewer_delay)}")
+if has_reviewer_delay:
+    avg_delay = sum(r['reviewerDelay'] for r in has_reviewer_delay) / len(has_reviewer_delay)
+    print(f"    Average reviewer delay: {avg_delay:.1f} days")
 
 # ── Merge ──
 merged = existing + new_records

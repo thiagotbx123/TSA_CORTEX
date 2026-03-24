@@ -1,4 +1,4 @@
-"""Build TSA Waki KPI HTML Dashboard v3 — audit-hardened version.
+"""Build Raccoons KPI HTML Dashboard v3 — audit-hardened version.
 
 Changes from v2:
   - H1: Dynamic isCoreWeek (data-driven, no hardcoded period)
@@ -22,7 +22,7 @@ import os, json, datetime
 
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
-OUTPUT = os.path.join(os.path.expanduser('~'), 'Downloads', 'TSA_WAKI_KPI_DASHBOARD.html')
+OUTPUT = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
 
 # L2: Validate JSON before processing
 try:
@@ -37,10 +37,10 @@ except json.JSONDecodeError as e:
 data_json_safe = data_json.replace('</script>', '<\\/script>').replace('</Script>', '<\\/Script>')
 
 # M11: Record build timestamp for staleness detection
-build_date = datetime.date.today().strftime('%Y-%m-%d')
+build_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 # Find the most recent dateAdd in data for staleness comparison (only past/present dates)
 data_dates = [r.get('dateAdd', '') for r in data_raw
-              if r.get('dateAdd', '') and len(r.get('dateAdd', '')) >= 10 and r['dateAdd'][:10] <= build_date]
+              if r.get('dateAdd', '') and len(r.get('dateAdd', '')) >= 10 and r['dateAdd'][:10] <= build_date[:10]]
 latest_data_date = max(data_dates) if data_dates else build_date
 
 HTML = r"""<!DOCTYPE html>
@@ -48,7 +48,7 @@ HTML = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TSA KPI Dashboard</title>
+<title>KPI Dashboard</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -102,16 +102,16 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .grid-section{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
 .grid-section .title{padding:14px 20px;font-size:.9em;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .grid-section .title .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.grid-section .title .info-btn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--gray-bg);color:var(--dim);font-size:.7em;font-weight:700;cursor:help;margin-left:4px;border:1px solid var(--border)}
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--gray-bg);color:var(--dim);font-size:.7em;font-weight:700;cursor:help;margin-left:4px;border:1px solid var(--border)}
 .heatmap{width:100%;border-collapse:collapse;font-size:.88em}
 .heatmap th,.heatmap td{padding:9px 12px;text-align:center;white-space:nowrap}
 .heatmap thead th{background:var(--gray-bg);font-weight:600;color:var(--dim);font-size:.8em;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border)}
 .heatmap .month-header{background:#eef2ff;color:var(--blue);font-weight:700;font-size:.88em;letter-spacing:.5px;border-bottom:2px solid var(--blue-l);padding:10px 8px;border-left:3px solid var(--accent)}
 .heatmap .week-header{background:var(--gray-bg);font-size:.78em;color:var(--dim);padding:7px 8px}
 .heatmap .month-first{border-left:3px solid var(--accent)!important}
-.heatmap .person-label{text-align:left;font-weight:600;padding-left:16px;background:var(--white);border-right:2px solid var(--border);min-width:120px;font-size:.9em;color:var(--text)}
+.heatmap .person-label{text-align:left;font-weight:600;padding-left:16px;background:var(--white);border-right:2px solid var(--border);min-width:120px;font-size:.9em;color:var(--text);position:sticky;left:0;z-index:2}
 .heatmap .team-row td{font-weight:800;background:#eef2ff;border-top:3px solid var(--accent);font-size:.92em}
-.heatmap .team-row .person-label{background:#eef2ff;color:var(--accent);font-size:.82em;text-transform:uppercase;letter-spacing:.3px;font-weight:800;white-space:normal;line-height:1.3}
+.heatmap .team-row .person-label{background:#eef2ff;color:var(--accent);font-size:.82em;text-transform:uppercase;letter-spacing:.3px;font-weight:800;white-space:normal;line-height:1.3;position:sticky;left:0;z-index:2}
 .heatmap td.cell{min-width:60px;font-weight:600;font-size:.9em;border:1px solid var(--gray-l);cursor:default;position:relative;transition:transform .1s}
 .heatmap td.cell:hover{transform:scale(1.05);z-index:1;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .heatmap td.total-col{background:#eef2ff!important;font-weight:800;border-left:3px solid var(--accent);font-size:.92em}
@@ -122,7 +122,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .heat-terrible{background:#fecaca;color:#7f1d1d}
 .heat-na{background:var(--white);color:#d5d8dd;font-weight:300;font-size:.75em}
 .heat-zero{background:var(--gray-bg);color:var(--light);font-style:italic}
-.tooltip{position:fixed;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;padding:14px 18px;border-radius:10px;font-size:.82em;pointer-events:none;z-index:999;max-width:420px;line-height:1.6;box-shadow:0 8px 30px rgba(0,0,0,.4);display:none;border:1px solid rgba(255,255,255,.08)}
+.tooltip{position:fixed;background:linear-gradient(135deg,rgba(15,23,42,.88),rgba(30,41,59,.92));backdrop-filter:blur(8px);color:#fff;padding:14px 18px;border-radius:10px;font-size:.82em;pointer-events:none;z-index:999;max-width:420px;line-height:1.6;box-shadow:0 8px 30px rgba(0,0,0,.4);display:none;border:1px solid rgba(255,255,255,.08)}
 .tooltip b{color:#93c5fd}
 .tooltip .tip-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.12)}
 .tooltip .tip-hdr b{font-size:1.05em;color:#60a5fa}
@@ -158,7 +158,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .segment-btn.active{background:#065f46;color:#fff;border-color:#065f46;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .segment-btn .seg-count{display:block;font-size:.75em;font-weight:400;opacity:.7;margin-top:2px}
 .audit-section{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:20px}
-.audit-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.audit-header{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;gap:10px}
 .audit-header h3{font-size:.9em;font-weight:700;display:flex;align-items:center;gap:8px}
 .audit-header .toggle{font-size:.75em;color:var(--dim);transition:transform .2s}
 .audit-header.open .toggle{transform:rotate(180deg)}
@@ -178,13 +178,15 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .audit-table .perf-late{color:var(--red);font-weight:600}
 .audit-table .perf-overdue{color:var(--yellow);font-weight:600}
 .audit-table .perf-na{color:var(--light)}
+.audit-table .perf-not-started{color:#a78bfa;font-weight:500}
 .audit-table .rework-yes{color:var(--red);font-weight:700}
 .audit-stats{padding:10px 20px;font-size:.72em;color:var(--dim);border-top:1px solid var(--gray-l);display:flex;gap:16px;flex-wrap:wrap}
-.member-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:18px}
+.member-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
 .member-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .member-card .mc-name{font-weight:700;font-size:.88em;margin-bottom:6px;color:var(--text)}
 .member-card .mc-body{flex:1}
 .member-card .mc-row{display:flex;justify-content:space-between;font-size:.72em;color:var(--dim);padding:2px 0}
+.member-card .mc-row span[title]{cursor:help;border-bottom:1px dotted var(--dim)}
 .member-card .mc-row b{color:var(--text)}
 .member-card .mc-bar{margin-top:auto;padding-top:8px}
 .member-card .mc-bar-track{height:4px;border-radius:2px;background:var(--gray-l);overflow:hidden}
@@ -199,13 +201,73 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .heat-vol-4{background:#93c5fd;color:#1e3a8a}
 .heat-vol-5{background:#3b82f6;color:#fff}
 .footer{text-align:center;margin-top:24px;padding:12px;color:var(--light);font-size:.7em}
+.scrum-card{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .15s}
+.scrum-card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(37,99,235,.12)}
+.scrum-card.copied{border-color:#059669;background:#ecfdf5}
+.scrum-card .sc-header{padding:12px 16px;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;display:flex;justify-content:space-between;align-items:center}
+.scrum-card .sc-name{font-weight:700;font-size:.95em}
+.scrum-card .sc-stats{display:flex;gap:8px;font-size:.7em}
+.scrum-card .sc-stats span{padding:2px 8px;border-radius:10px}
+.scrum-card .sc-body{padding:12px 16px;font-size:.82em;line-height:1.7;font-family:'Consolas','Menlo',monospace;white-space:pre-wrap;color:#334155;max-height:400px;overflow-y:auto}
+.scrum-card .sc-customer{color:#6366f1;font-weight:700;margin-top:6px}
+.scrum-card .sc-task{padding-left:4px}
+.scrum-card .sc-g{color:#059669}.scrum-card .sc-y{color:#d97706}.scrum-card .sc-r{color:#dc2626}
+.scrum-card .sc-copy-hint{text-align:center;padding:6px;font-size:.68em;color:var(--light);border-top:1px solid var(--gray-l)}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* ── Gantt chart styles (gt- prefix) ───────────── */
+.gt-months{display:flex;position:sticky;top:0;z-index:21;background:var(--white);border-bottom:2px solid var(--border)}
+.gt-months .gt-label-col{min-width:280px;max-width:280px;position:sticky;left:0;z-index:25;background:#0f172a;padding:6px 12px;display:flex;align-items:center;box-shadow:4px 0 8px rgba(0,0,0,.15)}
+.gt-months .gt-label-col span{color:#94a3b8;font-size:.72em;font-weight:600}
+.gt-month-cell{display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;color:var(--text);background:#f8fafc;border-right:2px solid var(--border);padding:4px 0}
+.gt-header{display:flex;position:sticky;top:28px;z-index:20;background:var(--white);border-bottom:1px solid var(--border)}
+.gt-header .gt-label-col{min-width:280px;max-width:280px;position:sticky;left:0;z-index:25;background:#f1f5f9;padding:2px 12px;display:flex;align-items:center;box-shadow:4px 0 8px rgba(0,0,0,.08)}
+.gt-header .gt-label-col span{color:#94a3b8;font-size:.6em}
+.gt-days{display:flex}
+.gt-day{min-width:6px;max-width:6px;text-align:center;font-size:.45em;color:#94a3b8;padding:1px 0;border-right:1px solid #f1f5f9}
+.gt-day.gt-weekend{background:#f1f5f9;color:#cbd5e1}
+.gt-day.gt-month-start{border-left:2px solid #cbd5e1}
+.gt-day.gt-today-col{background:#fef2f2;color:#dc2626;font-weight:700}
+.gt-row{display:flex;border-bottom:1px solid #e8ecf1;min-height:28px;align-items:stretch}
+.gt-row:hover{background:#f8fafc}
+.gt-label{min-width:280px;max-width:280px;position:sticky;left:0;z-index:10;background:var(--white);display:flex;align-items:center;padding:0 8px;border-right:2px solid #cbd5e1;box-shadow:4px 0 8px rgba(0,0,0,.06)}
+.gt-row:hover .gt-label{background:#f8fafc}
+.gt-group{background:#f8fafc;border-bottom:2px solid var(--border);cursor:pointer;user-select:none}
+.gt-group:hover{background:#e2e8f0}
+.gt-group .gt-label{background:#f8fafc;font-weight:700;font-size:.82em;gap:8px;box-shadow:4px 0 8px rgba(0,0,0,.06)}
+.gt-group:hover .gt-label{background:#e2e8f0}
+.gt-group .gt-arrow{font-size:.65em;color:#64748b;transition:transform .2s;width:14px;text-align:center}
+.gt-group.gt-open .gt-arrow{transform:rotate(90deg)}
+.gt-group .gt-count{font-size:.65em;color:#94a3b8;font-weight:400;margin-left:4px}
+.gt-group .gt-badges{display:flex;gap:4px;margin-left:auto;margin-right:4px}
+.gt-group .gt-badge{font-size:.6em;padding:1px 6px;border-radius:8px;font-weight:600}
+.gt-task .gt-label{font-size:.72em;color:#475569;padding-left:28px;gap:6px}
+.gt-task .gt-label a{color:var(--accent);text-decoration:none;font-weight:600;font-size:.95em}
+.gt-task .gt-label a:hover{text-decoration:underline}
+.gt-task .gt-label .gt-tname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.gt-task .gt-label .gt-person{font-size:.85em;color:#94a3b8;margin-left:auto;white-space:nowrap}
+.gt-task.gt-hidden{display:none}
+.gt-bars{display:flex;position:relative;flex:1;min-height:26px}
+.gt-cell{min-width:6px;border-right:1px solid #f8fafc00}
+.gt-cell.gt-weekend{background:#f8fafc}
+.gt-cell.gt-month-start{border-left:1px solid var(--border)}
+.gt-bar{position:absolute;top:4px;height:18px;border-radius:4px;min-width:4px;cursor:pointer;transition:filter .12s;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.gt-bar:hover{filter:brightness(1.15);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.gt-bar-done{background:linear-gradient(90deg,#059669,#34d399)}
+.gt-bar-late{background:linear-gradient(90deg,#dc2626,#f87171)}
+.gt-bar-active{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+.gt-bar-noeta{background:linear-gradient(90deg,#94a3b8,#cbd5e1)}
+.gt-bar-blocked{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.gt-bar-projected{border:2px dashed #94a3b8;background:#94a3b815;top:6px;height:14px}
+.gt-bar-summary{background:linear-gradient(90deg,#1e40af33,#3b82f633);border-radius:4px;top:5px;height:16px;border:1px solid #3b82f644}
+.gt-today-marker{position:absolute;top:0;bottom:0;width:2px;background:#dc2626;z-index:3;pointer-events:none;opacity:.8}
+.gt-month-line{position:absolute;top:0;bottom:0;width:1px;background:#cbd5e1;z-index:1;pointer-events:none;opacity:.5}
 @media(max-width:900px){.top-strip{flex-direction:column}.strip-group{flex-direction:row;flex-wrap:wrap}.heatmap{font-size:.7em}.audit-table{font-size:.65em}}
 </style>
 </head>
 <body>
 <div class="header">
   <div>
-    <h1>TSA KPI Dashboard</h1>
+    <h1>KPI Dashboard</h1>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <a href="https://linear.app/testbox/team/RAC/projects" target="_blank" class="linear-link"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z"/></svg>View in Linear</a>
       <a href="javascript:void(0)" onclick="showGuide()" class="linear-link" style="background:linear-gradient(135deg,#1e293b,#334155);border-color:#475569"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Guide</a>
@@ -213,8 +275,11 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   </div>
   <img src="https://cdn.prod.website-files.com/62f1899cd374937577f36d5f/6529d8cb022a253f2009f59a_testbox.svg" alt="TestBox" class="tbx-logo">
   <div class="filters">
+    <label>Month</label><select id="fMonth" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:.82em;cursor:pointer"><option value="ALL">All</option></select>
     <label>Person</label><select id="fPerson"><option value="ALL">All</option></select>
     <label>Category</label><select id="fCategory"><option value="ALL">All</option><option value="Internal">Internal</option><option value="External">External</option></select>
+    <button id="btnRefresh" onclick="refreshDashboard()" style="margin-left:12px;background:linear-gradient(135deg,#1e40af,#2563eb);border:1px solid #3b82f6;color:#fff;padding:6px 14px;border-radius:6px;font-size:.78em;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;letter-spacing:.3px" onmouseover="this.style.background='linear-gradient(135deg,#1e3a8a,#1d4ed8)'" onmouseout="this.style.background='linear-gradient(135deg,#1e40af,#2563eb)'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>Refresh Data</button>
+    <span id="refreshDate" style="font-size:.72em;font-style:italic;color:#a7f3d0;margin-left:6px"></span>
   </div>
 </div>
 
@@ -241,60 +306,158 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="tab" data-tab="velocity">Execution Time</div>
   <div class="tab" data-tab="reliability">Reliability</div>
   <div class="tab" data-tab="activity">Team Activity</div>
+  <div class="tab" data-tab="scrum">Scrum Copy</div>
+  <div class="tab" data-tab="gantt">Gantt</div>
 </div>
 
 <div class="tab-panel active" id="panel-accuracy">
-  <div class="grid-section">
-    <div class="title"><span class="dot" style="background:var(--blue)"></span>ETA Accuracy<span class="info-btn" onmouseenter="showTip(event,'<b>ETA Accuracy</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late)<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>ETA</span>: First date set on the ticket (measures prediction accuracy)<br><span class=tip-label>Excludes</span>: No ETA, No Delivery Date, Canceled, On Track, Blocked<br><span class=tip-label>Min sample</span>: n&lt;5 shown as count instead of %')" onmouseleave="hideTip()">?</span></div>
-    <div class="trend-wrap" id="trend-accuracy"></div>
-    <div style="overflow-x:auto"><table class="heatmap" id="grid-accuracy"></table></div>
+  <div class="audit-section" style="margin-top:0">
+    <div class="audit-header collapse-toggle">
+      <span class="toggle">&#9660;</span>
+      <h3><span class="dot" style="background:var(--blue);position:relative;top:0"></span>ETA Accuracy<span class="info-btn" onmouseenter="showTip(event,'<b>ETA Accuracy</b><br><span class=tip-label>Formula</span>: On Time / (On Time + Late)<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>Late</span>: Past ETA — delivered after deadline or not delivered yet<br><span class=tip-label>Not Started</span>: Backlog/Todo/Triage — ETA not applicable<br><span class=tip-label>Excludes</span>: No ETA, Not Started, On Track, Blocked, N/A')" onmouseleave="hideTip()" onclick="event.stopPropagation()">?</span></h3>
+    </div>
+    <div class="audit-body">
+      <div class="trend-wrap" id="trend-accuracy"></div>
+      <div style="overflow-x:auto"><table class="heatmap" id="grid-accuracy"></table></div>
+    </div>
   </div>
 </div>
 
 <div class="tab-panel" id="panel-velocity">
-  <div class="grid-section">
-    <div class="title"><span class="dot" style="background:var(--yellow)"></span>Execution Time<span class="info-btn" onmouseenter="showTip(event,'<b>Avg Execution Time</b><br><span class=tip-label>Formula</span>: Average(Delivery - Start Date)<br><span class=tip-label>Start Date</span>: startedAt (In Progress) or dateAdd as fallback<br><span class=tip-label>Target</span>: &lt;28 days<br><span class=tip-label>Includes</span>: Only Done tasks with both dates<br><br>Measures implementation speed. Lower = faster delivery.')" onmouseleave="hideTip()">?</span></div>
-    <div class="trend-wrap" id="trend-velocity"></div>
-    <div style="overflow-x:auto"><table class="heatmap" id="grid-velocity"></table></div>
+  <div class="audit-section" style="margin-top:0">
+    <div class="audit-header collapse-toggle">
+      <span class="toggle">&#9660;</span>
+      <h3><span class="dot" style="background:var(--yellow);position:relative;top:0"></span>Execution Time<span class="info-btn" onmouseenter="showTip(event,'<b>Avg Execution Time</b><br><span class=tip-label>Formula</span>: Average(Delivery - Start Date)<br><span class=tip-label>Start Date</span>: startedAt (In Progress) or dateAdd as fallback<br><span class=tip-label>Target</span>: &lt;28 days<br><span class=tip-label>Includes</span>: Only Done tasks with both dates<br><br>Measures implementation speed. Lower = faster delivery.')" onmouseleave="hideTip()" onclick="event.stopPropagation()">?</span></h3>
+    </div>
+    <div class="audit-body">
+      <div class="trend-wrap" id="trend-velocity"></div>
+      <div style="overflow-x:auto"><table class="heatmap" id="grid-velocity"></table></div>
+    </div>
   </div>
 </div>
 
 <div class="tab-panel" id="panel-reliability">
-  <div class="grid-section">
-    <div class="title"><span class="dot" style="background:var(--dim)"></span>Implementation Reliability <span style="font-size:.6em;background:var(--gray-l);color:var(--dim);padding:2px 8px;border-radius:4px;font-weight:700">NOT ACTIVE</span><span class="info-btn" onmouseenter="showTip(event,'<b>Implementation Reliability — NOT ACTIVE</b><br><span class=tip-label>Formula</span>: Done without Rework / Total Done<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>Rework</span>: Flagged via rework:implementation label in Linear<br><br><b style=color:#fbbf24>Status: No rework labels have been applied yet.</b><br>This metric will become active once the team starts using the rework:implementation label on Linear tickets that required rework after delivery.')" onmouseleave="hideTip()">?</span></div>
-    <div class="trend-wrap" id="trend-reliability"></div>
-    <div style="overflow-x:auto"><table class="heatmap" id="grid-reliability"></table></div>
-  </div>
-  <div class="grid-section" style="margin-top:16px">
-    <div class="title"><span class="dot" style="background:var(--red)"></span>Rework Log</div>
-    <div id="reworkLog" style="padding:16px 20px"></div>
+  <div class="audit-section" style="margin-top:0">
+    <div class="audit-header collapse-toggle">
+      <span class="toggle">&#9660;</span>
+      <h3><span class="dot" style="background:var(--dim);position:relative;top:0"></span>Implementation Reliability <span style="font-size:.6em;background:var(--gray-l);color:var(--dim);padding:2px 8px;border-radius:4px;font-weight:700">NOT ACTIVE</span><span class="info-btn" onmouseenter="showTip(event,'<b>Implementation Reliability — NOT ACTIVE</b><br><span class=tip-label>Formula</span>: Done without Rework / Total Done<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>Rework</span>: Flagged via rework:implementation label in Linear<br><br><b style=color:#fbbf24>Status: No rework labels have been applied yet.</b><br>This metric will become active once the team starts using the rework:implementation label on Linear tickets that required rework after delivery.')" onmouseleave="hideTip()" onclick="event.stopPropagation()">?</span></h3>
+    </div>
+    <div class="audit-body">
+      <div class="trend-wrap" id="trend-reliability"></div>
+      <div style="overflow-x:auto"><table class="heatmap" id="grid-reliability"></table></div>
+      <div style="margin-top:16px;padding:0 20px">
+        <div style="font-weight:700;font-size:.9em;margin-bottom:8px"><span class="dot" style="background:var(--red);position:relative;top:0"></span>Rework Log</div>
+        <div id="reworkLog"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="tab-panel" id="panel-activity">
-  <div class="grid-section">
-    <div class="title"><span class="dot" style="background:var(--accent)"></span>Team Activity<span class="info-btn" onmouseenter="showTip(event,'<b>Task Volume</b><br><span class=tip-label>Shows</span>: Number of tasks per person per week<br><span class=tip-label>Includes</span>: All tasks regardless of status<br><span class=tip-label>Color</span>: Darker = more tasks')" onmouseleave="hideTip()">?</span></div>
-    <div class="trend-wrap" id="trend-activity"></div>
-    <div style="overflow-x:auto"><table class="heatmap" id="grid-activity"></table></div>
+  <div class="audit-section" style="margin-top:0">
+    <div class="audit-header collapse-toggle">
+      <span class="toggle">&#9660;</span>
+      <h3><span class="dot" style="background:var(--accent);position:relative;top:0"></span>Team Activity<span class="info-btn" onmouseenter="showTip(event,'<b>Task Volume</b><br><span class=tip-label>Shows</span>: Number of tasks per person per week<br><span class=tip-label>Includes</span>: All tasks regardless of status<br><span class=tip-label>Color</span>: Darker = more tasks')" onmouseleave="hideTip()" onclick="event.stopPropagation()">?</span></h3>
+    </div>
+    <div class="audit-body">
+      <div class="trend-wrap" id="trend-activity"></div>
+      <div style="overflow-x:auto"><table class="heatmap" id="grid-activity"></table></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-scrum">
+  <div class="audit-section" style="margin-top:0">
+    <div class="audit-header collapse-toggle">
+      <span class="toggle">&#9660;</span>
+      <h3><span class="dot" style="background:#8b5cf6;position:relative;top:0"></span>Scrum Copy<span style="font-size:.72em;color:var(--dim);font-weight:400;margin-left:8px">Click any card to copy to clipboard</span></h3>
+    </div>
+    <div class="audit-body">
+      <div id="scrumCards" style="padding:16px 20px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-gantt">
+  <div class="audit-section" style="margin-top:0">
+    <div class="audit-header collapse-toggle">
+      <span class="toggle">&#9660;</span>
+      <h3><span class="dot" style="background:#0ea5e9;position:relative;top:0"></span>Gantt Chart</h3>
+    </div>
+    <div class="audit-body">
+      <div id="ganttControls" style="padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:.72em;color:var(--dim);font-weight:600">View</label>
+        <select id="gtView" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
+          <option value="ALL">All Tasks</option>
+          <option value="implementing">Active Implementations</option>
+        </select>
+        <label style="font-size:.72em;color:var(--dim);font-weight:600">Period</label>
+        <select id="gtPeriod" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:.78em;background:var(--white);cursor:pointer">
+          <option value="3m">Last 3 Months</option>
+          <option value="1m">Last Month</option>
+          <option value="6m" selected>Last 6 Months</option>
+          <option value="all">All Time</option>
+        </select>
+        <span id="gtStats" style="font-size:.72em;color:var(--dim);margin-left:auto"></span>
+      </div>
+      <div id="ganttWrap" style="overflow:auto;max-height:600px;padding:0 20px">
+        <div id="ganttCanvas"></div>
+      </div>
+      <div id="ganttLegend" style="padding:8px 20px;display:flex;gap:14px;font-size:.7em;color:#64748b;flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:linear-gradient(90deg,#059669,#34d399)"></i> On Time</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:linear-gradient(90deg,#dc2626,#f87171)"></i> Late</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:linear-gradient(90deg,#2563eb,#60a5fa)"></i> Active</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:linear-gradient(90deg,#d97706,#fbbf24)"></i> Blocked</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:linear-gradient(90deg,#94a3b8,#cbd5e1)"></i> No ETA</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;border:2px dashed #94a3b8;background:#94a3b822"></i> Projected</span>
+        <span style="color:#dc2626;font-weight:700">| Today</span>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
 
-<div class="grid-section" id="customerKPISection" style="margin-top:20px">
-  <div class="title"><span class="dot" style="background:var(--accent)"></span><span id="customerKPITitle">KPI by Customer</span><span class="info-btn" id="clientKpiInfo">?</span></div>
-  <div style="overflow-x:auto"><table class="heatmap" id="customerKPITable"></table></div>
+<div class="audit-section" id="customerKPISection" style="margin-top:20px">
+  <div class="audit-header" id="customerKPIToggle">
+    <span class="toggle">&#9660;</span>
+    <h3><span id="customerKPITitle">KPI by Customer</span><span class="info-btn" id="clientKpiInfo" onclick="event.stopPropagation()">?</span></h3>
+  </div>
+  <div class="audit-body" id="customerKPIBody">
+    <div style="overflow-x:auto"><table class="heatmap" id="customerKPITable"></table></div>
+  </div>
 </div>
 
 <div class="audit-section" id="auditSection">
   <div class="audit-header" id="auditToggle">
-    <h3><span style="font-size:1.1em">&#128203;</span> Audit Data Table <span style="font-size:.72em;font-weight:400;color:var(--dim)">(click to expand)</span></h3>
-    <div style="display:flex;align-items:center;gap:12px">
+    <span class="toggle">&#9660;</span>
+    <h3>Audit Data Table</h3>
+    <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
+      <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
+        <select id="auditFilterPerson" style="background:var(--gray-bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.72em;font-weight:600;color:var(--dim);cursor:pointer" onchange="renderAuditTable()">
+          <option value="ALL">All People</option>
+        </select>
+        <select id="auditFilterWorkStatus" style="background:var(--gray-bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.72em;font-weight:600;color:var(--dim);cursor:pointer" onchange="renderAuditTable()">
+          <option value="ALL">All Status</option>
+        </select>
+        <select id="auditFilterPerf" style="background:var(--gray-bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.72em;font-weight:600;color:var(--dim);cursor:pointer" onchange="renderAuditTable()">
+          <option value="ALL">All Performance</option>
+          <option value="On Time">On Time</option>
+          <option value="Late">Late</option>
+          <option value="On Track">On Track</option>
+          <option value="No ETA">No ETA</option>
+          <option value="Blocked">Blocked</option>
+          <option value="N/A">N/A</option>
+          <option value="Not Started">Not Started</option>
+        </select>
+        <select id="auditFilterCustomer" style="background:var(--gray-bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.72em;font-weight:600;color:var(--dim);cursor:pointer" onchange="renderAuditTable()">
+          <option value="ALL">All Customers</option>
+        </select>
+      </div>
       <div class="audit-tools">
         <button onclick="event.stopPropagation();downloadXLSX()">&#8681; XLSX</button>
         <button onclick="event.stopPropagation();copyTSV()">&#128203; Copy</button>
       </div>
-      <span class="toggle">&#9660;</span>
     </div>
   </div>
   <div class="audit-body" id="auditBody">
@@ -304,7 +467,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 </div>
 
 <div class="footer">
-  TSA KPI Dashboard &nbsp;&middot;&nbsp; Source: Linear + Spreadsheet (backlog) &nbsp;&middot;&nbsp; Generated __DATE__ &nbsp;&middot;&nbsp; Latest data: __LATEST_DATA__
+  KPI Dashboard &nbsp;&middot;&nbsp; Source: Linear + Spreadsheet (backlog) &nbsp;&middot;&nbsp; Generated __DATE__ &nbsp;&middot;&nbsp; Latest data: __LATEST_DATA__
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -356,20 +519,16 @@ function groupByMonth(weeks){
 }
 const MONTHS=groupByMonth(CORE_WEEKS);
 
-/* M11: Staleness banner */
+/* M11: Staleness indicator (inline next to Refresh button) */
 (function(){
-  const el=document.getElementById('stalenessBanner');
-  const ld=new Date(LATEST_DATA);const bd=new Date(BUILD_DATE);
-  const diffDays=Math.round((bd-ld)/864e5);
-  if(isNaN(diffDays)||diffDays<0){el.innerHTML='';return}
-  const pTag=PERIOD_LABEL?'<span style="font-style:italic;opacity:.85">'+PERIOD_LABEL+'</span> · ':'';
-  if(diffDays<=3){el.innerHTML='<div class="staleness-banner staleness-ok">'+pTag+'Data refreshed: '+BUILD_DATE+' ('+diffDays+' day'+(diffDays!==1?'s':'')+' since latest record)</div>'}
-  else if(diffDays<=7){el.innerHTML='<div class="staleness-banner staleness-warn">'+pTag+'Data may be stale: built '+BUILD_DATE+', latest record is '+LATEST_DATA+' ('+diffDays+' days ago)</div>'}
-  else{el.innerHTML='<div class="staleness-banner staleness-old">'+pTag+'Data is stale: built '+BUILD_DATE+', latest record is '+LATEST_DATA+' ('+diffDays+' days ago). Run the pipeline to refresh.</div>'}
+  const el=document.getElementById('refreshDate');
+  const banner=document.getElementById('stalenessBanner');
+  if(banner)banner.style.display='none';
+  if(el)el.textContent='Last update: '+BUILD_DATE;
 })();
 
 /* ── State — M12: default to ALL ──────────────────── */
-let state={person:'ALL',category:'ALL'};
+let state={person:'ALL',category:'ALL',month:'ALL'};
 const charts={};
 
 function getFiltered(){
@@ -377,6 +536,10 @@ function getFiltered(){
     if(!r.week||!isCoreWeek(r.week))return false;
     if(state.person!=='ALL'&&r.tsa!==state.person)return false;
     if(state.category!=='ALL'&&r.category!==state.category)return false;
+    if(state.month!=='ALL'){
+      const[y,m]=parseWeek(r.week);
+      if(monthLabel(y,m)!==state.month)return false;
+    }
     return true;
   });
 }
@@ -396,14 +559,54 @@ function showTip(e,html){
 }
 function hideTip(){tip.style.display='none'}
 
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;')}
+function refreshDashboard(){
+  const btn=document.getElementById('btnRefresh');
+  const orig=btn.innerHTML;
+  if(!['localhost','127.0.0.1'].includes(location.hostname)){
+    alert("For dashboard updates, please reach out to Thiago Rodrigues.");
+    return;
+  }
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>Refreshing...';
+  btn.disabled=true;btn.style.opacity='.7';
+  fetch('/refresh',{method:'POST'}).then(r=>r.json()).then(d=>{
+    if(d.success){
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Done!';
+      btn.style.background='linear-gradient(135deg,#065f46,#059669)';btn.style.opacity='1';
+      setTimeout(()=>location.reload(),800);
+    } else {
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Error';
+      btn.style.background='linear-gradient(135deg,#991b1b,#dc2626)';btn.style.opacity='1';
+      setTimeout(()=>{btn.innerHTML=orig;btn.style.background='linear-gradient(135deg,#1e40af,#2563eb)';btn.disabled=false},3000);
+    }
+  }).catch(()=>{
+    /* Server not running — try localhost:8787 in case file:// was opened directly */
+    fetch('http://localhost:8787/refresh',{method:'POST'}).then(r=>r.json()).then(d=>{
+      if(d.success){
+        btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Done! Redirecting...';
+        btn.style.background='linear-gradient(135deg,#065f46,#059669)';btn.style.opacity='1';
+        setTimeout(()=>{window.location.href='http://localhost:8787'},800);
+      } else {
+        btn.innerHTML='Error';btn.style.background='linear-gradient(135deg,#991b1b,#dc2626)';btn.style.opacity='1';
+        setTimeout(()=>{btn.innerHTML=orig;btn.style.background='linear-gradient(135deg,#1e40af,#2563eb)';btn.disabled=false},3000);
+      }
+    }).catch(()=>{
+      btn.style.opacity='1';btn.disabled=false;
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Server offline';
+      btn.style.background='linear-gradient(135deg,#991b1b,#dc2626)';
+      navigator.clipboard.writeText('cd C:\\\\Users\\\\adm_r\\\\Tools\\\\TSA_CORTEX && python scripts/kpi/serve_kpi.py');
+      setTimeout(()=>{btn.innerHTML=orig+' <span style="font-size:.7em;opacity:.8">(start server first)</span>';btn.style.background='linear-gradient(135deg,#1e40af,#2563eb)'},2500);
+    });
+  });
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/`/g,'&#96;')}
 
 /* ── KPI Calculations ──────────────────────────────── */
 function calcAccuracy(rows){
   const ot=rows.filter(r=>r.perf==='On Time').length;
   const lt=rows.filter(r=>r.perf==='Late').length;
-  const d=ot+lt; /* H2: aligned — On Time / (On Time + Late) everywhere */
-  return{val:d>0?ot/d:null,num:ot,den:d,n:rows.length};
+  const d=ot+lt; /* H2: On Time / (On Time + Late) — no Overdue concept, past ETA = Late */
+  return{val:d>0?ot/d:null,num:ot,den:d,n:rows.length,late:lt};
 }
 function calcVelocity(rows){
   const durs=rows.filter(r=>r.delivery&&(r.startedAt||r.dateAdd)&&r.status==='Done').map(r=>daysBetween(r.startedAt||r.dateAdd,r.delivery)).filter(d=>d!==null&&d>=0);
@@ -448,7 +651,7 @@ function buildGrid(tableId, calcFn, fmtFn, heatFn, tipFn){
   const people=getPeople();
   const months=MONTHS;
 
-  let h1='<tr><th rowspan="2" style="text-align:left;min-width:120px;border-right:2px solid var(--border);background:var(--white);font-size:.72em;color:var(--light);font-weight:500;letter-spacing:.5px;padding-left:16px">TEAM</th>';
+  let h1='<tr><th rowspan="2" style="text-align:left;min-width:120px;border-right:2px solid var(--border);background:var(--white);font-size:.72em;color:var(--light);font-weight:500;letter-spacing:.5px;padding-left:16px;position:sticky;left:0;z-index:3">TEAM</th>';
   months.forEach(mo=>{h1+=`<th class="month-header" colspan="${mo.weeks.length}">${mo.label}</th>`});
   h1+='<th class="month-header" rowspan="2" style="border-left:3px solid var(--accent);font-size:.78em;line-height:1.2">OVERALL<br><span style="font-weight:400;font-size:.8em;color:var(--dim)">all weeks</span></th></tr>';
 
@@ -533,20 +736,21 @@ function tipAccuracy(person,week,calc,rows){
   let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct ${pctCls}">${fmtPct(calc.val,calc.den)}</span></div>`;
   html+=`<div class="tip-stats">`;
   html+=`<div class="tip-stat"><b style="color:#34d399">${calc.num}</b><span>on time</span></div>`;
-  html+=`<div class="tip-stat"><b style="color:#f87171">${calc.den-calc.num}</b><span>late</span></div>`;
+  html+=`<div class="tip-stat"><b style="color:#f87171">${calc.late||0}</b><span>late</span></div>`;
   html+=`<div class="tip-stat"><b>${calc.den}</b><span>measured</span></div>`;
   html+=`</div>`;
   const excluded=rows.filter(r=>r.perf!=='On Time'&&r.perf!=='Late');
   if(excluded.length>0)html+=`<div style="font-size:.8em;color:#64748b;margin-top:2px">${excluded.length} excluded (${[...new Set(excluded.map(r=>r.perf))].join(', ')})</div>`;
   const lateOnes=rows.filter(r=>r.perf==='Late');
   if(lateOnes.length>0){
-    html+=`<div class="tip-section"><span class="tip-label">Late deliveries</span>`;
+    html+=`<div class="tip-section"><span class="tip-label">Late</span>`;
     lateOnes.slice(0,5).forEach(r=>{
       const delay=r.eta&&r.delivery?daysBetween(r.eta,r.delivery):null;
       const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
       const dates=r.eta?`<span class="tip-dates">ETA ${fmtDate(r.eta)}${r.delivery?' → '+fmtDate(r.delivery):''}</span>`:'';
-      const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d</span>`:'';
-      html+=`<div class="tip-task tip-late">${cust}${esc(r.focus.slice(0,50))}${delayTag}<br>${dates}</div>`;
+      const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d</span>`:(!r.delivery?' <span class="tip-delay" style="color:#f87171">NOT DELIVERED</span>':'');
+      const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
+      html+=`<div class="tip-task tip-late">${tid}${cust}${esc(r.focus.slice(0,50))}${delayTag}<br>${dates}</div>`;
     });
     if(lateOnes.length>5)html+=`<div style="color:#64748b;font-size:.85em;padding-left:10px">+ ${lateOnes.length-5} more</div>`;
     html+=`</div>`;
@@ -556,7 +760,8 @@ function tipAccuracy(person,week,calc,rows){
     html+=`<div class="tip-section"><span class="tip-label">On time</span>`;
     onTimeOnes.forEach(r=>{
       const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
-      html+=`<div class="tip-task tip-ontime">${cust}${esc(r.focus.slice(0,50))}</div>`;
+      const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
+      html+=`<div class="tip-task tip-ontime">${tid}${cust}${esc(r.focus.slice(0,50))}</div>`;
     });
     html+=`</div>`;
   }
@@ -614,7 +819,7 @@ function renderKPIStrip(){
   const openAct=data.filter(x=>x.status!=='Done'&&x.status!=='Canceled').length;
 
   const items=[
-    {el:'kpiCell1',name:'ETA Accuracy',val:a.val,fmt:v=>fmtPct(v,a.den),target:'>90%',pass:a.val!==null&&a.val>=.9,meta:`${a.num}/${a.den} on time`},
+    {el:'kpiCell1',name:'ETA Accuracy',val:a.val,fmt:v=>fmtPct(v,a.den),target:'>90%',pass:a.val!==null&&a.val>=.9,meta:`${a.num}/${a.den} on time, ${a.late||0} late`},
     {el:'kpiCell2',name:'Avg Execution Time',val:v.val,fmt:fmtDays,target:'<28 days',pass:v.val!==null&&v.val<=28,meta:`${v.n} tasks measured`},
     {el:'kpiCell3',name:'Reliability',val:hasReworkData?r.val:null,fmt:v=>fmtPct(v,r.den),target:'>90%',pass:hasReworkData&&r.val!==null&&r.val>=.9,inactive:!hasReworkData,meta:hasReworkData?`${r.num}/${r.den} clean`:'NOT ACTIVE'},
     {el:'kpiCell4',name:'Team Activity',val:act.val,fmt:fmtCount,pass:true,isActivity:true,meta:`${doneAct} done · ${openAct} open`},
@@ -643,7 +848,7 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
   const bar1=[],bar2=[],bar3=[],bar4=[];
   const bar1Label=barMode==='velocity'?'< 14d':barMode==='reliability'?'Clean':'On Time';
   const bar2Label=barMode==='velocity'?'14-28d':barMode==='reliability'?'Rework':'Late';
-  const bar3Label=barMode==='velocity'?'28-60d':barMode==='reliability'?'':'Overdue';
+  const bar3Label=barMode==='velocity'?'28-60d':barMode==='reliability'?'':'';
   const bar4Label=barMode==='velocity'?'> 60d':barMode==='reliability'?'':'No ETA';
   const bar1Color=barMode==='velocity'?'#34d39988':barMode==='reliability'?'#34d39988':'#34d39988';
   const bar2Color=barMode==='velocity'?'#fbbf2488':barMode==='reliability'?'#f8717188':'#f8717188';
@@ -668,7 +873,7 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
     }else{
       bar1.push(rows.filter(r=>r.perf==='On Time').length);
       bar2.push(rows.filter(r=>r.perf==='Late').length);
-      bar3.push(rows.filter(r=>r.perf==='Overdue').length);
+      bar3.push(0); /* Overdue merged into Late */
       bar4.push(rows.filter(r=>r.perf==='No ETA'||r.perf==='No Delivery Date').length);
     }
   });
@@ -680,7 +885,7 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
     weekTaskDetail[i]={
       onTime:rows.filter(r=>r.perf==='On Time').map(r=>({f:r.focus,c:r.customer||''})),
       late:rows.filter(r=>r.perf==='Late').map(r=>({f:r.focus,c:r.customer||'',d:r.eta&&r.delivery?daysBetween(r.eta,r.delivery):null})),
-      overdue:rows.filter(r=>r.perf==='Overdue').map(r=>({f:r.focus,c:r.customer||'',eta:r.eta||''})),
+      overdue:[], /* merged into late */
       noEta:rows.filter(r=>r.perf==='No ETA'||r.perf==='No Delivery Date').map(r=>({f:r.focus,c:r.customer||''})),
     };
   });
@@ -754,7 +959,7 @@ function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabe
       },
       scales:{
         yBar:{position:'left',stacked:true,ticks:{color:'#6b7280',font:{size:10},stepSize:1},grid:{color:'#e5e7eb88'},title:{display:true,text:'Tasks',color:'#9ca3af',font:{size:10}},beginAtZero:true},
-        yLine:{position:'right',ticks:{color:color,font:{size:10},callback:function(v){return isInverse?v+'d':barMode==='activity'?v:(v*100).toFixed(0)+'%'}},grid:{drawOnChartArea:false},title:{display:true,text:fmtLabel,color:color,font:{size:10}},beginAtZero:true,min:0,max:barMode==='activity'?undefined:(isInverse?undefined:1)},
+        yLine:{position:'right',ticks:{color:color,font:{size:10},stepSize:isInverse?5:undefined,callback:function(v){return isInverse?v+'d':barMode==='activity'?v:(v*100).toFixed(0)+'%'}},grid:{drawOnChartArea:false},title:{display:true,text:fmtLabel,color:color,font:{size:10}},beginAtZero:true,min:0,max:barMode==='activity'?undefined:(isInverse?undefined:1)},
         x:{stacked:true,ticks:{color:'#6b7280',font:{size:10}},grid:{color:'#f3f4f622'}}
       }
     }
@@ -806,7 +1011,7 @@ function renderMemberCards(){
     const open=pr.filter(r=>r.status!=='Done'&&r.status!=='Canceled').length;
     const onTime=pr.filter(r=>r.perf==='On Time').length;
     const late=pr.filter(r=>r.perf==='Late').length;
-    const overdue=pr.filter(r=>r.perf==='Overdue').length;
+    const overdue=0; /* merged into Late */
     const noEta=pr.filter(r=>r.perf==='No ETA').length;
     const total=pr.length;
     const donePct=total>0?Math.round(done/total*100):0;
@@ -831,13 +1036,13 @@ function renderMemberCards(){
     return`<div class="member-card">${alert}
       <div class="mc-name">${p}</div>
       <div class="mc-body">
-        <div class="mc-row"><span>Total</span><b>${total}</b></div>
-        <div class="mc-row"><span>Done</span><b>${done} (${donePct}%)</b></div>
-        <div class="mc-row"><span>Open</span><b>${open}</b></div>
-        <div class="mc-row"><span>On Time</span><b style="color:var(--green)">${onTime}</b></div>
-        <div class="mc-row"><span>Late/Overdue</span><b style="color:${late+overdue>0?'var(--red)':'var(--dim)'}">${late+overdue}</b></div>
-        <div class="mc-row"><span>Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b></div>
-        <div class="mc-row"><span>ETA Coverage</span><b style="color:${etaCov<50?'var(--yellow)':'var(--dim)'}">${etaCov}% (${withEta}/${total})</b></div>
+        <div class="mc-row"><span title="All tickets assigned to this person in the selected period">Total</span><b>${total}</b></div>
+        <div class="mc-row"><span title="Tickets marked as Done. Percentage is Done / Total">Done</span><b>${done} (${donePct}%)</b></div>
+        <div class="mc-row"><span title="Active tickets (not Done or Canceled)">Open</span><b>${open}</b></div>
+        <div class="mc-row"><span title="Delivered on or before the ETA deadline">On Time</span><b style="color:var(--green)">${onTime}</b></div>
+        <div class="mc-row"><span title="Past ETA — delivered after deadline or still not delivered">Late</span><b style="color:${late>0?'var(--red)':'var(--dim)'}">${late}</b></div>
+        <div class="mc-row"><span title="On Time / (On Time + Late). Excludes: No ETA, Not Started, Blocked, N/A">Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b></div>
+        <div class="mc-row"><span title="% of tickets with an ETA date set. Yellow when below 50%">ETA Coverage</span><b style="color:${etaCov<50?'var(--yellow)':'var(--dim)'}">${etaCov}% (${withEta}/${total})</b></div>
       </div>
       <div class="mc-bar"><div class="mc-bar-track"><div class="mc-bar-inner" style="width:${donePct}%;background:${barColor}"></div></div></div>
     </div>`;
@@ -873,11 +1078,12 @@ function renderCustomerKPI(){
   if(!base.length){el.innerHTML='<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--dim)">No customer data in this view</td></tr>';return}
   const custs=[...new Set(base.map(r=>r.customer))];
   custs.sort((a,b)=>base.filter(r=>r.customer===b).length-base.filter(r=>r.customer===a).length);
-  const cols=['Customer','Tasks','Done','On Time','Late','Overdue','No ETA','ETA Accuracy','Avg Execution','Reliability'];
+  const cols=['Customer','Tasks','Done','On Time','Late','No ETA','ETA Accuracy','Avg Execution','Reliability'];
+  let rowIdx=0;
   function kpiRow(label,rows,isTeam){
     const t=rows.length,dn=rows.filter(r=>r.status==='Done').length;
     const ot=rows.filter(r=>r.perf==='On Time').length,lt=rows.filter(r=>r.perf==='Late').length;
-    const ov=rows.filter(r=>r.perf==='Overdue').length,ne=rows.filter(r=>r.perf==='No ETA').length;
+    const ne=rows.filter(r=>r.perf==='No ETA').length;
     const ad=ot+lt,acc=ad>0?ot/ad:null;
     const doneRows=rows.filter(r=>r.status==='Done');const rw=doneRows.filter(r=>r.rework==='yes').length;const rd=doneRows.length,rel=rd>0?(rd-rw)/rd:null;
     const ds=rows.filter(r=>r.delivery&&(r.startedAt||r.dateAdd)&&r.status==='Done').map(r=>daysBetween(r.startedAt||r.dateAdd,r.delivery)).filter(d=>d!==null&&d>=0);
@@ -886,10 +1092,10 @@ function renderCustomerKPI(){
     const bg=isTeam?'':((rowIdx%2===0)?'background:#f9fafb;':'');
     const lbl=isTeam?`<td class="person-label">OVERALL</td>`:`<td class="person-label" style="${bg}">${label}</td>`;
     if(!isTeam)rowIdx++;
-    return`<tr${cls}>${lbl}<td style="${bg}">${t}</td><td style="${bg}">${dn}</td><td style="${bg}color:var(--green);font-weight:600">${ot}</td><td style="${bg}color:${lt?'var(--red)':'var(--dim)'}">${lt}</td><td style="${bg}color:${ov?'var(--yellow)':'var(--dim)'}">${ov}</td><td style="${bg}color:${ne?'var(--yellow)':'var(--dim)'}">${ne}</td><td class="cell ${acc!==null?heatPct(acc):'heat-na'}" style="font-weight:700">${fmtPct(acc,ad)}</td><td class="cell ${avg!==null?heatDays(avg):'heat-na'}" style="font-weight:700">${fmtDays(avg)}</td><td class="cell ${rel!==null?heatPct(rel):'heat-na'}" style="font-weight:700">${fmtPct(rel,rd)}</td></tr>`;
+    return`<tr${cls}>${lbl}<td style="${bg}">${t}</td><td style="${bg}">${dn}</td><td style="${bg}color:var(--green);font-weight:600">${ot}</td><td style="${bg}color:${lt?'var(--red)':'var(--dim)'}">${lt}</td><td style="${bg}color:${ne?'var(--yellow)':'var(--dim)'}">${ne}</td><td class="cell ${acc!==null?heatPct(acc):'heat-na'}" style="font-weight:700">${fmtPct(acc,ad)}</td><td class="cell ${avg!==null?heatDays(avg):'heat-na'}" style="font-weight:700">${fmtDays(avg)}</td><td class="cell ${rel!==null?heatPct(rel):'heat-na'}" style="font-weight:700">${fmtPct(rel,rd)}</td></tr>`;
   }
   let h='<thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead>';
-  let rowIdx=0;
+  rowIdx=0;
   let b='<tbody>';
   custs.forEach(c=>{b+=kpiRow(c,base.filter(r=>r.customer===c),false)});
   b+=kpiRow('OVERALL',base,true);
@@ -901,17 +1107,52 @@ function renderCustomerKPI(){
 let auditSortCol=0, auditSortAsc=true;
 
 function getAuditRows(){
-  return getFiltered().map((r,i)=>{
+  const fPerson=document.getElementById('auditFilterPerson').value;
+  const fWorkStatus=document.getElementById('auditFilterWorkStatus').value;
+  const fPerf=document.getElementById('auditFilterPerf').value;
+  const fCustomer=document.getElementById('auditFilterCustomer').value;
+  let data=getFiltered();
+  if(fPerson!=='ALL')data=data.filter(r=>r.tsa===fPerson);
+  if(fWorkStatus!=='ALL')data=data.filter(r=>r.status===fWorkStatus);
+  if(fPerf!=='ALL')data=data.filter(r=>r.perf===fPerf);
+  if(fCustomer!=='ALL')data=data.filter(r=>(r.customer||'')===(fCustomer==='(empty)'?'':fCustomer));
+  return data.map((r,i)=>{
     const start=r.startedAt||r.dateAdd;const dur=(r.delivery&&start)?daysBetween(start,r.delivery):null;
     return [i+1, r.tsa||'—', r.week||'—', r.ticketId||'—', r.focus||'—', r.status||'—', r.category||'—', r.demandType||'—', r.customer||'—', r.dateAdd||'—', r.eta||'—', r.delivery||'—', r.perf||'—', r.rework==='yes'?'YES':'—', dur!==null&&dur>=0?dur+'d':'—', r.source||'—', r.ticketUrl||'', r.milestone||'—', r.parentId||'—'];
   });
+}
+function populateAuditFilters(){
+  const selP=document.getElementById('auditFilterPerson');
+  const selS=document.getElementById('auditFilterWorkStatus');
+  const selC=document.getElementById('auditFilterCustomer');
+  const data=getFiltered();
+  const curP=selP.value,curS=selS.value,curC=selC.value;
+
+  const people=[...new Set(data.map(r=>r.tsa||''))].filter(Boolean).sort();
+  selP.innerHTML='<option value="ALL">All People</option>';
+  people.forEach(p=>{selP.innerHTML+=`<option value="${esc(p)}">${esc(p)}</option>`});
+  selP.value=curP;
+
+  const statuses=[...new Set(data.map(r=>r.status||''))].filter(Boolean).sort();
+  selS.innerHTML='<option value="ALL">All Status</option>';
+  statuses.forEach(s=>{selS.innerHTML+=`<option value="${esc(s)}">${esc(s)}</option>`});
+  selS.value=curS;
+
+  const custs=[...new Set(data.map(r=>r.customer||''))].sort();
+  selC.innerHTML='<option value="ALL">All Customers</option>';
+  custs.forEach(c=>{
+    const label=c||'(empty)';
+    selC.innerHTML+=`<option value="${c?esc(c):'(empty)'}">${esc(label)}</option>`;
+  });
+  selC.value=curC;
 }
 
 const AUDIT_COLS=['#','Person','Week','Ticket','Focus/Task','Status','Category','Demand Type','Customer','Date Added','ETA','Delivery','Performance','Rework','Duration','Source','Ticket URL','Milestone','Parent'];
 
 function perfClass(v){
   if(v==='On Time')return'perf-on-time';if(v==='Late')return'perf-late';
-  if(v==='Overdue')return'perf-overdue';return'perf-na';
+  if(v==='Not Started')return'perf-not-started';
+  return'perf-na';
 }
 
 function renderAuditTable(){
@@ -960,13 +1201,13 @@ function renderAuditTable(){
   const sdata=getFiltered();
   const onTime=sdata.filter(r=>r.perf==='On Time').length;
   const late=sdata.filter(r=>r.perf==='Late').length;
-  const overdue=sdata.filter(r=>r.perf==='Overdue').length;
+  /* Overdue merged into Late */
   const done=sdata.filter(r=>r.status==='Done').length;
   const open=sdata.filter(r=>r.status!=='Done'&&r.status!=='Canceled').length;
   const reworkCount=sdata.filter(r=>r.rework==='yes').length;
   /* M13: Note about On Track exclusion */
   const onTrack=sdata.filter(r=>r.perf==='On Track').length;
-  stats.innerHTML=`<span><b>${rows.length}</b> records</span><span>Done: <b>${done}</b></span><span>Open: <b>${open}</b></span><span style="color:var(--green)">On Time: <b>${onTime}</b></span><span style="color:var(--red)">Late: <b>${late}</b></span><span style="color:var(--yellow)">Overdue: <b>${overdue}</b></span><span>On Track: <b>${onTrack}</b> (excluded from KPI1)</span><span style="color:var(--red)">Rework: <b>${reworkCount}</b></span>`;
+  stats.innerHTML=`<span><b>${rows.length}</b> records</span><span>Done: <b>${done}</b></span><span>Open: <b>${open}</b></span><span style="color:var(--green)">On Time: <b>${onTime}</b></span><span style="color:var(--red)">Late: <b>${late}</b></span><span>On Track: <b>${onTrack}</b> (excluded)</span><span style="color:var(--red)">Rework: <b>${reworkCount}</b></span>`;
 }
 
 /* ── Export functions ──────────────────────────────── */
@@ -1049,7 +1290,7 @@ function showGuide(){
   box.innerHTML=`<style>${S}</style>
     <div class="g-hdr">
       <button class="g-close" onclick="document.getElementById('guideOverlay').remove()">&times;</button>
-      <h1>TSA KPI Dashboard</h1>
+      <h1>KPI Dashboard</h1>
       <p>Complete reference guide — every screen, metric, and interaction explained.</p>
     </div>
     <div class="g-body">
@@ -1091,7 +1332,7 @@ function showGuide(){
               <span>Total tasks in period</span>
             </div>
           </div>
-          <div class="g-formula">ETA Accuracy = On Time / (On Time + Late)<br><span style="font-size:.85em;color:#6366f1;font-weight:400">Excludes: On Track, No ETA, Blocked (B.B.C), Canceled</span></div>
+          <div class="g-formula">ETA Accuracy = On Time / (On Time + Late)<br><span style="font-size:.85em;color:#6366f1;font-weight:400">Late = past ETA (delivered or not). Excludes: On Track, No ETA, Not Started, Blocked (B.B.C), N/A</span></div>
         </div>
       </div>
 
@@ -1125,8 +1366,8 @@ function showGuide(){
           <div class="g-grid">
             <div class="g-grid-item"><b>Total / Done / Open</b><span>Task counts with completion %</span></div>
             <div class="g-grid-item"><b>On Time <span style="color:#059669">(green)</span></b><span>Delivered on or before ETA</span></div>
-            <div class="g-grid-item"><b>Late/Overdue <span style="color:#dc2626">(red)</span></b><span>Delivered after ETA or past due and still open</span></div>
-            <div class="g-grid-item"><b>Accuracy</b><span>Same formula as KPI1. Hover heatmap cells for detail</span></div>
+            <div class="g-grid-item"><b>Late <span style="color:#dc2626">(red)</span></b><span>Past ETA — delivered after deadline or not delivered yet</span></div>
+            <div class="g-grid-item"><b>Accuracy</b><span>On Time / (On Time + Late). Hover heatmap cells for detail</span></div>
             <div class="g-grid-item"><b>ETA Coverage</b><span>% of tasks with ETA set. <span style="color:#d97706">Yellow</span> if &lt; 50%</span></div>
             <div class="g-grid-item"><b>Progress Bar</b><span>Visual completion rate — green &ge; 80%, yellow &ge; 50%, red &lt; 50%</span></div>
           </div>
@@ -1150,7 +1391,7 @@ function showGuide(){
           <div class="g-grid">
             <div class="g-grid-item" style="border-left:3px solid #4f46e5">
               <b>Weekly Trend Chart</b>
-              <span>Stacked bars show the breakdown per week (On Time vs Late vs Overdue vs No ETA). A line traces the overall metric value across weeks.</span>
+              <span>Stacked bars show the breakdown per week (On Time vs Late vs No ETA). A line traces the overall metric value across weeks.</span>
               <br><span style="font-size:.78em;color:#6366f1;font-weight:600;margin-top:4px;display:inline-block">Hover any bar for task-level detail: task name, customer, and delay days.</span>
             </div>
             <div class="g-grid-item" style="border-left:3px solid #059669">
@@ -1160,7 +1401,7 @@ function showGuide(){
             </div>
           </div>
           <div class="g-grid" style="grid-template-columns:repeat(4,1fr);margin-top:10px">
-            <div class="g-grid-item" style="text-align:center;background:#eef2ff"><b style="color:#4f46e5;font-size:.85em">ETA Accuracy</b><br><span style="font-size:.72em">On Time vs Late vs Overdue</span></div>
+            <div class="g-grid-item" style="text-align:center;background:#eef2ff"><b style="color:#4f46e5;font-size:.85em">ETA Accuracy</b><br><span style="font-size:.72em">On Time vs Late</span></div>
             <div class="g-grid-item" style="text-align:center;background:#fffbeb"><b style="color:#b45309;font-size:.85em">Execution Time</b><br><span style="font-size:.72em">&lt;14d / 14-28d / 28-60d / &gt;60d</span></div>
             <div class="g-grid-item" style="text-align:center;background:#ecfdf5"><b style="color:#047857;font-size:.85em">Reliability</b><br><span style="font-size:.72em">Clean vs Rework</span></div>
             <div class="g-grid-item" style="text-align:center;background:#f5f3ff"><b style="color:#7c3aed;font-size:.85em">Team Activity</b><br><span style="font-size:.72em">Task volume per week</span></div>
@@ -1198,13 +1439,15 @@ function showGuide(){
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">
             <span class="g-badge" style="background:#d1fae5;color:#065f46">On Time</span>
             <span class="g-badge" style="background:#fee2e2;color:#991b1b">Late</span>
-            <span class="g-badge" style="background:#fef3c7;color:#92400e">Overdue</span>
             <span class="g-badge" style="background:#f3f4f6;color:#6b7280">No ETA</span>
             <span class="g-badge" style="background:#dbeafe;color:#1e40af">On Track</span>
             <span class="g-badge" style="background:#fce7f3;color:#9d174d">Blocked (B.B.C)</span>
-            <span class="g-badge" style="background:#f3f4f6;color:#9ca3af">Canceled (N/A)</span>
+            <span class="g-badge" style="background:#ede9fe;color:#7c3aed">Not Started</span>
+            <span class="g-badge" style="background:#f3f4f6;color:#9ca3af">N/A (Canceled)</span>
           </div>
-          <p style="margin-top:8px;font-size:.88em;color:#64748b"><b>B.B.C</b> = Blocked By Customer — excluded from accuracy calculations. <b>Canceled</b> tasks are excluded from all KPIs.</p>
+          <p style="margin-top:8px;font-size:.88em;color:#64748b">
+            <b>Late</b> = ETA passed (delivered after or not delivered yet). <b>No ETA</b> = active work without a due date set. <b>Not Started</b> = ticket in Backlog/Todo/Triage — ETA not applicable yet. <b>B.B.C</b> = Blocked By Customer — excluded from accuracy. <b>N/A</b> = Canceled or not measurable.
+          </p>
         </div>
       </div>
 
@@ -1255,21 +1498,25 @@ function showGuide(){
         </div>
         <div class="g-section-body">
           <div class="g-grid">
-            <div class="g-grid-item"><b>ETA</b><span>Estimated Time of Arrival — due date set in Linear</span></div>
-            <div class="g-grid-item"><b>Core Week</b><span>A week within the rolling 4-month window, excluding future weeks</span></div>
-            <div class="g-grid-item"><b>B.B.C</b><span>Blocked By Customer — task waiting on client action</span></div>
-            <div class="g-grid-item"><b>Rework</b><span>Task that needed re-implementation after delivery</span></div>
-            <div class="g-grid-item"><b>startedAt</b><span>When Linear status first moved to "In Progress"</span></div>
-            <div class="g-grid-item"><b>Velocity</b><span>Days between startedAt (or dateAdd) and delivery</span></div>
-            <div class="g-grid-item"><b>Source: Linear</b><span>Data fetched from Linear API (current, live)</span></div>
-            <div class="g-grid-item"><b>Source: Spreadsheet</b><span>Legacy data from CODA/sheets (frozen backlog)</span></div>
+            <div class="g-grid-item"><b>ETA</b><span>Due date set in Linear — the committed delivery date</span></div>
+            <div class="g-grid-item"><b>On Time</b><span>Delivered on or before ETA</span></div>
+            <div class="g-grid-item"><b>Late</b><span>Past ETA — delivered after deadline or still not delivered</span></div>
+            <div class="g-grid-item"><b>No ETA</b><span>Active work (In Progress/Done) without a due date set</span></div>
+            <div class="g-grid-item"><b>Not Started</b><span>Ticket in Backlog/Todo/Triage — ETA not applicable yet</span></div>
+            <div class="g-grid-item"><b>On Track</b><span>In progress, ETA is in the future</span></div>
+            <div class="g-grid-item"><b>B.B.C</b><span>Blocked By Customer — excluded from accuracy</span></div>
+            <div class="g-grid-item"><b>Core Week</b><span>A week within the rolling 4-month window</span></div>
+            <div class="g-grid-item"><b>Rework</b><span>Task re-implemented after delivery (rework:implementation label)</span></div>
+            <div class="g-grid-item"><b>Velocity</b><span>Days between start (In Progress) and delivery (In Review/Done)</span></div>
+            <div class="g-grid-item"><b>Source: Linear</b><span>Live data from Linear API — primary source</span></div>
+            <div class="g-grid-item"><b>Source: Spreadsheet</b><span>Historical backlog from CODA/sheets</span></div>
           </div>
         </div>
       </div>
 
     </div>
     <div class="g-footer">
-      TSA KPI Dashboard v3 &middot; Built ${BUILD_DATE} &middot; Team Raccoons &middot; Powered by Linear + Python + Chart.js
+      KPI Dashboard v3 &middot; Built ${BUILD_DATE} &middot; Team Raccoons &middot; Powered by Linear + Python + Chart.js
     </div>
   `;
   ov.appendChild(box);
@@ -1278,6 +1525,8 @@ function showGuide(){
 
 /* ── Render all ─────────────────────────────────────── */
 function render(){
+  Object.keys(tipCache).forEach(k => delete tipCache[k]);
+  tipCounter = 0;
   updateSegmentCounts();
   renderMemberCards();
   renderKPIStrip();
@@ -1290,8 +1539,362 @@ function render(){
   renderTrend('trend-reliability',calcReliability,'Reliability','#047857',.9,'Target 90%',false,'reliability');
   renderTrend('trend-activity',calcActivity,'Task Volume','#4338ca',5,'Avg 5/week',false,'activity');
   renderCustomerKPI();
+  renderScrumCards();
+  renderGantt();
+  populateAuditFilters();
   renderAuditTable();
   renderReworkLog();
+}
+
+/* ── Gantt Chart ─────────────────────────────────── */
+const GT_DAY_W=6;
+const gtCollapsed={};
+
+function gtGetFiltered(){
+  const view=document.getElementById('gtView').value;
+  const period=document.getElementById('gtPeriod').value;
+  let cutoff=null;
+  if(period!=='all'){const d=new Date();d.setMonth(d.getMonth()-(period==='1m'?1:period==='3m'?3:6));cutoff=d.toISOString().slice(0,10)}
+
+  /* For "implementing" view: find customers that have active tasks, then show ALL tasks for those customers */
+  let activeCustomers=null;
+  if(view==='implementing'){
+    activeCustomers=new Set();
+    RAW.forEach(r=>{
+      if(['In Progress','In Review','Production QA','Ready to Deploy'].includes(r.status)&&r.customer)activeCustomers.add(r.customer);
+    });
+  }
+
+  return RAW.filter(r=>{
+    const s=r.startedAt||r.dateAdd||'';
+    if(!s||s<'2025-01-01')return false;
+    if(r.status==='Canceled')return false;
+    if(state.person!=='ALL'&&r.tsa!==state.person)return false;
+    if(view==='implementing'&&activeCustomers&&!activeCustomers.has(r.customer))return false;
+    const e=r.delivery||r.eta||'';
+    if(cutoff&&(s||'9999')<cutoff&&(e||'9999')<cutoff)return false;
+    return true;
+  });
+}
+
+function gtBarCls(r){
+  if(r.perf==='Blocked'||r.status==='B.B.C')return'gt-bar-blocked';
+  if(r.status==='Done')return r.perf==='Late'?'gt-bar-late':'gt-bar-done';
+  if(['In Progress','In Review','Production QA','Ready to Deploy','Paused'].includes(r.status))return'gt-bar-active';
+  return'gt-bar-noeta';
+}
+
+function gtTipHtml(r){
+  const cls=r.perf==='On Time'?'good':r.perf==='Late'?'bad':'mid';
+  const s=r.startedAt||r.dateAdd,e=r.delivery||r.eta;
+  const dur=(s&&e)?daysBetween(s,e):null;
+  let h='<b>'+esc(r.focus||'')+'</b>'+(r.customer?' ['+esc(r.customer)+']':'')+'<br>';
+  h+='<span style="color:#94a3b8">Person:</span> '+esc(r.tsa||'')+'<br>';
+  h+='<span style="color:#94a3b8">Status:</span> <span class="tip-pct '+cls+'">'+esc(r.status||'')+'</span> · '+esc(r.perf||'')+'<br>';
+  h+='<span style="color:#94a3b8">Start:</span> '+esc(s||'\u2014')+' · <span style="color:#94a3b8">ETA:</span> '+esc(r.eta||'\u2014')+' · <span style="color:#94a3b8">Done:</span> '+esc(r.delivery||'\u2014')+'<br>';
+  if(dur!==null)h+='<span style="color:#94a3b8">Duration:</span> '+dur+'d<br>';
+  if(r.ticketId)h+='<span style="color:#94a3b8">Ticket:</span> '+esc(r.ticketId||'');
+  return h;
+}
+
+function gtToggleGroup(el){
+  el.classList.toggle('gt-open');
+  const gid=el.dataset.gtgrp;
+  if(!gid)return;
+  gtCollapsed[gid]=!el.classList.contains('gt-open');
+  document.querySelectorAll('.gt-task[data-gtgrp="'+gid+'"]').forEach(r=>r.classList.toggle('gt-hidden'));
+}
+
+function renderGantt(){
+  const data=gtGetFiltered();
+  const todayStr=new Date().toISOString().slice(0,10);
+
+  function pd(s){if(!s||s.length<10)return null;return new Date(s.slice(0,10)+'T12:00:00Z')}
+  function db(a,b){return Math.round((b-a)/864e5)}
+
+  /* Date range */
+  let minD=todayStr,maxD=todayStr;
+  data.forEach(r=>{
+    const s=r.startedAt||r.dateAdd||'';
+    const e=r.delivery||r.eta||s;
+    if(s&&s<minD)minD=s;if(e&&e>maxD)maxD=e;if(s&&s>maxD)maxD=s;
+  });
+  const sd=pd(minD),ed=pd(maxD);
+  if(!sd||!ed){document.getElementById('ganttCanvas').innerHTML='<p style="padding:20px;color:var(--dim)">No data for Gantt chart.</p>';return}
+  sd.setDate(sd.getDate()-5);ed.setDate(ed.getDate()+10);
+  const totalDays=db(sd,ed)+1;
+
+  /* Build day index */
+  const days=[];
+  for(let i=0;i<totalDays;i++){const d=new Date(sd);d.setDate(d.getDate()+i);days.push(d)}
+  function dayIdx(dateStr){const d=pd(dateStr);if(!d)return-1;return db(sd,d)}
+
+  /* Group by customer */
+  const groups={};
+  data.forEach(r=>{const c=r.customer||'No Customer';if(!groups[c])groups[c]=[];groups[c].push(r)});
+  const sortedGroups=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length);
+
+  /* Month spans */
+  const mNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const months=[];let curM=-1,curY=-1,curCount=0;
+  days.forEach(d=>{
+    if(d.getMonth()!==curM||d.getFullYear()!==curY){
+      if(curCount>0)months.push({label:mNames[curM]+' '+curY,days:curCount});
+      curM=d.getMonth();curY=d.getFullYear();curCount=0;
+    }
+    curCount++;
+  });
+  if(curCount>0)months.push({label:mNames[curM]+' '+curY,days:curCount});
+
+  /* Month header */
+  let html='<div class="gt-months"><div class="gt-label-col"><span>Customer / Task</span></div>';
+  months.forEach(m=>{html+='<div class="gt-month-cell" style="min-width:'+m.days*GT_DAY_W+'px;max-width:'+m.days*GT_DAY_W+'px">'+m.label+'</div>'});
+  html+='</div>';
+
+  /* Day header */
+  html+='<div class="gt-header"><div class="gt-label-col"><span></span></div><div class="gt-days">';
+  days.forEach(d=>{
+    const ds=d.toISOString().slice(0,10);
+    const dow=d.getDay();const isWe=dow===0||dow===6;const isMs=d.getDate()===1;const isToday=ds===todayStr;
+    let cls=isWe?'gt-day gt-weekend':'gt-day';
+    if(isMs)cls+=' gt-month-start';if(isToday)cls+=' gt-today-col';
+    const label=(d.getDate()%7===1||d.getDate()===1)?d.getDate():'';
+    html+='<div class="'+cls+'" style="min-width:'+GT_DAY_W+'px;max-width:'+GT_DAY_W+'px">'+label+'</div>';
+  });
+  html+='</div></div>';
+
+  /* Month divider positions */
+  const monthDividers=[];
+  days.forEach((d,i)=>{if(d.getDate()===1)monthDividers.push(i)});
+  function mLines(){return monthDividers.map(i=>'<div class="gt-month-line" style="left:'+i*GT_DAY_W+'px"></div>').join('')}
+
+  /* Groups */
+  sortedGroups.forEach(([cust,tasks])=>{
+    tasks.sort((a,b)=>(a.startedAt||a.dateAdd||'z').localeCompare(b.startedAt||b.dateAdd||'z'));
+
+    const done=tasks.filter(t=>t.status==='Done').length;
+    const active=tasks.filter(t=>['In Progress','In Review','Todo','Paused','Production QA'].includes(t.status)).length;
+    const late=tasks.filter(t=>t.perf==='Late').length;
+    const onTime=tasks.filter(t=>t.perf==='On Time').length;
+
+    /* Summary bar range */
+    let gMin=null,gMax=null;
+    tasks.forEach(t=>{
+      const s=t.startedAt||t.dateAdd||'';const e=t.delivery||t.eta||s;
+      if(s&&(!gMin||s<gMin))gMin=s;if(e&&(!gMax||e>gMax))gMax=e;
+    });
+    const gStartIdx=dayIdx(gMin);const gEndIdx=dayIdx(gMax);
+    const gLen=Math.max(1,gEndIdx-gStartIdx+1);
+
+    const gid='gt_'+cust.replace(/[^a-zA-Z0-9]/g,'_');
+    const isOpen=!gtCollapsed[gid];
+
+    html+='<div class="gt-row gt-group'+(isOpen?' gt-open':'')+'" data-gtgrp="'+gid+'" onclick="gtToggleGroup(this)">';
+    html+='<div class="gt-label">';
+    html+='<span class="gt-arrow">&#9654;</span>';
+    html+='<span>'+esc(cust)+'</span>';
+    html+='<span class="gt-count">'+tasks.length+'</span>';
+    html+='<div class="gt-badges">';
+    if(onTime)html+='<span class="gt-badge" style="background:#d1fae5;color:#065f46">'+onTime+' ok</span>';
+    if(late)html+='<span class="gt-badge" style="background:#fee2e2;color:#991b1b">'+late+' late</span>';
+    if(active)html+='<span class="gt-badge" style="background:#dbeafe;color:#1e40af">'+active+' active</span>';
+    html+='</div></div>';
+
+    /* Summary bar area */
+    html+='<div class="gt-bars" style="min-width:'+totalDays*GT_DAY_W+'px">';
+    html+=mLines();
+    if(gStartIdx>=0)html+='<div class="gt-bar gt-bar-summary" style="left:'+gStartIdx*GT_DAY_W+'px;width:'+gLen*GT_DAY_W+'px"></div>';
+    const tIdx=dayIdx(todayStr);
+    if(tIdx>=0&&tIdx<totalDays)html+='<div class="gt-today-marker" style="left:'+tIdx*GT_DAY_W+'px"></div>';
+    html+='</div></div>';
+
+    /* Task rows */
+    let lastPerson='';
+    tasks.sort((a,b)=>{const pc=(a.tsa||'').localeCompare(b.tsa||'');return pc!==0?pc:(a.startedAt||a.dateAdd||'z').localeCompare(b.startedAt||b.dateAdd||'z')});
+    tasks.forEach(t=>{
+      const s=t.startedAt||t.dateAdd||'';const e=t.delivery||t.eta||'';
+      let si=dayIdx(s),ei=dayIdx(e||s);
+      si=Math.max(0,Math.min(si,totalDays-1));ei=Math.max(0,Math.min(ei,totalDays-1));
+      const len=Math.max(1,ei-si+1);
+      const cls=gtBarCls(t);
+      const isProj=!t.delivery&&t.eta&&t.status!=='Done';
+      const bCls=cls+(isProj?' gt-bar-projected':'');
+      const tHtml=gtTipHtml(t);
+      const focusTxt=t.focus||'';
+
+      html+='<div class="gt-row gt-task'+(isOpen?'':' gt-hidden')+'" data-gtgrp="'+gid+'">';
+      html+='<div class="gt-label">';
+      if(t.ticketUrl&&t.ticketUrl.startsWith('http'))html+='<a href="'+esc(t.ticketUrl)+'" target="_blank">'+esc(t.ticketId||'')+'</a>';
+      else if(t.ticketId)html+='<span>'+esc(t.ticketId)+'</span>';
+      html+='<span class="gt-tname" title="'+esc(focusTxt)+'">'+esc(focusTxt.length>35?focusTxt.slice(0,33)+'...':focusTxt)+'</span>';
+      const showPerson=(t.tsa||'')!==lastPerson;lastPerson=t.tsa||'';
+      if(showPerson)html+='<span class="gt-person">'+esc(t.tsa||'')+'</span>';
+      html+='</div>';
+
+      html+='<div class="gt-bars" style="min-width:'+totalDays*GT_DAY_W+'px">';
+      html+=mLines();
+      if(si<=totalDays&&ei>=0){
+        html+='<div class="gt-bar '+bCls+'" style="left:'+si*GT_DAY_W+'px;width:'+len*GT_DAY_W+'px" onmouseenter="showTip(event,this.dataset.tip)" onmousemove="showTip(event,this.dataset.tip)" onmouseleave="hideTip()" data-tip="'+esc(tHtml)+'"></div>';
+      }
+      if(tIdx>=0&&tIdx<totalDays)html+='<div class="gt-today-marker" style="left:'+tIdx*GT_DAY_W+'px"></div>';
+      html+='</div></div>';
+    });
+  });
+
+  document.getElementById('ganttCanvas').innerHTML=html;
+
+  /* Stats */
+  const doneC=data.filter(r=>r.status==='Done').length;
+  const activeC=data.filter(r=>['In Progress','In Review','Todo','Paused'].includes(r.status)).length;
+  document.getElementById('gtStats').innerHTML=data.length+' tasks · '+doneC+' done · '+activeC+' active · '+sortedGroups.length+' customers';
+
+  /* Scroll listener for hiding tooltip */
+  const wrap=document.getElementById('ganttWrap');
+  wrap.removeEventListener('scroll',hideTip);
+  wrap.addEventListener('scroll',hideTip);
+}
+
+/* Gantt-specific filter change handlers */
+['gtView','gtPeriod'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener('change',function(){renderGantt()});
+});
+
+function renderScrumCards(){
+  const todayStr=new Date().toISOString().slice(0,10);
+  const today=new Date(todayStr);
+
+  /* Split: active (In Progress/In Review/Paused/Todo) + completed today — respects person filter */
+  const pf=state.person;
+  const active=RAW.filter(r=>r.source==='linear'&&['In Progress','In Review','Paused','Todo'].includes(r.status)&&(pf==='ALL'||r.tsa===pf));
+  const doneToday=RAW.filter(r=>r.source==='linear'&&r.status==='Done'&&r.delivery&&r.delivery.slice(0,10)===todayStr&&(pf==='ALL'||r.tsa===pf));
+
+  const people=[...new Set([...active,...doneToday].map(r=>r.tsa))].sort();
+  const el=document.getElementById('scrumCards');
+  if(!el)return;
+
+  const fmtD=d=>{if(!d||d.length<10)return'TBD';const p=d.slice(5,10).split('-');return p[0]+'/'+p[1]};
+
+  function taskSignal(t){
+    if(t.perf==='Blocked'||t.status==='B.B.C')return'blocked';
+    if(t.perf==='Late')return'atrisk';
+    /* If task has an ETA in the past and status is still active (not Done), flag as at risk
+       This catches reassigned-in-review tickets where the original delivery was on time
+       but the review is still pending past ETA */
+    if(t.eta&&t.status!=='Done'){
+      try{const eta=new Date(t.eta);if(eta<today)return'atrisk'}catch(e){}
+    }
+    return'ontrack';
+  }
+  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='atrisk'?':large_yellow_circle:':':large_green_circle:'}
+  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='atrisk'?'🟡':'🟢'}
+  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='atrisk'?'sc-y':'sc-g'}
+
+  function cleanName(focus,cust){
+    let s=focus;
+    s=s.replace(/^\[.*?\]\s*/,'');
+    if(cust&&s.toLowerCase().startsWith(cust.toLowerCase()))s=s.slice(cust.length).replace(/^\s*[-–—:]\s*/,'');
+    return s.slice(0,75)||focus.slice(0,75);
+  }
+
+  const cards=people.map(person=>{
+    const myActive=active.filter(r=>r.tsa===person);
+    const myDone=doneToday.filter(r=>r.tsa===person);
+
+    /* Group active by customer */
+    const byCust={};
+    myActive.forEach(t=>{
+      const c=t.customer||'General';
+      if(!byCust[c])byCust[c]=[];
+      byCust[c].push(t);
+    });
+    /* Group done today by customer */
+    const doneByCust={};
+    myDone.forEach(t=>{
+      const c=t.customer||'General';
+      if(!doneByCust[c])doneByCust[c]=[];
+      doneByCust[c].push(t);
+    });
+
+    let green=0,yellow=0,red=0;
+    myActive.forEach(t=>{
+      const sig=taskSignal(t);
+      if(sig==='ontrack')green++;else if(sig==='atrisk')yellow++;else red++;
+    });
+
+    /* Build Slack text */
+    let text=`[Daily Agenda – ${todayStr}]\n`;
+    Object.keys(byCust).sort().forEach(cust=>{
+      text+=`\n${cust}\n`;
+      byCust[cust].sort((a,b)=>(a.eta||'9999').localeCompare(b.eta||'9999')).forEach(t=>{
+        const name=cleanName(t.focus,cust);
+        text+=`  :black_small_square: Do: ${name} ETA: ${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}\n`;
+      });
+    });
+    /* Done today section */
+    const allDoneCusts=Object.keys(doneByCust).sort();
+    if(allDoneCusts.length>0){
+      text+=`\n———— Completed Today ————\n`;
+      allDoneCusts.forEach(cust=>{
+        doneByCust[cust].forEach(t=>{
+          const name=cleanName(t.focus,cust);
+          text+=`  :white_check_mark: Done: ${name} (${cust})\n`;
+        });
+      });
+    }
+
+    /* Build HTML preview */
+    let html='';
+    Object.keys(byCust).sort().forEach(cust=>{
+      html+=`<div class="sc-customer">${esc(cust)}</div>`;
+      byCust[cust].sort((a,b)=>(a.eta||'9999').localeCompare(b.eta||'9999')).forEach(t=>{
+        const sig=taskSignal(t);
+        const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
+        const name=cleanName(t.focus,cust);
+        html+=`<div class="sc-task">${tid}${esc(name)} <span style="color:var(--dim)">ETA:${fmtD(t.eta)}</span> <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
+      });
+    });
+    /* Done today with strikethrough line */
+    if(allDoneCusts.length>0){
+      html+=`<div style="border-top:2px dashed var(--green);margin:10px 0 6px;position:relative"><span style="position:absolute;top:-9px;left:12px;background:var(--white);padding:0 8px;font-size:.7em;font-weight:700;color:var(--green);text-transform:uppercase">Completed Today</span></div>`;
+      allDoneCusts.forEach(cust=>{
+        doneByCust[cust].forEach(t=>{
+          const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
+          const name=cleanName(t.focus,cust);
+          html+=`<div class="sc-task" style="text-decoration:line-through;opacity:.6">✅ ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)})</span></div>`;
+        });
+      });
+    }
+
+    return{person,active:myActive.length,done:myDone.length,green,yellow,red,text,html};
+  });
+
+  el.innerHTML=cards.map(c=>`
+    <div class="scrum-card" onclick="copyScrumCard(this)" data-scrum="${esc(c.text).replace(/"/g,'&quot;')}">
+      <div class="sc-header">
+        <span class="sc-name">${c.person}</span>
+        <div class="sc-stats">
+          <span style="background:#065f46;color:#a7f3d0">${c.green} 🟢</span>
+          ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} 🟡</span>`:''}
+          ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} 🔴</span>`:''}
+          ${c.done?`<span style="background:#059669;color:#fff">✅ ${c.done}</span>`:''}
+          <span style="background:#1e293b;color:#94a3b8">${c.active} active</span>
+        </div>
+      </div>
+      <div class="sc-body">${c.html}</div>
+      <div class="sc-copy-hint">Click to copy Slack-ready text</div>
+    </div>
+  `).join('');
+}
+
+function copyScrumCard(el){
+  const text=el.dataset.scrum.replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&#96;/g,'`');
+  navigator.clipboard.writeText(text).then(()=>{
+    el.classList.add('copied');
+    const hint=el.querySelector('.sc-copy-hint');
+    if(hint)hint.textContent='Copied!';
+    setTimeout(()=>{el.classList.remove('copied');if(hint)hint.textContent='Click to copy Slack-ready text'},1500);
+  });
 }
 
 function renderReworkLog(){
@@ -1317,10 +1920,15 @@ function init(){
   const fp=document.getElementById('fPerson');
   PEOPLE_ALL.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;fp.appendChild(o)});
 
+  /* Populate month filter from available months */
+  const fm=document.getElementById('fMonth');
+  MONTHS.forEach(mo=>{const o=document.createElement('option');o.value=mo.label;o.textContent=mo.label;fm.appendChild(o)});
+
   const cki=document.getElementById('clientKpiInfo');
   cki.addEventListener('mouseenter',e=>showTip(e,CLIENT_TIP));
   cki.addEventListener('mouseleave',()=>hideTip());
 
+  document.getElementById('fMonth').addEventListener('change',e=>{state.month=e.target.value;render()});
   document.getElementById('fPerson').addEventListener('change',e=>{state.person=e.target.value;render()});
 
   /* M12: Segment bar — default ALL */
@@ -1357,11 +1965,13 @@ function init(){
     cell.addEventListener('click',()=>switchTab(cell.dataset.tab));
   });
 
-  document.getElementById('auditToggle').addEventListener('click',()=>{
-    const header=document.getElementById('auditToggle');
-    const body=document.getElementById('auditBody');
-    header.classList.toggle('open');
-    body.classList.toggle('open');
+  /* Generic collapse toggle for all audit-header elements */
+  document.querySelectorAll('.audit-header').forEach(header=>{
+    header.addEventListener('click',()=>{
+      header.classList.toggle('open');
+      const body=header.nextElementSibling;
+      if(body&&body.classList.contains('audit-body'))body.classList.toggle('open');
+    });
   });
 
   render();

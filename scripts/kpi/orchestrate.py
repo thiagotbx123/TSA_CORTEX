@@ -22,6 +22,7 @@ STEPS = [
     ('merge_opossum_data.py', 'Merging Linear data into dashboard...'),
     ('normalize_data.py', 'Normalizing data quality...'),
     ('build_html_dashboard.py', 'Building HTML dashboard...'),
+    ('upload_dashboard_drive.py', 'Uploading to Google Drive...'),
 ]
 
 
@@ -113,7 +114,7 @@ def main():
     print(f"  Finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     if all_ok:
-        dashboard_path = os.path.join(os.path.expanduser('~'), 'Downloads', 'TSA_WAKI_KPI_DASHBOARD.html')
+        dashboard_path = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
         print(f"\n  Dashboard: {dashboard_path}")
 
     sys.exit(0 if all_ok else 1)

@@ -41,11 +41,23 @@ HTTP_TIMEOUT = 30  # H11: timeout to prevent hanging
 OPOSSUM_TEAM_ID = 'b3fb1317-885c-47a0-b87d-85a77252d994'
 RACCOONS_TEAM_ID = '5a021b9f-bb1a-49fa-ad3b-83422c46c357'
 
-# Person IDs (Thais and Yasmim)
+# Person IDs — KPI team members
 THAIS_ID = '0879df15-56d6-477f-944d-df033121641a'
 YASMIM_ID = 'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
 
-QUERY = """
+# ALL KPI team members — fetch by person across ALL teams
+KPI_MEMBERS = {
+    'a6063009-d822-49f1-a638-6cebfe59e89e': 'THIAGO',
+    'b13ca864-e0f4-4ff6-b020-ec3f4491643e': 'CARLOS',
+    '19b6975e-3026-450b-bc01-f468ad543028': 'ALEXANDRA',
+    '717e7b13-d840-41c0-baeb-444354c8ff91': 'DIEGO',
+    'd9745bdb-7138-4345-9303-516aa6e4ec39': 'GABI',
+    THAIS_ID: 'THAIS',
+    YASMIM_ID: 'YASMIM',
+}
+
+# Query by team (legacy — still used for completeness)
+QUERY_TEAM = """
 query($teamId: ID!, $cursor: String) {
   issues(
     filter: { team: { id: { eq: $teamId } } }
@@ -80,6 +92,124 @@ query($teamId: ID!, $cursor: String) {
       parent { identifier }
       team { name id key }
       estimate
+      history(first: 200) {
+        nodes {
+          createdAt
+          fromStateId
+          toStateId
+          fromDueDate
+          toDueDate
+          fromAssignee { id name }
+          toAssignee { id name }
+          actor { name id }
+        }
+      }
+    }
+  }
+}
+"""
+
+# Query by assignee — fetch ALL issues for a person across ALL teams
+QUERY_PERSON = """
+query($assigneeId: ID!, $cursor: String) {
+  issues(
+    filter: { assignee: { id: { eq: $assigneeId } } }
+    first: 100
+    after: $cursor
+    orderBy: createdAt
+  ) {
+    pageInfo { hasNextPage endCursor }
+    nodes {
+      identifier
+      title
+      description
+      url
+      branchName
+      createdAt
+      updatedAt
+      archivedAt
+      completedAt
+      dueDate
+      startedAt
+      slaStartedAt
+      slaMediumRiskAt
+      slaHighRiskAt
+      slaBreachesAt
+      slaType
+      state { name }
+      labels { nodes { name } }
+      creator { name id }
+      assignee { name id }
+      project { name id }
+      projectMilestone { name id }
+      parent { identifier }
+      team { name id key }
+      estimate
+      history(first: 200) {
+        nodes {
+          createdAt
+          fromStateId
+          toStateId
+          fromDueDate
+          toDueDate
+          fromAssignee { id name }
+          toAssignee { id name }
+          actor { name id }
+        }
+      }
+    }
+  }
+}
+"""
+
+# Query by creator — catch tickets created by KPI member but reassigned elsewhere
+QUERY_CREATOR = """
+query($creatorId: ID!, $cursor: String) {
+  issues(
+    filter: { creator: { id: { eq: $creatorId } } }
+    first: 100
+    after: $cursor
+    orderBy: createdAt
+  ) {
+    pageInfo { hasNextPage endCursor }
+    nodes {
+      identifier
+      title
+      description
+      url
+      branchName
+      createdAt
+      updatedAt
+      archivedAt
+      completedAt
+      dueDate
+      startedAt
+      slaStartedAt
+      slaMediumRiskAt
+      slaHighRiskAt
+      slaBreachesAt
+      slaType
+      state { name }
+      labels { nodes { name } }
+      creator { name id }
+      assignee { name id }
+      project { name id }
+      projectMilestone { name id }
+      parent { identifier }
+      team { name id key }
+      estimate
+      history(first: 200) {
+        nodes {
+          createdAt
+          fromStateId
+          toStateId
+          fromDueDate
+          toDueDate
+          fromAssignee { id name }
+          toAssignee { id name }
+          actor { name id }
+        }
+      }
     }
   }
 }
@@ -94,150 +224,156 @@ def atomic_write_json(path, data):
     os.replace(tmp_path, path)
 
 
-def fetch_team_issues(team_id, team_name):
-    """Fetch all issues for a team with pagination.
+def parse_issue_node(node):
+    """F08: Shared parser — extract all fields from a Linear issue node."""
+    estimate = node.get('estimate')
+    pm = node.get('projectMilestone')
+    project = node.get('project')
+    parent = node.get('parent')
+    labels_raw = node.get('labels', {}).get('nodes', [])
+    desc_raw = (node.get('description') or '')
+    desc = desc_raw[:2000] + ('...' if len(desc_raw) > 2000 else '')  # L1: truncation indicator
+
+    history_raw = node.get('history', {}).get('nodes', [])
+    history = []
+    for h in history_raw:
+        history.append({
+            'createdAt': h.get('createdAt', ''),
+            'fromStateId': h.get('fromStateId'),
+            'toStateId': h.get('toStateId'),
+            'fromDueDate': h.get('fromDueDate'),
+            'toDueDate': h.get('toDueDate'),
+            'actorName': h.get('actor', {}).get('name', '') if h.get('actor') else '',
+            'actorId': h.get('actor', {}).get('id', '') if h.get('actor') else '',
+            'fromAssigneeId': h.get('fromAssignee', {}).get('id', '') if h.get('fromAssignee') else '',
+            'toAssigneeId': h.get('toAssignee', {}).get('id', '') if h.get('toAssignee') else '',
+            'fromAssigneeName': h.get('fromAssignee', {}).get('name', '') if h.get('fromAssignee') else '',
+            'toAssigneeName': h.get('toAssignee', {}).get('name', '') if h.get('toAssignee') else '',
+        })
+
+    return {
+        'id': node['identifier'],
+        'title': node.get('title', ''),
+        'description': desc,
+        'projectMilestone': {'id': pm['id'], 'name': pm['name']} if pm else None,
+        'estimate': {'value': estimate, 'name': f"{estimate} Points"} if estimate else None,
+        'url': node.get('url', ''),
+        'gitBranchName': node.get('branchName', ''),
+        'createdAt': node.get('createdAt', ''),
+        'updatedAt': node.get('updatedAt', ''),
+        'archivedAt': node.get('archivedAt'),
+        'completedAt': node.get('completedAt'),
+        'dueDate': node.get('dueDate'),
+        'startedAt': node.get('startedAt'),
+        'slaStartedAt': node.get('slaStartedAt'),
+        'slaMediumRiskAt': node.get('slaMediumRiskAt'),
+        'slaHighRiskAt': node.get('slaHighRiskAt'),
+        'slaBreachesAt': node.get('slaBreachesAt'),
+        'slaType': node.get('slaType', ''),
+        'status': node.get('state', {}).get('name', ''),
+        'labels': [l['name'] for l in labels_raw],
+        'createdBy': node.get('creator', {}).get('name', '') if node.get('creator') else '',
+        'createdById': node.get('creator', {}).get('id', '') if node.get('creator') else '',
+        'assignee': node.get('assignee', {}).get('name', '') if node.get('assignee') else '',
+        'assigneeId': node.get('assignee', {}).get('id', '') if node.get('assignee') else '',
+        'project': project['name'] if project else '',
+        'projectId': project['id'] if project else '',
+        'parentId': parent['identifier'] if parent else None,
+        'team': node.get('team', {}).get('name', '') if node.get('team') else '',
+        'teamId': node.get('team', {}).get('id', '') if node.get('team') else '',
+        'history': history,
+    }
+
+
+def fetch_issues_by_query(query_template, var_name, person_id, person_name):
+    """Generic fetch using any query template with pagination.
     C2: Returns (issues, complete) tuple — complete=False if pagination broke mid-way."""
     all_issues = []
     cursor = None
+    complete = False
     page = 0
-    pagination_complete = False
-
     while True:
         page += 1
-        variables = {'teamId': team_id}
+        variables = {var_name: person_id}
         if cursor:
             variables['cursor'] = cursor
-
         try:
             resp = requests.post(API_URL, headers=HEADERS,
-                                 json={'query': QUERY, 'variables': variables},
+                                 json={'query': query_template, 'variables': variables},
                                  timeout=HTTP_TIMEOUT)
-        except requests.exceptions.Timeout:
-            print(f"  ERROR: Request timed out on page {page}")
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            print(f"    ERROR: {e}")
             break
-        except requests.exceptions.ConnectionError as e:
-            print(f"  ERROR: Connection failed on page {page}: {e}")
-            break
-
         if resp.status_code != 200:
-            print(f"  ERROR: API returned {resp.status_code}: {resp.text[:200]}")
+            print(f"    ERROR: API returned {resp.status_code}: {resp.text[:200]}")
             break
-
         data = resp.json()
         if 'errors' in data:
-            print(f"  ERROR: {data['errors'][0].get('message', '')}")
+            print(f"    ERROR: {data['errors'][0].get('message', '')}")
             break
-
         issues_data = data['data']['issues']
         nodes = issues_data['nodes']
-        print(f"  Page {page}: {len(nodes)} issues")
-
         for node in nodes:
-            estimate = node.get('estimate')
-            pm = node.get('projectMilestone')
-            project = node.get('project')
-            parent = node.get('parent')
-            labels_raw = node.get('labels', {}).get('nodes', [])
-            desc_raw = (node.get('description') or '')
-            desc = desc_raw[:500] + ('...' if len(desc_raw) > 500 else '')  # L1: truncation indicator
-
-            issue = {
-                'id': node['identifier'],
-                'title': node.get('title', ''),
-                'description': desc,
-                'projectMilestone': {'id': pm['id'], 'name': pm['name']} if pm else None,
-                'estimate': {'value': estimate, 'name': f"{estimate} Points"} if estimate else None,
-                'url': node.get('url', ''),
-                'gitBranchName': node.get('branchName', ''),
-                'createdAt': node.get('createdAt', ''),
-                'updatedAt': node.get('updatedAt', ''),
-                'archivedAt': node.get('archivedAt'),
-                'completedAt': node.get('completedAt'),
-                'dueDate': node.get('dueDate'),
-                'startedAt': node.get('startedAt'),
-                'slaStartedAt': node.get('slaStartedAt'),
-                'slaMediumRiskAt': node.get('slaMediumRiskAt'),
-                'slaHighRiskAt': node.get('slaHighRiskAt'),
-                'slaBreachesAt': node.get('slaBreachesAt'),
-                'slaType': node.get('slaType', ''),
-                'status': node.get('state', {}).get('name', ''),
-                'labels': [l['name'] for l in labels_raw],
-                'createdBy': node.get('creator', {}).get('name', '') if node.get('creator') else '',
-                'createdById': node.get('creator', {}).get('id', '') if node.get('creator') else '',
-                'assignee': node.get('assignee', {}).get('name', '') if node.get('assignee') else '',
-                'assigneeId': node.get('assignee', {}).get('id', '') if node.get('assignee') else '',
-                'project': project['name'] if project else '',
-                'projectId': project['id'] if project else '',
-                'parentId': parent['identifier'] if parent else None,
-                'team': node.get('team', {}).get('name', '') if node.get('team') else '',
-                'teamId': node.get('team', {}).get('id', '') if node.get('team') else '',
-            }
-            all_issues.append(issue)
-
+            all_issues.append(parse_issue_node(node))
         if not issues_data['pageInfo']['hasNextPage']:
-            pagination_complete = True  # C2: only mark complete if we reached the end
+            complete = True
             break
         cursor = issues_data['pageInfo']['endCursor']
-
-    return all_issues, pagination_complete
-
-
-def fetch_raccoons_thais(raccoons_issues):
-    """Filter Raccoons issues assigned to Thais."""
-    return [i for i in raccoons_issues if i.get('assigneeId') == THAIS_ID]
+    if not complete:
+        print(f"    WARNING: fetch incomplete for {person_name} — results may be partial")
+    return all_issues, complete
 
 
 print(f"=== Linear Cache Refresh — {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
 
-# Fetch Opossum team
-print("Fetching Opossum team...")
-opossum_issues, opossum_complete = fetch_team_issues(OPOSSUM_TEAM_ID, 'Opossum')
-print(f"  Total Opossum issues: {len(opossum_issues)} (complete: {opossum_complete})")
+# Fetch ALL issues per KPI team member — by assignee AND by creator
+all_kpi_issues = []
+seen_ids = set()
 
-# Filter by Thais/Yasmim
-thais_opo = [i for i in opossum_issues if i.get('assigneeId') == THAIS_ID]
-yasmim_opo = [i for i in opossum_issues if i.get('assigneeId') == YASMIM_ID]
-print(f"  Thais: {len(thais_opo)} | Yasmim: {len(yasmim_opo)}")
+print("Fetching issues per person (assignee + creator, all teams)...")
+for uid, name in sorted(KPI_MEMBERS.items(), key=lambda x: x[1]):
+    # Fetch by current assignee
+    issues_assigned, ok1 = fetch_issues_by_query(QUERY_PERSON, 'assigneeId', uid, name)
+    # Fetch by creator (catches tickets reassigned outside the team)
+    issues_created, ok2 = fetch_issues_by_query(QUERY_CREATOR, 'creatorId', uid, name)
 
-# Check dueDate coverage
-thais_with_due = sum(1 for i in thais_opo if i.get('dueDate'))
-yasmim_with_due = sum(1 for i in yasmim_opo if i.get('dueDate'))
-print(f"  Thais dueDate: {thais_with_due}/{len(thais_opo)} ({100*thais_with_due//max(len(thais_opo),1)}%)")
-print(f"  Yasmim dueDate: {yasmim_with_due}/{len(yasmim_opo)} ({100*yasmim_with_due//max(len(yasmim_opo),1)}%)")
+    # Merge and dedup
+    combined = list(issues_assigned)
+    local_ids = {i['id'] for i in combined}
+    extra_from_creator = 0
+    for iss in issues_created:
+        if iss['id'] not in local_ids:
+            combined.append(iss)
+            local_ids.add(iss['id'])
+            extra_from_creator += 1
 
-# Save Opossum cache — C2: only save if pagination completed fully
-opossum_path = os.path.join(ROOT, '_opossum_raw.json')
-if len(opossum_issues) == 0:
-    print(f"  SKIPPED save — 0 issues fetched, keeping existing cache")
-elif not opossum_complete:
-    print(f"  SKIPPED save — pagination incomplete ({len(opossum_issues)} partial issues), keeping existing cache")
+    new_count = 0
+    for iss in combined:
+        if iss['id'] not in seen_ids:
+            all_kpi_issues.append(iss)
+            seen_ids.add(iss['id'])
+            new_count += 1
+    with_due = sum(1 for i in combined if i.get('dueDate'))
+    teams = set(i.get('team', '?') for i in combined)
+    extra_note = f" +{extra_from_creator} from creator" if extra_from_creator else ""
+    print(f"  {name}: {len(combined)} issues ({new_count} new, {with_due} with dueDate{extra_note}) — teams: {', '.join(sorted(teams))} — {'OK' if ok1 and ok2 else 'PARTIAL'}")
+
+print(f"\nTotal unique KPI issues: {len(all_kpi_issues)}")
+
+# Save unified KPI cache
+kpi_path = os.path.join(ROOT, '_kpi_all_members.json')
+raccoons_compat_path = os.path.join(ROOT, '_raccoons_kpi.json')
+if len(all_kpi_issues) == 0:
+    print(f"  SKIPPED save — 0 KPI issues found")
 else:
-    atomic_write_json(opossum_path, opossum_issues)
-    print(f"  Saved: {opossum_path}")
-
-# Fetch Raccoons team
-print("\nFetching Raccoons team...")
-raccoons_issues, raccoons_complete = fetch_team_issues(RACCOONS_TEAM_ID, 'Raccoons')
-print(f"  Total Raccoons issues: {len(raccoons_issues)} (complete: {raccoons_complete})")
-
-# Filter Thais from Raccoons
-raccoons_thais = fetch_raccoons_thais(raccoons_issues)
-print(f"  Raccoons/Thais: {len(raccoons_thais)}")
-
-# Save Raccoons/Thais cache — H8: check raccoons_thais count (not raccoons_issues)
-raccoons_path = os.path.join(ROOT, '_raccoons_thais.json')
-if len(raccoons_thais) == 0:
-    print(f"  SKIPPED save — 0 Thais issues found, keeping existing cache")
-elif not raccoons_complete:
-    print(f"  SKIPPED save — pagination incomplete, keeping existing cache")
-else:
-    atomic_write_json(raccoons_path, raccoons_thais)
-    print(f"  Saved: {raccoons_path}")
+    atomic_write_json(kpi_path, all_kpi_issues)
+    atomic_write_json(raccoons_compat_path, all_kpi_issues)  # backward compat
+    print(f"  Saved: {kpi_path} ({len(all_kpi_issues)} issues)")
 
 # Summary
 print(f"\n=== Refresh complete ===")
-print(f"  Opossum: {len(opossum_issues)} issues ({len(thais_opo)} Thais + {len(yasmim_opo)} Yasmim) — {'COMPLETE' if opossum_complete else 'PARTIAL'}")
-print(f"  Raccoons/Thais: {len(raccoons_thais)} issues — {'COMPLETE' if raccoons_complete else 'PARTIAL'}")
-print(f"  Thais ETA coverage: {thais_with_due}/{len(thais_opo)}")
-print(f"  Yasmim ETA coverage: {yasmim_with_due}/{len(yasmim_opo)}")
+print(f"  Total KPI issues: {len(all_kpi_issues)} (across all teams)")
+for uid, name in sorted(KPI_MEMBERS.items(), key=lambda x: x[1]):
+    count = sum(1 for i in all_kpi_issues if i.get('assigneeId') == uid)
+    print(f"    {name}: {count}")
 print(f"\nNext: run 'python kpi/merge_opossum_data.py' then 'python kpi/build_html_dashboard.py'")

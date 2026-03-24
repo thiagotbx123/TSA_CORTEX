@@ -31,6 +31,8 @@ REQUIRED = {
     'customer': '', 'dateAdd': '', 'eta': '', 'delivery': '',
     'perf': '', 'ticketId': '', 'ticketUrl': '', 'source': '',
     'milestone': '', 'parentId': '', 'rework': '', 'startedAt': '',
+    'deliveryDate': '', 'originalEta': '', 'finalEta': '',
+    'reviewerDelay': None, 'etaChanges': 0, 'inReviewDate': '',
 }
 
 # M6: Unified customer mapping — Staircase is the correct name (Gabi's reference)
@@ -88,13 +90,17 @@ def infer_year(month, context_date=None):
 
 
 def calc_perf(status, eta, delivery):
-    """D.LIE7: Calculate performance label from current data."""
+    """D.LIE7: Calculate performance label from current data (legacy fallback)."""
     if status == 'Canceled':
         return 'N/A'
     # D.LIE10: B.B.C. (Blocked By Customer) should not be penalized
     if status == 'B.B.C':
         return 'Blocked'
     if not eta:
+        # D.LIE17: Not-started tickets without ETA = N/A (not actionable yet)
+        # Only flag "No ETA" for active/completed work
+        if status in ('Backlog', 'Todo', 'Triage'):
+            return 'Not Started'
         return 'No ETA'
     if status == 'Done':
         if not delivery:
@@ -113,11 +119,80 @@ def calc_perf(status, eta, delivery):
         try:
             d_eta = datetime.strptime(eta[:10], '%Y-%m-%d').date()
             if d_eta < datetime.now().date():
-                return 'Overdue'
+                return 'Late'
             else:
                 return 'On Track'
         except ValueError:
             return 'N/A'
+
+
+def calc_perf_with_history(record):
+    """Activity-based perf calculation using Linear issue history.
+
+    Uses deliveryDate (first In Review/Done) instead of completedAt,
+    and finalEta (current dueDate) for comparison. Falls back to
+    legacy calc_perf when history fields are missing.
+    """
+    status = record.get('status', '')
+    final_eta = record.get('originalEta', '') or record.get('finalEta', '') or record.get('eta', '')
+    delivery_date = record.get('deliveryDate', '')
+    in_review_date = record.get('inReviewDate', '')
+
+    # Preserve special statuses
+    if status == 'Canceled':
+        return 'N/A'
+    if status == 'B.B.C':
+        return 'Blocked'
+    if not final_eta:
+        if status in ('Backlog', 'Todo', 'Triage'):
+            return 'Not Started'
+        return 'No ETA'
+
+    today = datetime.now().date()
+
+    try:
+        d_eta = datetime.strptime(final_eta[:10], '%Y-%m-%d').date()
+    except ValueError:
+        return 'N/A'
+
+    # Case 1: Has a deliveryDate (first In Review or Done transition)
+    if delivery_date:
+        try:
+            d_del = datetime.strptime(delivery_date[:10], '%Y-%m-%d').date()
+            if d_del <= d_eta:
+                return 'On Time'
+            else:
+                return 'Late'
+        except ValueError:
+            pass
+
+    # Case 2: No deliveryDate, but is In Review — check when it moved there
+    if not delivery_date and status == 'In Progress' and in_review_date:
+        # status mapped to In Progress but actually In Review in Linear
+        pass
+    if not delivery_date and in_review_date:
+        try:
+            d_review = datetime.strptime(in_review_date[:10], '%Y-%m-%d').date()
+            if today > d_eta:
+                # Past ETA — was the In Review move on time?
+                if d_review <= d_eta:
+                    return 'On Time'
+                else:
+                    return 'Late'
+            else:
+                return 'On Track'
+        except ValueError:
+            pass
+
+    # Case 3: No deliveryDate AND no In Review — open ticket
+    if not delivery_date and not in_review_date:
+        if d_eta < today:
+            return 'Late'
+        else:
+            return 'On Track'
+
+    # Fallback to legacy
+    return calc_perf(status, final_eta, record.get('delivery', ''))
 
 
 for r in data:
@@ -286,12 +361,81 @@ for r in data:
         fixes.setdefault('canceled_perf_fixed', 0)
         fixes['canceled_perf_fixed'] += 1
 
+    # D.LIE14: Update delivery field with activity-based deliveryDate for velocity accuracy
+    if r.get('source') == 'linear' and r.get('deliveryDate') and not r.get('delivery'):
+        r['delivery'] = r['deliveryDate']
+        fixes.setdefault('delivery_from_history', 0)
+        fixes['delivery_from_history'] += 1
+    # Also update delivery if deliveryDate is earlier (person moved to In Review before Done)
+    if r.get('source') == 'linear' and r.get('deliveryDate') and r.get('delivery'):
+        if r['deliveryDate'] < r['delivery']:
+            r['delivery'] = r['deliveryDate']
+            fixes.setdefault('delivery_corrected_to_review', 0)
+            fixes['delivery_corrected_to_review'] += 1
+
     # D.LIE7: Recalculate perf for ALL records to ensure consistency after date fixes
-    new_perf = calc_perf(r.get('status', ''), r.get('eta', ''), r.get('delivery', ''))
-    if new_perf != r.get('perf', ''):
+    # Use activity-based history for Linear records; legacy for spreadsheet
+    old_perf = r.get('perf', '')
+
+    # D.LIE15: Detect bulk-closed / admin-closed / migrated tickets
+    # Pattern 1: No startedAt, no deliveryDate, no inReviewDate → pure admin close
+    # Pattern 2: Migrated from spreadsheet (createdAt ≈ dueDate, only 1 status transition)
+    #            These tickets were already delivered in the spreadsheet and just closed in Linear
+    is_admin_close = False
+    if r.get('source') == 'linear' and r.get('status') == 'Done':
+        # Pattern 1: never started
+        if not r.get('startedAt') and not r.get('deliveryDate') and not r.get('inReviewDate'):
+            is_admin_close = True
+        # Pattern 2: migrated ticket — createdAt == dueDate (same day) and no In Review step
+        elif (r.get('eta') and r.get('dateAdd')
+              and r['eta'][:10] == r['dateAdd'][:10]
+              and not r.get('inReviewDate')
+              and r.get('etaChanges', 0) <= 1):
+            is_admin_close = True
+
+    if is_admin_close:
+        if r.get('eta'):
+            new_perf = 'On Time'
+        else:
+            new_perf = 'N/A'
+        fixes.setdefault('admin_close_fixed', 0)
+        fixes['admin_close_fixed'] += 1
+    elif r.get('source') == 'linear' and (r.get('deliveryDate') or r.get('inReviewDate')):
+        new_perf = calc_perf_with_history(r)
+    else:
+        new_perf = calc_perf(r.get('status', ''), r.get('eta', ''), r.get('delivery', ''))
+    if new_perf != old_perf:
         fixes.setdefault('perf_recalculated', 0)
         fixes['perf_recalculated'] += 1
+        # Track history-based improvements separately
+        if r.get('source') == 'linear' and (r.get('deliveryDate') or r.get('inReviewDate')):
+            fixes.setdefault('perf_improved_by_history', 0)
+            fixes['perf_improved_by_history'] += 1
         r['perf'] = new_perf
+
+# D.LIE22: Remove spreadsheet records that have a Linear equivalent
+# Linear is the source of truth — if a ticket exists in Linear for the same task, drop the spreadsheet version
+linear_focuses = set()
+for r in data:
+    if r.get('source') == 'linear' and r.get('focus'):
+        # Normalize: lowercase, strip brackets, first 40 chars
+        norm = re.sub(r'^\[.*?\]\s*', '', r['focus']).strip().lower()[:40]
+        linear_focuses.add((r.get('tsa', ''), norm))
+
+before_dedup = len(data)
+deduped = []
+sheet_replaced = 0
+for r in data:
+    if r.get('source') == 'spreadsheet' and r.get('focus'):
+        norm = r['focus'].strip().lower()[:40]
+        if (r.get('tsa', ''), norm) in linear_focuses:
+            sheet_replaced += 1
+            continue  # Linear has this — drop the spreadsheet version
+    deduped.append(r)
+data = deduped
+if sheet_replaced:
+    fixes['sheet_replaced_by_linear'] = sheet_replaced
+    print(f"  D.LIE22: {sheet_replaced} spreadsheet records replaced by Linear equivalents")
 
 # M9: Detect duplicates (alert, don't auto-remove)
 seen = {}
@@ -337,6 +481,13 @@ if dup_groups:
     print(f"\n  Potential duplicates detected: {len(dup_groups)} pairs")
     for idx, orig_idx, key in dup_groups[:5]:
         print(f"    [{idx}] = [{orig_idx}] | {key[0]} | {key[1][:40]} | {key[2]}")
+
+# History impact summary
+history_improved = fixes.get('perf_improved_by_history', 0)
+linear_with_history = [r for r in data if r.get('source') == 'linear' and (r.get('deliveryDate') or r.get('inReviewDate'))]
+print(f"\n  Activity-based history analysis:")
+print(f"    Linear records with history data: {len(linear_with_history)}")
+print(f"    {history_improved} issues improved by history analysis")
 
 # C3: Atomic write
 tmp_path = DATA_PATH + '.tmp'

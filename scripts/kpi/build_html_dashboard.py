@@ -216,11 +216,11 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* ── Gantt chart styles (gt- prefix) ───────────── */
 .gt-months{display:flex;position:sticky;top:0;z-index:21;background:var(--white);border-bottom:2px solid var(--border)}
-.gt-months .gt-label-col{min-width:280px;max-width:280px;position:sticky;left:0;z-index:25;background:#0f172a;padding:6px 12px;display:flex;align-items:center;box-shadow:4px 0 8px rgba(0,0,0,.15)}
+.gt-months .gt-label-col{min-width:280px;max-width:280px;position:sticky;left:0;z-index:30;background:#0f172a;padding:6px 12px;display:flex;align-items:center;box-shadow:6px 0 12px rgba(0,0,0,.2)}
 .gt-months .gt-label-col span{color:#94a3b8;font-size:.72em;font-weight:600}
-.gt-month-cell{display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;color:var(--text);background:#f8fafc;border-right:2px solid var(--border);padding:4px 0}
+.gt-month-cell{display:flex;align-items:center;justify-content:center;font-size:.72em;font-weight:700;color:#1e293b;background:#f8fafc;border-right:2px solid #94a3b8;padding:4px 0}
 .gt-header{display:flex;position:sticky;top:28px;z-index:20;background:var(--white);border-bottom:1px solid var(--border)}
-.gt-header .gt-label-col{min-width:280px;max-width:280px;position:sticky;left:0;z-index:25;background:#f1f5f9;padding:2px 12px;display:flex;align-items:center;box-shadow:4px 0 8px rgba(0,0,0,.08)}
+.gt-header .gt-label-col{min-width:280px;max-width:280px;position:sticky;left:0;z-index:28;background:#f1f5f9;padding:2px 12px;display:flex;align-items:center;box-shadow:6px 0 12px rgba(0,0,0,.1)}
 .gt-header .gt-label-col span{color:#94a3b8;font-size:.6em}
 .gt-days{display:flex}
 .gt-day{min-width:6px;max-width:6px;text-align:center;font-size:.45em;color:#94a3b8;padding:1px 0;border-right:1px solid #f1f5f9}
@@ -229,11 +229,11 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .gt-day.gt-today-col{background:#fef2f2;color:#dc2626;font-weight:700}
 .gt-row{display:flex;border-bottom:1px solid #e8ecf1;min-height:28px;align-items:stretch}
 .gt-row:hover{background:#f8fafc}
-.gt-label{min-width:280px;max-width:280px;position:sticky;left:0;z-index:10;background:var(--white);display:flex;align-items:center;padding:0 8px;border-right:2px solid #cbd5e1;box-shadow:4px 0 8px rgba(0,0,0,.06)}
+.gt-label{min-width:280px;max-width:280px;position:sticky;left:0;z-index:15;background:var(--white);display:flex;align-items:center;padding:0 8px;border-right:2px solid #cbd5e1;box-shadow:6px 0 12px rgba(0,0,0,.1)}
 .gt-row:hover .gt-label{background:#f8fafc}
 .gt-group{background:#f8fafc;border-bottom:2px solid var(--border);cursor:pointer;user-select:none}
 .gt-group:hover{background:#e2e8f0}
-.gt-group .gt-label{background:#f8fafc;font-weight:700;font-size:.82em;gap:8px;box-shadow:4px 0 8px rgba(0,0,0,.06)}
+.gt-group .gt-label{background:#f8fafc;font-weight:700;font-size:.82em;gap:8px;box-shadow:6px 0 12px rgba(0,0,0,.1)}
 .gt-group:hover .gt-label{background:#e2e8f0}
 .gt-group .gt-arrow{font-size:.65em;color:#64748b;transition:transform .2s;width:14px;text-align:center}
 .gt-group.gt-open .gt-arrow{transform:rotate(90deg)}
@@ -260,7 +260,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .gt-bar-projected{border:2px dashed #94a3b8;background:#94a3b815;top:6px;height:14px}
 .gt-bar-summary{background:linear-gradient(90deg,#1e40af33,#3b82f633);border-radius:4px;top:5px;height:16px;border:1px solid #3b82f644}
 .gt-today-marker{position:absolute;top:0;bottom:0;width:2px;background:#dc2626;z-index:3;pointer-events:none;opacity:.8}
-.gt-month-line{position:absolute;top:0;bottom:0;width:1px;background:#cbd5e1;z-index:1;pointer-events:none;opacity:.5}
+.gt-month-line{position:absolute;top:0;bottom:0;width:1px;background:#94a3b8;z-index:1;pointer-events:none;opacity:.6}
 @media(max-width:900px){.top-strip{flex-direction:column}.strip-group{flex-direction:row;flex-wrap:wrap}.heatmap{font-size:.7em}.audit-table{font-size:.65em}}
 </style>
 </head>
@@ -382,7 +382,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="audit-section" style="margin-top:0">
     <div class="audit-header collapse-toggle">
       <span class="toggle">&#9660;</span>
-      <h3><span class="dot" style="background:#0ea5e9;position:relative;top:0"></span>Gantt Chart</h3>
+      <h3><span class="dot" style="background:#0ea5e9;position:relative;top:0"></span>Gantt Chart <span style="font-size:.6em;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-weight:700">WIP</span></h3>
     </div>
     <div class="audit-body">
       <div id="ganttControls" style="padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -415,7 +415,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
         </select>
         <span id="gtStats" style="font-size:.72em;color:var(--dim);margin-left:auto"></span>
       </div>
-      <div id="ganttWrap" style="overflow:auto;max-height:600px;padding:0 20px">
+      <div id="ganttWrap" style="overflow:auto;max-height:600px;position:relative">
         <div id="ganttCanvas"></div>
       </div>
       <div id="ganttLegend" style="padding:8px 20px;display:flex;gap:14px;font-size:.7em;color:#64748b;flex-wrap:wrap">

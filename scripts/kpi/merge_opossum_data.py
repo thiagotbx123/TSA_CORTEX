@@ -249,7 +249,7 @@ def map_status(linear_status):
     mapping = {
         'Done': 'Done',
         'In Progress': 'In Progress',
-        'In Review': 'In Progress',
+        'In Review': 'In Review',
         'Todo': 'Todo',
         'Backlog': 'Backlog',
         'Canceled': 'Canceled',
@@ -430,11 +430,12 @@ for iss in issues:
     week = date_to_week(week_date)
     wrange = week_range(week_date)
 
-    # D.LIE24: When ticket was reassigned at In Review, the implementor's
-    # delivery date is when they moved it to In Review (not when reviewer marked Done).
-    # This separates implementor execution time from reviewer delay.
+    # D.LIE24+D.LIE25: In Review = implementor delivered.
+    # When a ticket moves to In Review, the implementor's delivery date is the
+    # In Review date — regardless of whether it was reassigned or not.
+    # "In Review" means "I finished my part" for the owner.
     effective_delivery = completed
-    if hist_fields.get('reassignedInReview') and hist_fields.get('inReviewDate'):
+    if hist_fields.get('inReviewDate') and status in ('In Review', 'Done'):
         effective_delivery = hist_fields['inReviewDate']
         review_delivery_adjusted += 1
 

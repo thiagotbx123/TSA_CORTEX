@@ -1814,9 +1814,15 @@ function renderScrumCards(){
   /* Split: active (In Progress/In Review/Paused/Todo) + completed today — respects person filter */
   const pf=state.person;
   const active=RAW.filter(r=>r.source==='linear'&&['In Progress','In Review','Paused','Todo'].includes(r.status)&&(pf==='ALL'||r.tsa===pf));
-  const doneToday=RAW.filter(r=>r.source==='linear'&&r.status==='Done'&&r.delivery&&r.delivery.slice(0,10)===todayStr&&(pf==='ALL'||r.tsa===pf));
+  /* Done in last 48h — on weekends (Sat/Sun) extend back to Friday */
+  const todayDate=new Date(todayStr+'T12:00:00');
+  const dow=todayDate.getDay();
+  const lookbackDays=dow===0?2:dow===6?1:2; /* Sun→Fri(2d), Sat→Fri(1d), weekday→48h(2d) */
+  const cutoffDate=new Date(todayDate);cutoffDate.setDate(cutoffDate.getDate()-lookbackDays);
+  const cutoffStr=cutoffDate.toISOString().slice(0,10);
+  const doneRecent=RAW.filter(r=>r.source==='linear'&&r.status==='Done'&&r.delivery&&r.delivery.slice(0,10)>=cutoffStr&&(pf==='ALL'||r.tsa===pf));
 
-  const people=[...new Set([...active,...doneToday].map(r=>r.tsa))].sort();
+  const people=[...new Set([...active,...doneRecent].map(r=>r.tsa))].sort();
   const el=document.getElementById('scrumCards');
   if(!el)return;
 
@@ -1846,7 +1852,7 @@ function renderScrumCards(){
 
   const cards=people.map(person=>{
     const myActive=active.filter(r=>r.tsa===person);
-    const myDone=doneToday.filter(r=>r.tsa===person);
+    const myDone=doneRecent.filter(r=>r.tsa===person);
 
     /* Group active by customer */
     const byCust={};
@@ -1884,7 +1890,7 @@ function renderScrumCards(){
     /* Done today section */
     const allDoneCusts=Object.keys(doneByCust).sort();
     if(allDoneCusts.length>0){
-      text+=`\n———— Completed Today ————\n`;
+      text+=`\n———— Recently Completed ————\n`;
       allDoneCusts.forEach(cust=>{
         doneByCust[cust].forEach(t=>{
           const name=cleanName(t.focus,cust);
@@ -1907,7 +1913,7 @@ function renderScrumCards(){
     });
     /* Done today with strikethrough line */
     if(allDoneCusts.length>0){
-      html+=`<div style="border-top:2px dashed var(--green);margin:10px 0 6px;position:relative"><span style="position:absolute;top:-9px;left:12px;background:var(--white);padding:0 8px;font-size:.7em;font-weight:700;color:var(--green);text-transform:uppercase">Completed Today</span></div>`;
+      html+=`<div style="border-top:2px dashed var(--green);margin:10px 0 6px;position:relative"><span style="position:absolute;top:-9px;left:12px;background:var(--white);padding:0 8px;font-size:.7em;font-weight:700;color:var(--green);text-transform:uppercase">Recently Completed</span></div>`;
       allDoneCusts.forEach(cust=>{
         doneByCust[cust].forEach(t=>{
           const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';

@@ -1703,6 +1703,7 @@ function renderGantt(){
     const active=tasks.filter(t=>['In Progress','In Review','Todo','Paused','Production QA'].includes(t.status)).length;
     const late=tasks.filter(t=>t.perf==='Late').length;
     const onTime=tasks.filter(t=>t.perf==='On Time').length;
+    const tbd=tasks.filter(t=>!t.eta&&t.status!=='Done'&&t.status!=='Canceled').length;
 
     /* Summary bar range */
     let gMin=null,gMax=null;
@@ -1725,6 +1726,7 @@ function renderGantt(){
     if(onTime)html+='<span class="gt-badge" style="background:#d1fae5;color:#065f46">'+onTime+' ok</span>';
     if(late)html+='<span class="gt-badge" style="background:#fee2e2;color:#991b1b">'+late+' late</span>';
     if(active)html+='<span class="gt-badge" style="background:#dbeafe;color:#1e40af">'+active+' active</span>';
+    if(tbd)html+='<span class="gt-badge" style="background:#bfdbfe;color:#1e3a8a">'+tbd+' TBD</span>';
     html+='</div></div>';
 
     /* Summary bar area */
@@ -1862,6 +1864,7 @@ function renderScrumCards(){
     });
 
     let green=0,yellow=0,red=0;
+    const tbd=myActive.filter(t=>!t.eta).length;
     myActive.forEach(t=>{
       const sig=taskSignal(t);
       if(sig==='ontrack')green++;else if(sig==='atrisk')yellow++;else red++;
@@ -1869,11 +1872,13 @@ function renderScrumCards(){
 
     /* Build Slack text */
     let text=`[Daily Agenda – ${todayStr}]\n`;
+    /* Sort: TBD (no ETA) first, then by ETA oldest→newest */
+    const sortTasks=arr=>arr.sort((a,b)=>{if(!a.eta&&b.eta)return-1;if(a.eta&&!b.eta)return 1;return(a.eta||'').localeCompare(b.eta||'')});
     Object.keys(byCust).sort().forEach(cust=>{
       text+=`\n${cust}\n`;
-      byCust[cust].sort((a,b)=>(a.eta||'9999').localeCompare(b.eta||'9999')).forEach(t=>{
+      sortTasks(byCust[cust]).forEach(t=>{
         const name=cleanName(t.focus,cust);
-        text+=`  :black_small_square: Do: ${name} ETA: ${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}\n`;
+        text+=`  :black_small_square: [${t.status}] ${name} ETA: ${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}\n`;
       });
     });
     /* Done today section */
@@ -1892,11 +1897,12 @@ function renderScrumCards(){
     let html='';
     Object.keys(byCust).sort().forEach(cust=>{
       html+=`<div class="sc-customer">${esc(cust)}</div>`;
-      byCust[cust].sort((a,b)=>(a.eta||'9999').localeCompare(b.eta||'9999')).forEach(t=>{
+      sortTasks(byCust[cust]).forEach(t=>{
         const sig=taskSignal(t);
         const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
         const name=cleanName(t.focus,cust);
-        html+=`<div class="sc-task">${tid}${esc(name)} <span style="color:var(--dim)">ETA:${fmtD(t.eta)}</span> <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
+        const statusColor=t.status==='In Progress'?'#3b82f6':t.status==='In Review'?'#8b5cf6':t.status==='Todo'?'#94a3b8':'#64748b';
+        html+=`<div class="sc-task"><span style="color:${statusColor};font-size:.8em;font-weight:600">[${esc(t.status)}]</span> ${tid}${esc(name)} <span style="color:var(--dim)">ETA:${fmtD(t.eta)}</span> <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
       });
     });
     /* Done today with strikethrough line */
@@ -1911,7 +1917,7 @@ function renderScrumCards(){
       });
     }
 
-    return{person,active:myActive.length,done:myDone.length,green,yellow,red,text,html};
+    return{person,active:myActive.length,done:myDone.length,green,yellow,red,tbd,text,html};
   });
 
   el.innerHTML=cards.map(c=>`
@@ -1924,6 +1930,7 @@ function renderScrumCards(){
           ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} 🔴</span>`:''}
           ${c.done?`<span style="background:#059669;color:#fff">✅ ${c.done}</span>`:''}
           <span style="background:#1e293b;color:#94a3b8">${c.active} active</span>
+          ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe">${c.tbd} TBD</span>`:''}
         </div>
       </div>
       <div class="sc-body">${c.html}</div>

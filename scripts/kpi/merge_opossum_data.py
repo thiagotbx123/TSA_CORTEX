@@ -234,6 +234,7 @@ def extract_customer(title):
             'staircase': 'Staircase',
             'mailchimp': 'Mailchimp',
             'quickbooks': 'QuickBooks', 'qbo': 'QuickBooks',
+            'intuit quickbooks': 'QuickBooks', 'intuit': 'QuickBooks',
             'de team': 'Internal',
             'spike': None,
         }
@@ -397,6 +398,7 @@ for iss in issues:
         proj = iss['project']
         proj_map = {
             'qbo': 'QuickBooks', '[quickbook] data gen': 'QuickBooks',
+            'intuit quickbooks': 'QuickBooks', '[intuit quickbooks]': 'QuickBooks',
             'archer': 'Archer', 'gong implementation': 'Gong', '[gong]': 'Gong',
             '[gem]': 'Gem', '[tabs] integration': 'Tabs',
             '[tropic] implementation': 'Tropic', '[brevo] integration': 'Brevo',

@@ -38,6 +38,9 @@ REQUIRED = {
 # M6: Unified customer mapping — Staircase is the correct name (Gabi's reference)
 CUSTOMER_MAP = {
     'qbo': 'QuickBooks', 'quickbooks': 'QuickBooks',
+    'intuit quickbooks': 'QuickBooks', 'intuit': 'QuickBooks',
+    'intuit ies tco/keystone construction': 'QuickBooks',
+    'qbo-wfs': 'WFS',
     'gong': 'Gong',
     'gem': 'Gem',
     'mailchimp': 'Mailchimp',

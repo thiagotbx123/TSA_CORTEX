@@ -239,10 +239,9 @@ for r in data:
             r['week'] = '25-' + r['week'][3:]
         fixes.setdefault('year_fixed', 0)
         fixes['year_fixed'] += 1
-    if r.get('eta', '').startswith('2019-'):
-        r['eta'] = '2025-' + r['eta'][5:]
-    if r.get('delivery', '').startswith('2019-'):
-        r['delivery'] = '2025-' + r['delivery'][5:]
+    for df in ('eta', 'delivery', 'startedAt', 'deliveryDate', 'inReviewDate', 'originalEta', 'finalEta'):
+        if r.get(df, '').startswith('2019-'):
+            r[df] = '2025-' + r[df][5:]
 
     # M10: Fix weekRange year 2019→2025
     wr = r.get('weekRange', '')

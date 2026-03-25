@@ -17,12 +17,14 @@ from datetime import datetime
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PYTHON = sys.executable
 
+# Steps: (script, description, optional)
+# Optional steps don't fail the pipeline if they error
 STEPS = [
-    ('refresh_linear_cache.py', 'Refreshing Linear cache from API...'),
-    ('merge_opossum_data.py', 'Merging Linear data into dashboard...'),
-    ('normalize_data.py', 'Normalizing data quality...'),
-    ('build_html_dashboard.py', 'Building HTML dashboard...'),
-    ('upload_dashboard_drive.py', 'Uploading to Google Drive...'),
+    ('refresh_linear_cache.py', 'Refreshing Linear cache from API...', False),
+    ('merge_opossum_data.py', 'Merging Linear data into dashboard...', False),
+    ('normalize_data.py', 'Normalizing data quality...', False),
+    ('build_html_dashboard.py', 'Building HTML dashboard...', False),
+    ('upload_dashboard_drive.py', 'Uploading to Google Drive...', True),
 ]
 
 
@@ -86,20 +88,25 @@ def main():
 
     steps_to_run = STEPS[:]
     if build_only:
-        steps_to_run = [STEPS[3]]  # Only build
+        steps_to_run = [STEPS[3], STEPS[4]]  # Build + optional upload
     elif skip_refresh:
         steps_to_run = STEPS[1:]  # Skip refresh
 
     total_start = time.time()
     all_ok = True
 
-    for script, desc in steps_to_run:
+    for step in steps_to_run:
+        script, desc = step[0], step[1]
+        optional = step[2] if len(step) > 2 else False
         ok, dur, output = run_step(script, desc, cwd)
         results.append((script, ok, dur))
         if not ok:
-            all_ok = False
-            print(f"\n  Pipeline STOPPED at {script}. Fix the error and retry.")
-            break
+            if optional:
+                print(f"\n  WARNING: Optional step {script} failed — continuing pipeline.")
+            else:
+                all_ok = False
+                print(f"\n  Pipeline STOPPED at {script}. Fix the error and retry.")
+                break
 
     total_dur = time.time() - total_start
 

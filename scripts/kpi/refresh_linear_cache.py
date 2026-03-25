@@ -328,6 +328,7 @@ print(f"=== Linear Cache Refresh — {datetime.now().strftime('%Y-%m-%d %H:%M')}
 
 # Fetch ALL issues per KPI team member — by assignee AND by creator
 all_kpi_issues = []
+fetch_warnings = []
 seen_ids = set()
 
 print("Fetching issues per person (assignee + creator, all teams)...")
@@ -356,8 +357,13 @@ for uid, name in sorted(KPI_MEMBERS.items(), key=lambda x: x[1]):
     with_due = sum(1 for i in combined if i.get('dueDate'))
     teams = set(i.get('team', '?') for i in combined)
     extra_note = f" +{extra_from_creator} from creator" if extra_from_creator else ""
-    print(f"  {name}: {len(combined)} issues ({new_count} new, {with_due} with dueDate{extra_note}) — teams: {', '.join(sorted(teams))} — {'OK' if ok1 and ok2 else 'PARTIAL'}")
+    fetch_status = 'OK' if ok1 and ok2 else 'PARTIAL'
+    if fetch_status == 'PARTIAL':
+        fetch_warnings.append(name)
+    print(f"  {name}: {len(combined)} issues ({new_count} new, {with_due} with dueDate{extra_note}) — teams: {', '.join(sorted(teams))} — {fetch_status}")
 
+if fetch_warnings:
+    print(f"\n  WARNING: Partial fetch for: {', '.join(fetch_warnings)} — data may be incomplete")
 print(f"\nTotal unique KPI issues: {len(all_kpi_issues)}")
 
 # Save unified KPI cache

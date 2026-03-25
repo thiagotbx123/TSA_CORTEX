@@ -176,6 +176,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .audit-table tr:hover td{background:var(--blue-bg)}
 .audit-table .perf-on-time{color:var(--green);font-weight:600}
 .audit-table .perf-late{color:var(--red);font-weight:600}
+.audit-table .perf-on-track{color:#2563eb;font-weight:600}
 .audit-table .perf-overdue{color:var(--yellow);font-weight:600}
 .audit-table .perf-na{color:var(--light)}
 .audit-table .perf-not-started{color:#a78bfa;font-weight:500}
@@ -277,7 +278,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="filters">
     <label>Month</label><select id="fMonth" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:.82em;cursor:pointer"><option value="ALL">All</option></select>
     <label>Person</label><select id="fPerson"><option value="ALL">All</option></select>
-    <label>Category</label><select id="fCategory"><option value="ALL">All</option><option value="Internal">Internal</option><option value="External">External</option></select>
+    <select id="fCategory" style="display:none"><option value="ALL">All</option><option value="Internal">Internal</option><option value="External">External</option></select>
     <button id="btnRefresh" onclick="refreshDashboard()" style="margin-left:12px;background:linear-gradient(135deg,#1e40af,#2563eb);border:1px solid #3b82f6;color:#fff;padding:6px 14px;border-radius:6px;font-size:.78em;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;letter-spacing:.3px" onmouseover="this.style.background='linear-gradient(135deg,#1e3a8a,#1d4ed8)'" onmouseout="this.style.background='linear-gradient(135deg,#1e40af,#2563eb)'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>Refresh Data</button>
     <span id="refreshDate" style="font-size:.72em;font-style:italic;color:#a7f3d0;margin-left:6px"></span>
   </div>
@@ -727,17 +728,20 @@ function buildGrid(tableId, calcFn, fmtFn, heatFn, tipFn){
   const allCls=allRows.length===0?'heat-na':heatFn(allCalc.val);
   teamRow+=`<td class="cell total-col ${allCls}">${allRows.length===0?'—':fmtFn(allCalc.val,allCalc.den!==undefined?allCalc.den:allCalc.n)}</td></tr>`;
 
-  table.innerHTML=`<thead>${h1}${h2}</thead><tbody>${bodyRows}${teamRow}</tbody>`;
+  /* Replace table node to clear old event listeners */
+  const fresh=table.cloneNode(false);
+  table.parentNode.replaceChild(fresh,table);
+  fresh.innerHTML=`<thead>${h1}${h2}</thead><tbody>${bodyRows}${teamRow}</tbody>`;
 
-  table.addEventListener('mouseenter',function(e){
+  fresh.addEventListener('mouseenter',function(e){
     const td=e.target.closest('td[data-tip]');
     if(td){const html=tipCache[td.dataset.tip];if(html)showTip(e,html)}
   },true);
-  table.addEventListener('mouseleave',function(e){
+  fresh.addEventListener('mouseleave',function(e){
     const td=e.target.closest('td[data-tip]');
     if(td)hideTip();
   },true);
-  table.addEventListener('mousemove',function(e){
+  fresh.addEventListener('mousemove',function(e){
     const td=e.target.closest('td[data-tip]');
     if(td&&tip.style.display==='block'){
       const x=Math.min(e.clientX+14,window.innerWidth-tip.offsetWidth-20);
@@ -1169,7 +1173,7 @@ function populateAuditFilters(){
 const AUDIT_COLS=['#','Person','Week','Ticket','Focus/Task','Status','Category','Demand Type','Customer','Date Added','ETA','Delivery','Performance','Rework','Duration','Source','Ticket URL','Milestone','Parent'];
 
 function perfClass(v){
-  if(v==='On Time')return'perf-on-time';if(v==='Late')return'perf-late';
+  if(v==='On Time')return'perf-on-time';if(v==='Late')return'perf-late';if(v==='On Track')return'perf-on-track';
   if(v==='Not Started')return'perf-not-started';
   return'perf-na';
 }
@@ -1543,6 +1547,8 @@ function showGuide(){
 }
 
 /* ── Render all ─────────────────────────────────────── */
+let _renderTimer=null;
+function debouncedRender(){clearTimeout(_renderTimer);_renderTimer=setTimeout(render,150)}
 function render(){
   Object.keys(tipCache).forEach(k => delete tipCache[k]);
   tipCounter = 0;
@@ -1559,7 +1565,9 @@ function render(){
   renderTrend('trend-activity',calcActivity,'Task Volume','#4338ca',5,'Avg 5/week',false,'activity');
   renderCustomerKPI();
   renderScrumCards();
-  renderGantt();
+  /* Only render Gantt when its tab is active — expensive DOM rebuild */
+  const ganttPanel=document.getElementById('panel-gantt');
+  if(ganttPanel&&ganttPanel.classList.contains('active'))renderGantt();
   populateAuditFilters();
   renderAuditTable();
   renderReworkLog();
@@ -1765,7 +1773,6 @@ function renderGantt(){
       if(si<=totalDays&&ei>=0){
         html+='<div class="gt-bar '+bCls+'" style="left:'+si*GT_DAY_W+'px;width:'+len*GT_DAY_W+'px" onmouseenter="showTip(event,this.dataset.tip)" onmousemove="showTip(event,this.dataset.tip)" onmouseleave="hideTip()" data-tip="'+esc(tHtml)+'"></div>';
       }
-      if(tIdx>=0&&tIdx<totalDays)html+='<div class="gt-today-marker" style="left:'+tIdx*GT_DAY_W+'px"></div>';
       html+='</div></div>';
     });
   });
@@ -1817,7 +1824,7 @@ function renderScrumCards(){
   /* Done in last 48h — on weekends (Sat/Sun) extend back to Friday */
   const todayDate=new Date(todayStr+'T12:00:00');
   const dow=todayDate.getDay();
-  const lookbackDays=dow===0?2:dow===6?1:2; /* Sun→Fri(2d), Sat→Fri(1d), weekday→48h(2d) */
+  const lookbackDays=dow===1?3:dow===0?2:dow===6?1:2; /* Mon→Fri(3d), Sun→Fri(2d), Sat→Fri(1d), weekday→48h(2d) */
   const cutoffDate=new Date(todayDate);cutoffDate.setDate(cutoffDate.getDate()-lookbackDays);
   const cutoffStr=cutoffDate.toISOString().slice(0,10);
   const doneRecent=RAW.filter(r=>r.source==='linear'&&r.status==='Done'&&r.delivery&&r.delivery.slice(0,10)>=cutoffStr&&(pf==='ALL'||r.tsa===pf));
@@ -1880,7 +1887,14 @@ function renderScrumCards(){
     let text=`[Daily Agenda – ${todayStr}]\n`;
     /* Sort: TBD (no ETA) first, then by ETA oldest→newest */
     const sortTasks=arr=>arr.sort((a,b)=>{if(!a.eta&&b.eta)return-1;if(a.eta&&!b.eta)return 1;return(a.eta||'').localeCompare(b.eta||'')});
-    Object.keys(byCust).sort().forEach(cust=>{
+    /* Sort customers by urgency: most at-risk/blocked first, then by task count */
+    const custKeys=Object.keys(byCust).sort((a,b)=>{
+      const urgA=byCust[a].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'}).length;
+      const urgB=byCust[b].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'}).length;
+      if(urgB!==urgA)return urgB-urgA;
+      return byCust[b].length-byCust[a].length;
+    });
+    custKeys.forEach(cust=>{
       text+=`\n${cust}\n`;
       sortTasks(byCust[cust]).forEach(t=>{
         const name=cleanName(t.focus,cust);
@@ -1901,7 +1915,7 @@ function renderScrumCards(){
 
     /* Build HTML preview */
     let html='';
-    Object.keys(byCust).sort().forEach(cust=>{
+    custKeys.forEach(cust=>{
       html+=`<div class="sc-customer">${esc(cust)}</div>`;
       sortTasks(byCust[cust]).forEach(t=>{
         const sig=taskSignal(t);
@@ -1986,8 +2000,8 @@ function init(){
   cki.addEventListener('mouseenter',e=>showTip(e,CLIENT_TIP));
   cki.addEventListener('mouseleave',()=>hideTip());
 
-  document.getElementById('fMonth').addEventListener('change',e=>{state.month=e.target.value;render()});
-  document.getElementById('fPerson').addEventListener('change',e=>{state.person=e.target.value;render()});
+  document.getElementById('fMonth').addEventListener('change',e=>{state.month=e.target.value;debouncedRender()});
+  document.getElementById('fPerson').addEventListener('change',e=>{state.person=e.target.value;debouncedRender()});
 
   /* M12: Segment bar — default ALL */
   document.querySelectorAll('.segment-btn').forEach(btn=>{
@@ -1996,7 +2010,7 @@ function init(){
       btn.classList.add('active');
       state.category=btn.dataset.seg;
       document.getElementById('fCategory').value=btn.dataset.seg;
-      render();
+      debouncedRender();
     });
   });
   document.getElementById('fCategory').addEventListener('change',e=>{
@@ -2004,7 +2018,7 @@ function init(){
     document.querySelectorAll('.segment-btn').forEach(b=>{
       b.classList.toggle('active',b.dataset.seg===state.category);
     });
-    render();
+    debouncedRender();
   });
 
   function switchTab(tabName){
@@ -2020,7 +2034,7 @@ function init(){
     /* Gantt collapse uses display:none (sticky needs no overflow:hidden in ancestors) */
     const gBody=document.getElementById('ganttCollapseBody');
     const gHdr=document.getElementById('ganttCollapseHdr');
-    if(tabName==='gantt'&&gBody&&gHdr){gBody.style.display='';gHdr.classList.add('open')}
+    if(tabName==='gantt'&&gBody&&gHdr){gBody.style.display='';gHdr.classList.add('open');renderGantt()}
     /* Hide summary sections on Gantt/Scrum — show only on KPI tabs */
     const isFullscreen=tabName==='gantt'||tabName==='scrum';
     const custSection=document.getElementById('customerKPISection');

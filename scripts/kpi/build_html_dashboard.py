@@ -767,6 +767,19 @@ function tipAccuracy(person,week,calc,rows){
   html+=`<div class="tip-stat"><b style="color:#f87171">${calc.late||0}</b><span>late</span></div>`;
   html+=`<div class="tip-stat"><b>${calc.den}</b><span>measured</span></div>`;
   html+=`</div>`;
+  /* ETA Quality summary for measured tickets */
+  const measured=rows.filter(r=>r.perf==='On Time'||r.perf==='Late');
+  if(measured.length>0){
+    const etaChanged=measured.filter(r=>(r.etaChanges||0)>0).length;
+    const etaStable=measured.length-etaChanged;
+    const setLater=measured.filter(r=>{const c=r.dateAdd||'';const o=r.originalEta||'';return o&&c&&o.slice(0,10)!==c.slice(0,10)}).length;
+    if(etaChanged>0||setLater>0){
+      html+=`<div style="font-size:.78em;color:#818cf8;margin-top:3px;padding:2px 0;border-top:1px dashed #334155">`;
+      html+=`ETA Quality: <b>${etaStable}</b> stable, <b style="color:#fbbf24">${etaChanged}</b> changed`;
+      if(setLater>0)html+=`, <b style="color:#94a3b8">${setLater}</b> set after creation`;
+      html+=`</div>`;
+    }
+  }
   const excluded=rows.filter(r=>r.perf!=='On Time'&&r.perf!=='Late');
   if(excluded.length>0)html+=`<div style="font-size:.8em;color:#64748b;margin-top:2px">${excluded.length} excluded (${[...new Set(excluded.map(r=>r.perf))].join(', ')})</div>`;
   const lateOnes=rows.filter(r=>r.perf==='Late');
@@ -778,7 +791,8 @@ function tipAccuracy(person,week,calc,rows){
       const dates=r.eta?`<span class="tip-dates">ETA ${fmtDate(r.eta)}${r.delivery?' → '+fmtDate(r.delivery):''}</span>`:'';
       const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d</span>`:(!r.delivery?' <span class="tip-delay" style="color:#f87171">NOT DELIVERED</span>':'');
       const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
-      html+=`<div class="tip-task tip-late">${tid}${cust}${esc(r.focus.slice(0,50))}${delayTag}<br>${dates}</div>`;
+      const etaTag=(r.etaChanges||0)>0?` <span style="color:#fbbf24;font-size:.78em">ETA changed ${r.etaChanges}x</span>`:'';
+      html+=`<div class="tip-task tip-late">${tid}${cust}${esc(r.focus.slice(0,50))}${delayTag}${etaTag}<br>${dates}</div>`;
     });
     if(lateOnes.length>5)html+=`<div style="color:#64748b;font-size:.85em;padding-left:10px">+ ${lateOnes.length-5} more</div>`;
     html+=`</div>`;
@@ -789,7 +803,8 @@ function tipAccuracy(person,week,calc,rows){
     onTimeOnes.forEach(r=>{
       const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
       const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
-      html+=`<div class="tip-task tip-ontime">${tid}${cust}${esc(r.focus.slice(0,50))}</div>`;
+      const etaTag=(r.etaChanges||0)>0?` <span style="color:#fbbf24;font-size:.78em">ETA changed ${r.etaChanges}x</span>`:'';
+      html+=`<div class="tip-task tip-ontime">${tid}${cust}${esc(r.focus.slice(0,50))}${etaTag}</div>`;
     });
     html+=`</div>`;
   }

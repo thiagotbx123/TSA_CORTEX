@@ -22,12 +22,14 @@ REM 2. Copy dashboard to dedicated serve folder (F01: never expose full Download
 echo [2/4] Preparing serve folder...
 set SERVE_DIR=C:\Users\adm_r\Downloads\kpi-serve
 if not exist "%SERVE_DIR%" mkdir "%SERVE_DIR%"
+REM Clean kpi-serve to contain only the dashboard (H07: no directory listing of stale files)
+del /Q "%SERVE_DIR%\*" 2>nul
 copy /Y "C:\Users\adm_r\Downloads\KPI_DASHBOARD.html" "%SERVE_DIR%\" >nul
 echo Dashboard copied to %SERVE_DIR%
 
-REM 3. Check if HTTP server is already running on port 8080
+REM 3. Check if HTTP server is already running on port 8080 (M17: curl liveness probe on the target file)
 echo [3/4] Checking HTTP server on port 8080...
-netstat -ano | findstr ":8080.*LISTENING" >nul 2>&1
+curl -s -o NUL http://localhost:8080/KPI_DASHBOARD.html
 if errorlevel 1 (
     echo Starting HTTP server...
     start /B "" python -m http.server 8080 --directory "%SERVE_DIR%" >nul 2>&1

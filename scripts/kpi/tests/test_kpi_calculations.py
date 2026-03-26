@@ -134,20 +134,20 @@ class TestCalcPerf(unittest.TestCase):
         result = calc_perf('In Progress', future_eta, '')
         self.assertEqual(result, 'On Track')
 
-    def test_in_progress_eta_past_is_overdue(self):
+    def test_in_progress_eta_past_is_late(self):
         past_eta = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
         result = calc_perf('In Progress', past_eta, '')
-        self.assertEqual(result, 'Overdue')
+        self.assertEqual(result, 'Late')
 
     def test_todo_eta_future_is_on_track(self):
         future_eta = (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
         result = calc_perf('Todo', future_eta, '')
         self.assertEqual(result, 'On Track')
 
-    def test_todo_eta_past_is_overdue(self):
+    def test_todo_eta_past_is_late(self):
         past_eta = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         result = calc_perf('Todo', past_eta, '')
-        self.assertEqual(result, 'Overdue')
+        self.assertEqual(result, 'Late')
 
     # ── Edge cases ────────────────────────────────────────────────────────────
 

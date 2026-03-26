@@ -1,3 +1,8 @@
+# Architecture note: This file generates a self-contained HTML dashboard.
+# The HTML/CSS/JS is embedded as a raw string for single-file deployment.
+# Structure: CSS (lines ~45-270) | HTML (270-440) | JS (440-2080)
+# To lint JS independently, extract the <script> block to a temp file.
+
 """Build Raccoons KPI HTML Dashboard v3 — audit-hardened version.
 
 Changes from v2:
@@ -613,7 +618,7 @@ function refreshDashboard(){
       btn.style.opacity='1';btn.disabled=false;
       btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Server offline';
       btn.style.background='linear-gradient(135deg,#991b1b,#dc2626)';
-      navigator.clipboard.writeText('cd C:\\\\Users\\\\adm_r\\\\Tools\\\\TSA_CORTEX && python scripts/kpi/serve_kpi.py');
+      navigator.clipboard.writeText('python kpi/serve_kpi.py');
       setTimeout(()=>{btn.innerHTML=orig+' <span style="font-size:.7em;opacity:.8">(start server first)</span>';btn.style.background='linear-gradient(135deg,#1e40af,#2563eb)'},2500);
     });
   });
@@ -1552,25 +1557,39 @@ function debouncedRender(){clearTimeout(_renderTimer);_renderTimer=setTimeout(re
 function render(){
   Object.keys(tipCache).forEach(k => delete tipCache[k]);
   tipCounter = 0;
+  const activeTab=document.querySelector('.tab.active');
+  const activeTabName=activeTab?activeTab.dataset.tab:'accuracy';
+  /* Always-run: shared across all tabs */
   updateSegmentCounts();
   renderMemberCards();
   renderKPIStrip();
-  buildGrid('grid-accuracy',calcAccuracy,fmtPct,heatPct,tipAccuracy);
-  buildGrid('grid-velocity',calcVelocity,fmtDays,heatDays,tipVelocity);
-  buildGrid('grid-reliability',calcReliability,fmtPct,heatPct,tipReliability);
-  buildGrid('grid-activity',calcActivity,fmtCount,heatVol,tipActivity);
-  renderTrend('trend-accuracy',calcAccuracy,'ETA Accuracy','#4f46e5',.9,'Target 90%',false,'accuracy');
-  renderTrend('trend-velocity',calcVelocity,'Execution Time','#b45309',28,'Target 28d',true,'velocity');
-  renderTrend('trend-reliability',calcReliability,'Reliability','#047857',.9,'Target 90%',false,'reliability');
-  renderTrend('trend-activity',calcActivity,'Task Volume','#4338ca',5,'Avg 5/week',false,'activity');
-  renderCustomerKPI();
-  renderScrumCards();
-  /* Only render Gantt when its tab is active — expensive DOM rebuild */
-  const ganttPanel=document.getElementById('panel-gantt');
-  if(ganttPanel&&ganttPanel.classList.contains('active'))renderGantt();
   populateAuditFilters();
   renderAuditTable();
   renderReworkLog();
+  renderCustomerKPI();
+  /* Per-tab lazy rendering: only build the currently visible tab */
+  if(activeTabName==='accuracy'){
+    buildGrid('grid-accuracy',calcAccuracy,fmtPct,heatPct,tipAccuracy);
+    renderTrend('trend-accuracy',calcAccuracy,'ETA Accuracy','#4f46e5',.9,'Target 90%',false,'accuracy');
+  }
+  if(activeTabName==='velocity'){
+    buildGrid('grid-velocity',calcVelocity,fmtDays,heatDays,tipVelocity);
+    renderTrend('trend-velocity',calcVelocity,'Execution Time','#b45309',28,'Target 28d',true,'velocity');
+  }
+  if(activeTabName==='reliability'){
+    buildGrid('grid-reliability',calcReliability,fmtPct,heatPct,tipReliability);
+    renderTrend('trend-reliability',calcReliability,'Reliability','#047857',.9,'Target 90%',false,'reliability');
+  }
+  if(activeTabName==='activity'){
+    buildGrid('grid-activity',calcActivity,fmtCount,heatVol,tipActivity);
+    renderTrend('trend-activity',calcActivity,'Task Volume','#4338ca',5,'Avg 5/week',false,'activity');
+  }
+  if(activeTabName==='scrum'){
+    renderScrumCards();
+  }
+  /* Only render Gantt when its tab is active — expensive DOM rebuild */
+  const ganttPanel=document.getElementById('panel-gantt');
+  if(ganttPanel&&ganttPanel.classList.contains('active'))renderGantt();
 }
 
 /* ── Gantt Chart ─────────────────────────────────── */
@@ -2043,6 +2062,8 @@ function init(){
     if(custSection)custSection.style.display=isFullscreen?'none':'';
     if(topStrip)topStrip.style.display=isFullscreen?'none':'';
     if(memberCards)memberCards.style.display=isFullscreen?'none':'';
+    /* Render the newly active tab */
+    render();
   }
 
   document.querySelectorAll('.tab').forEach(tab=>{
@@ -2063,6 +2084,9 @@ function init(){
       /* Gantt uses display:none instead of max-height (sticky needs no overflow:hidden) */
       if(body&&body.id==='ganttCollapseBody'){body.style.display=header.classList.contains('open')?'':'none'}
     });
+    header.setAttribute('role','button');
+    header.setAttribute('tabindex','0');
+    header.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();header.click()}});
   });
 
   render();
@@ -2074,7 +2098,7 @@ init();
 </html>"""
 
 # Inject data and date
-html = HTML.replace('__DATA__', data_json_safe).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date)
+html = HTML.replace('__DATA__', data_json_safe).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('${BUILD_DATE}', build_date)
 
 # C3: Atomic write
 tmp_path = OUTPUT + '.tmp'

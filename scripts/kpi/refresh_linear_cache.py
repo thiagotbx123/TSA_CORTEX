@@ -21,7 +21,7 @@ for env_file in [ENV_PATH, os.path.join(ROOT, '.env')]:
         with open(env_file, 'r') as f:
             for line in f:
                 if line.strip().startswith('LINEAR_API_KEY='):
-                    api_key = line.strip().split('=', 1)[1]
+                    api_key = line.strip().split('=', 1)[1].split('#')[0].strip()
                     break
     if api_key:
         break
@@ -41,20 +41,12 @@ HTTP_TIMEOUT = 30  # H11: timeout to prevent hanging
 OPOSSUM_TEAM_ID = 'b3fb1317-885c-47a0-b87d-85a77252d994'
 RACCOONS_TEAM_ID = '5a021b9f-bb1a-49fa-ad3b-83422c46c357'
 
-# Person IDs — KPI team members
+# Person IDs — convenience aliases (kept for reference)
 THAIS_ID = '0879df15-56d6-477f-944d-df033121641a'
 YASMIM_ID = 'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
 
-# ALL KPI team members — fetch by person across ALL teams
-KPI_MEMBERS = {
-    'a6063009-d822-49f1-a638-6cebfe59e89e': 'THIAGO',
-    'b13ca864-e0f4-4ff6-b020-ec3f4491643e': 'CARLOS',
-    '19b6975e-3026-450b-bc01-f468ad543028': 'ALEXANDRA',
-    '717e7b13-d840-41c0-baeb-444354c8ff91': 'DIEGO',
-    'd9745bdb-7138-4345-9303-516aa6e4ec39': 'GABI',
-    THAIS_ID: 'THAIS',
-    YASMIM_ID: 'YASMIM',
-}
+# ALL KPI team members — imported from shared config (M14)
+from team_config import KPI_MEMBERS
 
 # Query by team (legacy — still used for completeness)
 QUERY_TEAM = """
@@ -370,8 +362,19 @@ print(f"\nTotal unique KPI issues: {len(all_kpi_issues)}")
 kpi_path = os.path.join(ROOT, '_kpi_all_members.json')
 raccoons_compat_path = os.path.join(ROOT, '_raccoons_kpi.json')
 if len(all_kpi_issues) == 0:
-    print(f"  SKIPPED save — 0 KPI issues found")
+    print(f"  ERROR: 0 KPI issues found — possible API permission issue or team ID change")
+    sys.exit(1)
 else:
+    # Check for dramatic count drop (possible API failure)
+    if os.path.exists(kpi_path):
+        try:
+            with open(kpi_path, 'r', encoding='utf-8') as f:
+                old_count = len(json.load(f))
+            if len(all_kpi_issues) < old_count * 0.5:
+                print(f"  CRITICAL: New count ({len(all_kpi_issues)}) is <50% of previous ({old_count}). Skipping save to protect data.")
+                sys.exit(1)
+        except:
+            pass
     atomic_write_json(kpi_path, all_kpi_issues)
     atomic_write_json(raccoons_compat_path, all_kpi_issues)  # backward compat
     print(f"  Saved: {kpi_path} ({len(all_kpi_issues)} issues)")

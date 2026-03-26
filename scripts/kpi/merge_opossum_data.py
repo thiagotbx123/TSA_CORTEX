@@ -84,8 +84,13 @@ def extract_history_fields(issue):
     in_review_date = None
     done_date = None
 
+    _warned_state_ids = set()  # M15: track already-warned unknown state IDs (avoid log spam)
     for h in sorted_history:
-        to_state = STATE_NAMES.get(h.get('toStateId', ''), '')
+        state_id = h.get('toStateId', '')
+        to_state = STATE_NAMES.get(state_id, '')
+        if not to_state and state_id and state_id not in _warned_state_ids:
+            print(f"    WARNING: Unknown state ID: {state_id}")
+            _warned_state_ids.add(state_id)
         ts = h.get('createdAt', '')[:10]
 
         # Track first time moved to In Review or Done
@@ -103,9 +108,14 @@ def extract_history_fields(issue):
         if from_state == 'Done' and to_state in ('In Progress', 'Todo', 'Backlog'):
             result['reworkDetected'] = True
 
-        # D.LIE23: Track original assignee (first person ever assigned)
+        # D.LIE23: Track original assignee (first person ever assigned).
+        # History is sorted oldest-first. The FIRST event that touches assignee fields
+        # tells us who was there before the reassignment.
+        # - If fromAssigneeId is set: this is a reassignment. The fromAssignee IS the
+        #   original (they were assigned before this event moved the ticket to someone else).
+        # - If fromAssigneeId is absent: this is the initial assignment (no prior assignee),
+        #   so toAssigneeId is the original.
         if h.get('toAssigneeId') and result['originalAssigneeId'] is None:
-            # The first assignment event: fromAssignee is the original if exists, else toAssignee
             if h.get('fromAssigneeId'):
                 result['originalAssigneeId'] = h['fromAssigneeId']
                 result['originalAssigneeName'] = h.get('fromAssigneeName', '')
@@ -155,8 +165,12 @@ def extract_history_fields(issue):
 
 
 # ── Load existing dashboard data ──
-with open(DATA_PATH, 'r', encoding='utf-8') as f:
-    existing = json.load(f)
+try:
+    with open(DATA_PATH, 'r', encoding='utf-8') as f:
+        existing = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    print(f"No existing data at {DATA_PATH} — starting fresh")
+    existing = []
 
 # H6: Count existing Linear-sourced records before removing
 old_linear = {}
@@ -173,10 +187,14 @@ if old_linear:
     print(f"  Removed Linear records: {old_linear}")
 
 # ── Load unified KPI issues (all members, all teams) ──
+import time as _time
 KPI_ALL_PATH = os.path.join(SCRIPT_DIR, '..', '_kpi_all_members.json')
 issues = []
 for cache_path in [KPI_ALL_PATH, RACCOONS_KPI_CACHE, OPOSSUM_CACHE]:
     if os.path.exists(cache_path):
+        cache_age = _time.time() - os.path.getmtime(cache_path)
+        if cache_age > 86400:  # 24 hours
+            print(f"  WARNING: Cache is {cache_age/3600:.0f}h old — consider running refresh_linear_cache.py")
         with open(cache_path, 'r', encoding='utf-8') as f:
             loaded = json.load(f)
         print(f"Linear issues loaded: {len(loaded)} from {os.path.basename(cache_path)}")
@@ -204,6 +222,7 @@ def date_to_week(date_str):
     y = dt.year % 100
     m = dt.month
     day = dt.day
+    # Custom week: W1=days 1-7, W2=8-14, W3=15-21, W4=22-28, W5=29-31. NOT ISO week.
     wn = (day - 1) // 7 + 1
     return f"{y:02d}-{m:02d} W.{wn}"
 
@@ -285,7 +304,7 @@ def calc_perf(status, eta, delivery):
         try:
             d_eta = datetime.strptime(eta, '%Y-%m-%d').date()
             if d_eta < datetime.now().date():
-                return 'Overdue'
+                return 'Late'
             else:
                 return 'On Track'
         except ValueError:
@@ -306,24 +325,7 @@ def determine_category(customer, title):
 
 
 # ── Convert Linear issues to dashboard records ──
-PERSON_MAP = {
-    'Tha\u00eds Linzmaier': 'THAIS',
-    'Yasmim Arsego': 'YASMIM',
-    'Thiago Rodrigues': 'THIAGO',
-    'Carlos Guilherme Matos de Almeida da Silva': 'CARLOS',
-    'Alexandra Lacerda': 'ALEXANDRA',
-    'Diego Cavalli': 'DIEGO',
-    'Gabrielle Cupello': 'GABI',
-}
-PERSON_MAP_BY_ID = {
-    'a6063009-d822-49f1-a638-6cebfe59e89e': 'THIAGO',
-    'b13ca864-e0f4-4ff6-b020-ec3f4491643e': 'CARLOS',
-    '19b6975e-3026-450b-bc01-f468ad543028': 'ALEXANDRA',
-    '717e7b13-d840-41c0-baeb-444354c8ff91': 'DIEGO',
-    'd9745bdb-7138-4345-9303-516aa6e4ec39': 'GABI',
-    '0879df15-56d6-477f-944d-df033121641a': 'THAIS',
-    'df4a6bcf-c519-469d-bb40-b1a0e93d0041': 'YASMIM',
-}
+from team_config import PERSON_MAP, PERSON_MAP_BY_ID  # M14: shared config
 LINEAR_TSA_NAMES = set(PERSON_MAP.values())
 
 # D.LIE19: Identify parent tickets (have subtasks) — exclude from KPI

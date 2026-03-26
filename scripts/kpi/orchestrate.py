@@ -40,6 +40,7 @@ def run_step(script, description, cwd):
         print(f"  ERROR: Script not found: {script_path}")
         return False, 0, f"Script not found: {script_path}"
 
+    timeout = 600 if 'refresh' in script else 180
     start = time.time()
     try:
         result = subprocess.run(
@@ -49,7 +50,7 @@ def run_step(script, description, cwd):
             text=True,
             encoding='utf-8',
             errors='replace',
-            timeout=120,
+            timeout=timeout,
         )
         duration = time.time() - start
         output = result.stdout + (('\nSTDERR: ' + result.stderr) if result.stderr else '')
@@ -65,7 +66,7 @@ def run_step(script, description, cwd):
     except subprocess.TimeoutExpired:
         duration = time.time() - start
         print(f"\n  TIMEOUT after {duration:.1f}s")
-        return False, duration, "Timed out after 120s"
+        return False, duration, f"Timed out after {timeout}s"
     except Exception as e:
         duration = time.time() - start
         print(f"\n  ERROR: {e}")
@@ -88,7 +89,7 @@ def main():
 
     steps_to_run = STEPS[:]
     if build_only:
-        steps_to_run = [STEPS[3], STEPS[4]]  # Build + optional upload
+        steps_to_run = [s for s in STEPS if s[0] in ('build_html_dashboard.py', 'upload_dashboard_drive.py')]
     elif skip_refresh:
         steps_to_run = STEPS[1:]  # Skip refresh
 

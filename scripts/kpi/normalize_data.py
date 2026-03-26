@@ -389,9 +389,11 @@ for r in data:
         if not r.get('startedAt') and not r.get('deliveryDate') and not r.get('inReviewDate'):
             is_admin_close = True
         # Pattern 2: migrated ticket — createdAt == dueDate (same day) and no In Review step
+        # Guard: also require no startedAt to avoid misclassifying tickets that were actually worked on.
         elif (r.get('eta') and r.get('dateAdd')
               and r['eta'][:10] == r['dateAdd'][:10]
               and not r.get('inReviewDate')
+              and not r.get('startedAt')
               and r.get('etaChanges', 0) <= 1):
             is_admin_close = True
 
@@ -420,8 +422,8 @@ for r in data:
 linear_focuses = set()
 for r in data:
     if r.get('source') == 'linear' and r.get('focus'):
-        # Normalize: lowercase, strip brackets, first 40 chars
-        norm = re.sub(r'^\[.*?\]\s*', '', r['focus']).strip().lower()[:40]
+        # Normalize: lowercase, strip brackets, first 60 chars
+        norm = re.sub(r'^\[.*?\]\s*', '', r['focus']).strip().lower()[:60]
         linear_focuses.add((r.get('tsa', ''), norm))
 
 before_dedup = len(data)
@@ -429,7 +431,7 @@ deduped = []
 sheet_replaced = 0
 for r in data:
     if r.get('source') == 'spreadsheet' and r.get('focus'):
-        norm = r['focus'].strip().lower()[:40]
+        norm = r['focus'].strip().lower()[:60]
         if (r.get('tsa', ''), norm) in linear_focuses:
             sheet_replaced += 1
             continue  # Linear has this — drop the spreadsheet version

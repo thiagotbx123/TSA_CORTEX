@@ -660,8 +660,9 @@ function heatDays(val){
 
 /* M15: Format with sample size threshold */
 function fmtPct(v,n){
-  if(v===null||v===undefined||isNaN(v))return'—';
-  return(v*100).toFixed(0)+'%';
+  if(v===null||v===undefined) return '—';
+  if(n!==undefined && n < 3) return n===0 ? '—' : '(' + n + ')';
+  return (v*100).toFixed(0)+'%';
 }
 function fmtDays(v){return(v===null||v===undefined||isNaN(v))?'—':v.toFixed(0)+'d'}
 
@@ -788,7 +789,8 @@ function tipAccuracy(person,week,calc,rows){
     lateOnes.slice(0,5).forEach(r=>{
       const delay=r.eta&&r.delivery?daysBetween(r.eta,r.delivery):null;
       const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
-      const dates=r.eta?`<span class="tip-dates">ETA ${fmtDate(r.eta)}${r.delivery?' → '+fmtDate(r.delivery):''}</span>`:'';
+      const etaLabel=r.originalEta&&r.originalEta!==r.eta?`Original ETA ${fmtDate(r.originalEta)} → Final ${fmtDate(r.eta)}`:`ETA ${fmtDate(r.eta)}`;
+      const dates=r.eta?`<span class="tip-dates">${etaLabel}${r.delivery?' → '+fmtDate(r.delivery):''}</span>`:'';
       const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d</span>`:(!r.delivery?' <span class="tip-delay" style="color:#f87171">NOT DELIVERED</span>':'');
       const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
       const etaTag=(r.etaChanges||0)>0?` <span style="color:#fbbf24;font-size:.78em">ETA changed ${r.etaChanges}x</span>`:'';
@@ -832,6 +834,9 @@ function tipVelocity(person,week,calc,rows){
     });
     html+=`</div>`;
   }
+  const withStart=rows.filter(r=>r.delivery&&r.startedAt&&r.status==='Done').length;
+  const withFallback=rows.filter(r=>r.delivery&&!r.startedAt&&r.dateAdd&&r.status==='Done').length;
+  if(withFallback>0) html+=`<div style="font-size:.78em;color:#94a3b8;margin-top:3px;border-top:1px dashed #334155;padding-top:3px">${withStart} with start date, ${withFallback} using creation date (may inflate)</div>`;
   return html;
 }
 function tipReliability(person,week,calc,rows){
@@ -1250,7 +1255,8 @@ function renderAuditTable(){
   const reworkCount=sdata.filter(r=>r.rework==='yes').length;
   /* M13: Note about On Track exclusion */
   const onTrack=sdata.filter(r=>r.perf==='On Track').length;
-  stats.innerHTML=`<span><b>${rows.length}</b> records</span><span>Done: <b>${done}</b></span><span>Open: <b>${open}</b></span><span style="color:var(--green)">On Time: <b>${onTime}</b></span><span style="color:var(--red)">Late: <b>${late}</b></span><span>On Track: <b>${onTrack}</b> (excluded)</span><span style="color:var(--red)">Rework: <b>${reworkCount}</b></span>`;
+  const personNote=state.person!=='ALL'?` · Filtered by: ${state.person}`:'';
+  stats.innerHTML=`<span><b>${rows.length}</b> records</span><span>Done: <b>${done}</b></span><span>Open: <b>${open}</b></span><span style="color:var(--green)">On Time: <b>${onTime}</b></span><span style="color:var(--red)">Late: <b>${late}</b></span><span>On Track: <b>${onTrack}</b> (excluded)</span><span style="color:var(--red)">Rework: <b>${reworkCount}</b></span>${personNote}`;
 }
 
 /* ── Export functions ──────────────────────────────── */
@@ -1578,9 +1584,11 @@ function render(){
   updateSegmentCounts();
   renderMemberCards();
   renderKPIStrip();
-  populateAuditFilters();
-  renderAuditTable();
-  renderReworkLog();
+  if(activeTabName!=='gantt'&&activeTabName!=='scrum'){
+    populateAuditFilters();
+    renderAuditTable();
+    renderReworkLog();
+  }
   renderCustomerKPI();
   /* Per-tab lazy rendering: only build the currently visible tab */
   if(activeTabName==='accuracy'){

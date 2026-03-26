@@ -358,6 +358,12 @@ if fetch_warnings:
     print(f"\n  WARNING: Partial fetch for: {', '.join(fetch_warnings)} — data may be incomplete")
 print(f"\nTotal unique KPI issues: {len(all_kpi_issues)}")
 
+# A12: Per-person minimum check — warn if any KPI member has 0 issues (possible API issue)
+for uid, name in KPI_MEMBERS.items():
+    count = sum(1 for i in all_kpi_issues if i.get('assigneeId') == uid or i.get('createdById') == uid)
+    if count == 0:
+        print(f"  WARNING: {name} has 0 issues in fetch — possible API issue")
+
 # Save unified KPI cache
 kpi_path = os.path.join(ROOT, '_kpi_all_members.json')
 raccoons_compat_path = os.path.join(ROOT, '_raccoons_kpi.json')

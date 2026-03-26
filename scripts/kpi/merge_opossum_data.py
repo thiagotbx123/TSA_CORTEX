@@ -46,6 +46,9 @@ STATE_NAMES = {
 # Terminal/delivery states
 DELIVERY_STATES = {'In Review', 'Done'}
 
+# A19: Accumulate unknown state IDs across all extract_history_fields calls
+_all_unknown_state_ids = set()
+
 
 def extract_history_fields(issue):
     """Extract activity-based dates from issue history.
@@ -84,13 +87,12 @@ def extract_history_fields(issue):
     in_review_date = None
     done_date = None
 
-    _warned_state_ids = set()  # M15: track already-warned unknown state IDs (avoid log spam)
+    # A19: Use module-level set so unknown IDs accumulate across all calls (summary printed after loop)
     for h in sorted_history:
         state_id = h.get('toStateId', '')
         to_state = STATE_NAMES.get(state_id, '')
-        if not to_state and state_id and state_id not in _warned_state_ids:
-            print(f"    WARNING: Unknown state ID: {state_id}")
-            _warned_state_ids.add(state_id)
+        if not to_state and state_id:
+            _all_unknown_state_ids.add(state_id)
         ts = h.get('createdAt', '')[:10]
 
         # Track first time moved to In Review or Done
@@ -143,7 +145,11 @@ def extract_history_fields(issue):
                 else:
                     result['originalEta'] = h['toDueDate']
 
-    result['deliveryDate'] = first_delivery_date
+    # A32c: When rework detected, use the LAST Done date (not first delivery date)
+    if result['reworkDetected'] and done_date:
+        result['deliveryDate'] = done_date
+    else:
+        result['deliveryDate'] = first_delivery_date
     result['inReviewDate'] = in_review_date
 
     # If no originalEta found in history, use current dueDate
@@ -285,6 +291,12 @@ def calc_perf(status, eta, delivery):
     L5: Removed unused date_add parameter."""
     if status == 'Canceled':
         return 'N/A'
+    # A09: B.B.C (Blocked By Customer) must not be penalized
+    if status == 'B.B.C' or status == 'Blocked':
+        return 'Blocked'
+    # A32: Paused / On Hold statuses
+    if status == 'Paused' or status == 'On Hold':
+        return 'On Hold'
     if not eta:
         return 'No ETA'
     if status == 'Done':
@@ -503,6 +515,12 @@ for iss in issues:
     new_records.append(record)
 
 print(f"\nNew Linear records: {len(new_records)} (skipped {skipped_parents} parents, {reassigned_to_original} attributed to original assignee, {review_delivery_adjusted} delivery adjusted to In Review date)")
+
+# A19: Summary of unknown state IDs encountered across all issues
+if _all_unknown_state_ids:
+    print(f"\n  WARNING: {len(_all_unknown_state_ids)} unknown state IDs encountered — update STATE_NAMES")
+    for sid in sorted(_all_unknown_state_ids):
+        print(f"    {sid}")
 
 # H6: Validate counts per person
 for tsa_name in sorted(LINEAR_TSA_NAMES):

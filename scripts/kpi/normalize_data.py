@@ -417,6 +417,15 @@ for r in data:
             fixes['perf_improved_by_history'] += 1
         r['perf'] = new_perf
 
+    # A35c: D.LIE20 — If history signals rework but rework label is absent, flag it.
+    # reassignedInReview is stored in the record; reworkDetected is not persisted but
+    # merge already sets rework='yes' from it. This is a safety net for stale/partial records.
+    if r.get('source') == 'linear' and r.get('status') == 'Done':
+        if r.get('reassignedInReview') and not r.get('rework'):
+            r['rework'] = 'yes'
+            fixes.setdefault('rework_flagged_from_history', 0)
+            fixes['rework_flagged_from_history'] += 1
+
 # D.LIE22: Remove spreadsheet records that have a Linear equivalent
 # Linear is the source of truth — if a ticket exists in Linear for the same task, drop the spreadsheet version
 linear_focuses = set()

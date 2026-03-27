@@ -1886,20 +1886,20 @@ function renderGantt(){
   if(el)el.addEventListener('change',function(){renderGantt()});
 });
 
+/* KPI team member IDs — global, used by Scrum and Insights */
+const KPI_IDS=new Set([
+  'a6063009-d822-49f1-a638-6cebfe59e89e',
+  'b13ca864-e0f4-4ff6-b020-ec3f4491643e',
+  '19b6975e-3026-450b-bc01-f468ad543028',
+  '717e7b13-d840-41c0-baeb-444354c8ff91',
+  'd9745bdb-7138-4345-9303-516aa6e4ec39',
+  '0879df15-56d6-477f-944d-df033121641a',
+  'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
+]);
+
 function renderScrumCards(){
   const todayStr=new Date().toISOString().slice(0,10);
   const today=new Date(todayStr);
-
-  /* KPI team member IDs — for needs-response detection */
-  const KPI_IDS=new Set([
-    'a6063009-d822-49f1-a638-6cebfe59e89e',
-    'b13ca864-e0f4-4ff6-b020-ec3f4491643e',
-    '19b6975e-3026-450b-bc01-f468ad543028',
-    '717e7b13-d840-41c0-baeb-444354c8ff91',
-    'd9745bdb-7138-4345-9303-516aa6e4ec39',
-    '0879df15-56d6-477f-944d-df033121641a',
-    'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
-  ]);
 
   /* Split: active (In Progress/In Review/Paused/Todo) + completed today — respects person filter */
   const pf=state.person;
@@ -2128,7 +2128,7 @@ function renderScrumCards(){
         /* Needs-response badge */
         const nrBadge=needsResponse(t)?`<span class="sc-needs-response">\u26a0 needs response</span>`:'';
         /* ETA on main line (no drift) or simple ETA */
-        const hasDrift=t.etaChanges&&t.etaChanges>0&&t.originalEta&&t.originalEta!==t.eta;
+        const hasDrift=etaWasDelayed(t);
         const etaInline=hasDrift?'':`<span style="color:var(--dim);font-size:.82em"> ETA:${fmtD(t.eta)}</span>`;
         const reviewNote=t.reassignedInReview?` <span style="color:#94a3b8;font-size:.72em">\u21a9 review</span>`:'';
         /* Compute filter tags for badge click filtering */
@@ -2278,19 +2278,11 @@ function renderInsights(){
   const today=new Date(todayStr);
   const pf=state.person;
 
-  /* Use ALL data (no core-week restriction) but respect person filter */
-  const allData=RAW.filter(r=>pf==='ALL'||r.tsa===pf);
+  /* Use ALL data (no core-week restriction) but respect person + category filters */
+  const cat=state.category;
+  const allData=RAW.filter(r=>(pf==='ALL'||r.tsa===pf)&&(cat==='ALL'||r.category===cat));
 
-  /* KPI_IDS for cross-team detection */
-  const KPI_IDS=new Set([
-    'a6063009-d822-49f1-a638-6cebfe59e89e',
-    'b13ca864-e0f4-4ff6-b020-ec3f4491643e',
-    '19b6975e-3026-450b-bc01-f468ad543028',
-    '717e7b13-d840-41c0-baeb-444354c8ff91',
-    'd9745bdb-7138-4345-9303-516aa6e4ec39',
-    '0879df15-56d6-477f-944d-df033121641a',
-    'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
-  ]);
+  /* KPI_IDS is global — defined before renderScrumCards */
 
   function ageDays(dateStr){if(!dateStr)return 0;try{return Math.max(0,Math.floor((today-new Date(dateStr))/864e5))}catch(e){return 0}}
   function collapsible(id,title,bodyHtml){

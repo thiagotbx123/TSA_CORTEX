@@ -152,6 +152,7 @@ def extract_history_fields(issue):
         last_event = sorted_history[-1]
         result['lastActorId'] = last_event.get('actorId', '')
         result['lastActorName'] = last_event.get('actorName', '')
+        result['lastActorDate'] = last_event.get('createdAt', '')[:10]
 
     # A32c: When rework detected, use the LAST Done date (not first delivery date)
     if result['reworkDetected'] and done_date:
@@ -345,14 +346,11 @@ def determine_category(customer, title):
 
 
 def _compute_last_touch(hist_fields, comments):
-    """Determine who last touched the ticket: history actor or commenter (most recent wins)."""
-    last_hist_date = ''
+    """Determine who last touched the ticket: compare history actor date vs last comment date."""
     last_hist_id = hist_fields.get('lastActorId', '')
     last_hist_name = hist_fields.get('lastActorName', '')
+    last_hist_date = hist_fields.get('lastActorDate', '')
 
-    # Get date of last history event from the fields
-    # We don't store the exact date of the last actor, so use updatedAt as proxy
-    # But we can compare against the last comment's date
     last_comment_date = ''
     last_comment_id = ''
     last_comment_name = ''
@@ -364,21 +362,20 @@ def _compute_last_touch(hist_fields, comments):
             last_comment_id = last_c.get('userId', '')
             last_comment_name = last_c.get('userName', '')
 
-    # If we have a comment, compare dates. Comment is more reliable for "needs response"
-    if last_comment_id:
-        return {
-            'lastActorId': last_comment_id,
-            'lastActorName': last_comment_name,
-            'lastCommentById': last_comment_id,
-            'lastCommentByName': last_comment_name,
-            'lastCommentDate': last_comment_date,
-        }
+    # Date-aware: whoever acted MORE RECENTLY is the lastActor
+    if last_comment_id and last_comment_date >= (last_hist_date or ''):
+        winner_id = last_comment_id
+        winner_name = last_comment_name
+    else:
+        winner_id = last_hist_id
+        winner_name = last_hist_name
 
     return {
-        'lastActorId': last_hist_id,
-        'lastActorName': last_hist_name,
-        'lastCommentById': '',
-        'lastCommentByName': '',
+        'lastActorId': winner_id,
+        'lastActorName': winner_name,
+        'lastCommentById': last_comment_id,
+        'lastCommentByName': last_comment_name,
+        'lastCommentDate': last_comment_date,
         'lastCommentDate': '',
     }
 
@@ -569,6 +566,8 @@ for iss in issues:
         'weekRangeByStart': wrange_by_start,
         'updatedAt': (iss.get('updatedAt', '')[:10] if iss.get('updatedAt') else ''),
         'createdById': creator_id,
+        'assigneeId': current_id,
+        'assigneeName': current_assignee,
         # Last touch: compare last history actor vs last commenter — most recent wins
         **_compute_last_touch(hist_fields, iss.get('comments', [])),
     }

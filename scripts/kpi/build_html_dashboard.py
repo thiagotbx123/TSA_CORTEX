@@ -1920,9 +1920,11 @@ function renderScrumCards(){
 
   /* Needs-response detection: last actor is NOT on our team and ticket is active */
   function needsResponse(t){
-    if(!t.lastActorId)return false;
-    if(KPI_IDS.has(t.lastActorId))return false;
-    /* Only flag if: status is active (not backlog/todo) AND updated in last 7 days */
+    /* Use lastActorId from history, fallback to createdById */
+    const actorId=t.lastActorId||t.createdById||'';
+    if(!actorId)return false;
+    if(KPI_IDS.has(actorId))return false;
+    /* Only flag active statuses updated in last 7 days */
     if(!['In Progress','In Review'].includes(t.status))return false;
     if(!t.updatedAt)return false;
     const updated=(t.updatedAt||'').slice(0,10);
@@ -1958,7 +1960,7 @@ function renderScrumCards(){
   function etaWasDelayed(t){return t.etaChanges&&t.etaChanges>0&&t.originalEta&&!sameDate(t.originalEta,t.eta)&&(t.eta||'').slice(0,10)>(t.originalEta||'').slice(0,10)}
   function etaDriftHtml(t){
     if(!etaWasDelayed(t))return'';
-    return`<div class="sc-eta-drift">ETA: <span style="text-decoration:line-through">${fmtD(t.originalEta)}</span> <span style="color:#fbbf24">\u2192 ${fmtD(t.eta)} (delayed ${t.etaChanges}x)</span></div>`;
+    return`<div class="sc-eta-drift">ETA: <span style="text-decoration:line-through">${fmtD(t.originalEta)}</span> <span style="color:#ef4444;font-weight:600">\u2192 ${fmtD(t.eta)} (delayed ${t.etaChanges}x)</span></div>`;
   }
   function etaDriftSlack(t){
     if(!etaWasDelayed(t))return'';

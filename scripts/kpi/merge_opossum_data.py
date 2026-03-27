@@ -531,6 +531,7 @@ for iss in issues:
         'updatedAt': (iss.get('updatedAt', '')[:10] if iss.get('updatedAt') else ''),
         'lastActorId': hist_fields.get('lastActorId', ''),
         'lastActorName': hist_fields.get('lastActorName', ''),
+        'createdById': creator_id,
     }
     new_records.append(record)
 

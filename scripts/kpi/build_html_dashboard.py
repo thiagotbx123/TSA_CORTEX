@@ -1890,7 +1890,8 @@ function renderScrumCards(){
 
   /* Split: active (In Progress/In Review/Paused/Todo) + completed today — respects person filter */
   const pf=state.person;
-  const active=RAW.filter(r=>r.source==='linear'&&['In Progress','In Review','Paused','Todo'].includes(r.status)&&(pf==='ALL'||r.tsa===pf));
+  const SCRUM_ACTIVE=['In Progress','In Review','Paused','Todo','Production QA','Blocked','Refinement','Ready to Deploy','Triage'];
+  const active=RAW.filter(r=>r.source==='linear'&&SCRUM_ACTIVE.includes(r.status)&&(pf==='ALL'||r.tsa===pf));
   /* Done in last 48h — on weekends (Sat/Sun) extend back to Friday */
   const todayDate=new Date(todayStr+'T12:00:00');
   const dow=todayDate.getDay();
@@ -1909,8 +1910,8 @@ function renderScrumCards(){
     if(t.perf==='Blocked'||t.status==='B.B.C')return'blocked';
     if(t.status==='Paused'||t.status==='On Hold')return'paused';
     if(t.rework==='yes')return'rework';
-    /* Todo/Backlog with past ETA = overdue (gray) — not actively at risk */
-    if(['Todo','Backlog','Triage'].includes(t.status)){
+    /* Todo/Backlog/Triage/Refinement with past ETA = overdue (gray) — not actively at risk */
+    if(['Todo','Backlog','Triage','Refinement'].includes(t.status)){
       if(t.eta){try{if(new Date(t.eta)<today)return'overdue'}catch(e){}}
       return'ontrack';
     }
@@ -2203,6 +2204,10 @@ function scFilterCard(badge,filterTag){
   /* Highlight active badge */
   card.querySelectorAll('.sc-stats span').forEach(s=>{s.style.opacity=isToggleOff||s===badge?'1':'.4'});
   if(isToggleOff){badge.style.opacity='1'}
+  /* Expand any collapsed stale sections when filtering */
+  if(!isToggleOff&&filterTag!=='all'){
+    card.querySelectorAll('[id^="stale_"]').forEach(el=>{el.style.display=''});
+  }
   /* Show/hide tasks */
   tasks.forEach(t=>{
     if(isToggleOff||filterTag==='all'){t.style.display='';return}

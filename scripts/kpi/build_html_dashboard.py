@@ -319,6 +319,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="tab" data-tab="activity">Team Activity</div>
   <div class="tab" data-tab="scrum">Scrum Copy</div>
   <div class="tab" data-tab="gantt">Gantt</div>
+  <div class="tab" data-tab="insights">Insights</div>
 </div>
 
 <div class="tab-panel active" id="panel-accuracy">
@@ -443,6 +444,15 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
         <span style="color:#dc2626;font-weight:700">| Today</span>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-insights">
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;margin-top:0">
+    <div class="audit-header" style="cursor:default">
+      <h3><span class="dot" style="background:#8b5cf6;position:relative;top:0"></span>Insights <span style="font-size:.6em;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-weight:700">WIP</span></h3>
+    </div>
+    <div id="insightsBody" style="padding:16px 20px"></div>
   </div>
 </div>
 
@@ -1625,6 +1635,9 @@ function render(){
   if(activeTabName==='scrum'){
     renderScrumCards();
   }
+  if(activeTabName==='insights'){
+    renderInsights();
+  }
   /* Only render Gantt when its tab is active — expensive DOM rebuild */
   const ganttPanel=document.getElementById('panel-gantt');
   if(ganttPanel&&ganttPanel.classList.contains('active'))renderGantt();
@@ -2257,6 +2270,183 @@ function renderReworkLog(){
   el.innerHTML=html;
 }
 
+/* ── Insights Tab ──────────────────────────────────── */
+function renderInsights(){
+  const el=document.getElementById('insightsBody');
+  if(!el)return;
+  const todayStr=new Date().toISOString().slice(0,10);
+  const today=new Date(todayStr);
+  const pf=state.person;
+
+  /* Use ALL data (no core-week restriction) but respect person filter */
+  const allData=RAW.filter(r=>pf==='ALL'||r.tsa===pf);
+
+  /* KPI_IDS for cross-team detection */
+  const KPI_IDS=new Set([
+    'a6063009-d822-49f1-a638-6cebfe59e89e',
+    'b13ca864-e0f4-4ff6-b020-ec3f4491643e',
+    '19b6975e-3026-450b-bc01-f468ad543028',
+    '717e7b13-d840-41c0-baeb-444354c8ff91',
+    'd9745bdb-7138-4345-9303-516aa6e4ec39',
+    '0879df15-56d6-477f-944d-df033121641a',
+    'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
+  ]);
+
+  function ageDays(dateStr){if(!dateStr)return 0;try{return Math.max(0,Math.floor((today-new Date(dateStr))/864e5))}catch(e){return 0}}
+  function collapsible(id,title,bodyHtml){
+    return '<div class="audit-section" style="margin-top:16px"><div class="audit-header collapse-toggle" onclick="this.classList.toggle(\'open\');var b=this.nextElementSibling;if(b)b.classList.toggle(\'open\')"><span class="toggle">&#9660;</span><h3>'+title+'</h3></div><div class="audit-body"><div style="padding:12px 16px;overflow-x:auto">'+bodyHtml+'</div></div></div>';
+  }
+
+  let html='';
+
+  /* ── Section 1: Cross-Team Tickets ── */
+  const crossTeam=allData.filter(r=>{
+    if(!r.createdById||!r.assigneeId)return false;
+    if(r.status==='Done')return false;
+    return KPI_IDS.has(r.createdById)&&!KPI_IDS.has(r.assigneeId);
+  }).sort((a,b)=>ageDays(b.dateAdd)-ageDays(a.dateAdd));
+
+  let s1='<table class="audit-table"><thead><tr><th>Ticket</th><th>Title</th><th>Opened By</th><th>Assigned To</th><th>Customer</th><th>Status</th><th>ETA</th><th>Age</th></tr></thead><tbody>';
+  if(crossTeam.length===0){
+    s1+='<tr><td colspan="8" style="text-align:center;color:var(--dim);padding:20px">No cross-team tickets found</td></tr>';
+  } else {
+    crossTeam.forEach(r=>{
+      const link=r.ticketUrl?'<a href="'+esc(r.ticketUrl)+'" target="_blank" style="color:var(--accent);font-weight:600">'+esc(r.ticketId||'--')+'</a>':esc(r.ticketId||'--');
+      const title=(r.focus||'').length>50?esc(r.focus.slice(0,50))+'...':esc(r.focus||'--');
+      const age=ageDays(r.dateAdd);
+      const ageCls=age>30?'color:var(--red);font-weight:700':age>14?'color:var(--yellow);font-weight:600':'';
+      s1+='<tr><td>'+link+'</td><td title="'+esc(r.focus||'')+'">'+title+'</td><td>'+esc(r.tsa||'--')+'</td><td>External</td><td>'+esc(r.customer||'--')+'</td><td>'+esc(r.status||'--')+'</td><td>'+esc(r.eta||'--')+'</td><td style="'+ageCls+'">'+age+'d</td></tr>';
+    });
+  }
+  s1+='</tbody></table>';
+  s1+='<div style="margin-top:8px;font-size:.72em;color:var(--dim)">'+crossTeam.length+' ticket'+(crossTeam.length!==1?'s':'')+' delegated to external teams</div>';
+  html+=collapsible('ins-crossteam','Delegated Out &mdash; Tickets opened by TSA for other teams',s1);
+
+  /* ── Section 2: Review Bottleneck ── */
+  const reviewPeople=pf!=='ALL'?[pf]:PEOPLE_ALL;
+  let s2='<table class="audit-table"><thead><tr><th>Person</th><th>Tickets Reviewed</th><th>Avg Review Time</th><th>Max Review Time</th><th>Currently In Review</th><th>Oldest In Review</th></tr></thead><tbody>';
+  reviewPeople.forEach(person=>{
+    const personData=RAW.filter(r=>r.tsa===person);
+    const reviewed=personData.filter(r=>r.status==='Done'&&(r.reviewerDelay||0)>0);
+    const delays=reviewed.map(r=>r.reviewerDelay).filter(d=>d>0);
+    const avg=delays.length>0?delays.reduce((a,b)=>a+b,0)/delays.length:0;
+    const max=delays.length>0?Math.max(...delays):0;
+    const inReview=personData.filter(r=>r.status==='In Review');
+    const oldestInReview=inReview.length>0?Math.max(...inReview.map(r=>ageDays(r.inReviewDate||r.startedAt||r.dateAdd))):0;
+    const inRevCls=inReview.length>3?'color:var(--red);font-weight:700':inReview.length>1?'color:var(--yellow);font-weight:600':'';
+    s2+='<tr><td style="font-weight:600">'+esc(person)+'</td><td>'+reviewed.length+'</td><td>'+avg.toFixed(1)+'d</td><td>'+max.toFixed(0)+'d</td><td style="'+inRevCls+'">'+inReview.length+'</td><td>'+(inReview.length>0?oldestInReview+'d':'--')+'</td></tr>';
+  });
+  s2+='</tbody></table>';
+  html+=collapsible('ins-review','Review Pipeline &mdash; Time in review across team',s2);
+
+  /* ── Section 3: Customer Response Time ── */
+  const custMap={};
+  allData.forEach(r=>{
+    const c=r.customer||'(none)';
+    if(!custMap[c])custMap[c]={done:[],waiting:[]};
+    if(r.status==='Done'&&r.startedAt&&r.dateAdd){
+      const delay=daysBetween(r.dateAdd,r.startedAt);
+      if(delay!==null&&delay>=0)custMap[c].done.push(delay);
+    }
+    if(!r.startedAt&&['Todo','Backlog','Triage'].includes(r.status)){
+      custMap[c].waiting.push(r);
+    }
+  });
+  const custEntries=Object.entries(custMap).filter(([,v])=>v.done.length>0).map(([c,v])=>{
+    const avg=v.done.reduce((a,b)=>a+b,0)/v.done.length;
+    const fastest=Math.min(...v.done);
+    const slowest=Math.max(...v.done);
+    return{customer:c,tickets:v.done.length,avg,fastest,slowest,waiting:v.waiting.length};
+  }).sort((a,b)=>b.avg-a.avg);
+
+  let s3='<table class="audit-table"><thead><tr><th>Customer</th><th>Tickets</th><th>Avg Start Delay</th><th>Fastest</th><th>Slowest</th><th>Currently Waiting</th></tr></thead><tbody>';
+  if(custEntries.length===0){
+    s3+='<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:20px">No data available</td></tr>';
+  } else {
+    custEntries.slice(0,25).forEach(e=>{
+      const avgCls=e.avg>14?'color:var(--red);font-weight:700':e.avg>7?'color:var(--yellow);font-weight:600':'color:var(--green)';
+      const waitCls=e.waiting>0?'color:var(--yellow);font-weight:600':'';
+      s3+='<tr><td style="font-weight:600">'+esc(e.customer)+'</td><td>'+e.tickets+'</td><td style="'+avgCls+'">'+e.avg.toFixed(1)+'d</td><td>'+e.fastest+'d</td><td>'+e.slowest+'d</td><td style="'+waitCls+'">'+(e.waiting>0?e.waiting:'--')+'</td></tr>';
+    });
+  }
+  s3+='</tbody></table>';
+  html+=collapsible('ins-custresponse','Customer Response &mdash; Time from creation to start',s3);
+
+  /* ── Section 4: Backlog Health ── */
+  const BACKLOG_STATUSES=['Backlog','Todo','Triage'];
+  const backlog=allData.filter(r=>BACKLOG_STATUSES.includes(r.status));
+  const nowDate=new Date();
+  const thisWeekStart=new Date(nowDate);thisWeekStart.setDate(thisWeekStart.getDate()-thisWeekStart.getDay());
+  const thisMonthStart=new Date(nowDate.getFullYear(),nowDate.getMonth(),1);
+  const createdThisWeek=backlog.filter(r=>r.dateAdd&&r.dateAdd.slice(0,10)>=thisWeekStart.toISOString().slice(0,10)).length;
+  const createdThisMonth=backlog.filter(r=>r.dateAdd&&r.dateAdd.slice(0,10)>=thisMonthStart.toISOString().slice(0,10)).length;
+
+  const buckets=[
+    {label:'< 7 days',min:0,max:7,color:'#d1fae5',count:0},
+    {label:'7-14 days',min:7,max:14,color:'#fef9c3',count:0},
+    {label:'14-30 days',min:14,max:30,color:'#fed7aa',count:0},
+    {label:'30-60 days',min:30,max:60,color:'#fecaca',count:0},
+    {label:'> 60 days',min:60,max:9999,color:'#fca5a5',count:0}
+  ];
+  backlog.forEach(r=>{
+    const age=ageDays(r.dateAdd);
+    for(const b of buckets){if(age>=b.min&&age<b.max){b.count++;break}}
+  });
+  const staleCount=backlog.filter(r=>ageDays(r.dateAdd)>30).length;
+  const staleRate=backlog.length>0?(staleCount/backlog.length*100).toFixed(0):0;
+  const maxBucket=Math.max(1,...buckets.map(b=>b.count));
+
+  let s4='<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">';
+  s4+='<div style="text-align:center;padding:8px 16px;background:var(--blue-bg);border-radius:8px"><div style="font-size:1.5em;font-weight:800;color:var(--accent)">'+backlog.length+'</div><div style="font-size:.72em;color:var(--dim)">Total Backlog</div></div>';
+  s4+='<div style="text-align:center;padding:8px 16px;background:var(--green-bg);border-radius:8px"><div style="font-size:1.5em;font-weight:800;color:var(--green)">'+createdThisWeek+'</div><div style="font-size:.72em;color:var(--dim)">Created This Week</div></div>';
+  s4+='<div style="text-align:center;padding:8px 16px;background:var(--yellow-bg);border-radius:8px"><div style="font-size:1.5em;font-weight:800;color:var(--yellow)">'+createdThisMonth+'</div><div style="font-size:.72em;color:var(--dim)">Created This Month</div></div>';
+  const staleCls=staleRate>40?'var(--red)':staleRate>20?'var(--yellow)':'var(--green)';
+  s4+='<div style="text-align:center;padding:8px 16px;background:var(--red-bg);border-radius:8px"><div style="font-size:1.5em;font-weight:800;color:'+staleCls+'">'+staleRate+'%</div><div style="font-size:.72em;color:var(--dim)">Stale Rate (&gt;30d)</div></div>';
+  s4+='</div>';
+  s4+='<table class="audit-table"><thead><tr><th>Age Bucket</th><th>Count</th><th style="min-width:200px">Distribution</th></tr></thead><tbody>';
+  buckets.forEach(b=>{
+    const pct=backlog.length>0?(b.count/backlog.length*100).toFixed(0):0;
+    const barW=maxBucket>0?(b.count/maxBucket*100).toFixed(0):0;
+    s4+='<tr><td style="font-weight:600">'+b.label+'</td><td>'+b.count+' ('+pct+'%)</td><td><div style="background:var(--gray-l);border-radius:4px;height:18px;overflow:hidden"><div style="background:'+b.color+';height:100%;width:'+barW+'%;border-radius:4px;transition:width .3s"></div></div></td></tr>';
+  });
+  s4+='</tbody></table>';
+  html+=collapsible('ins-backlog','Backlog Health &mdash; Age distribution of pending work',s4);
+
+  /* ── Section 5: Prediction Accuracy Trend ── */
+  const monthMap={};
+  allData.filter(r=>r.status==='Done'&&r.delivery).forEach(r=>{
+    const d=r.delivery.slice(0,7);/* YYYY-MM */
+    if(!monthMap[d])monthMap[d]={total:0,withEta:0,onTime:0,daysOff:[],stable:0};
+    monthMap[d].total++;
+    if(r.eta){
+      monthMap[d].withEta++;
+      if(r.perf==='On Time')monthMap[d].onTime++;
+      const diff=daysBetween(r.eta,r.delivery);
+      if(diff!==null)monthMap[d].daysOff.push(Math.abs(diff));
+      if((r.etaChanges||0)===0)monthMap[d].stable++;
+    }
+  });
+  const monthKeys=Object.keys(monthMap).sort().slice(-6);
+
+  let s5='<table class="audit-table"><thead><tr><th>Month</th><th>Tickets with ETA</th><th>On Time %</th><th>Avg Days Off</th><th>ETA Stability %</th></tr></thead><tbody>';
+  if(monthKeys.length===0){
+    s5+='<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">No data available</td></tr>';
+  } else {
+    monthKeys.forEach(mk=>{
+      const m=monthMap[mk];
+      const onTimePct=m.withEta>0?(m.onTime/m.withEta*100).toFixed(0):'--';
+      const avgOff=m.daysOff.length>0?(m.daysOff.reduce((a,b)=>a+b,0)/m.daysOff.length).toFixed(1):'--';
+      const stabPct=m.withEta>0?(m.stable/m.withEta*100).toFixed(0):'--';
+      const onTimeCls=m.withEta>0&&(m.onTime/m.withEta)>=0.9?'color:var(--green);font-weight:700':m.withEta>0&&(m.onTime/m.withEta)>=0.7?'color:var(--yellow);font-weight:600':m.withEta>0?'color:var(--red);font-weight:600':'';
+      s5+='<tr><td style="font-weight:600">'+esc(mk)+'</td><td>'+m.withEta+' / '+m.total+'</td><td style="'+onTimeCls+'">'+onTimePct+(onTimePct!=='--'?'%':'')+'</td><td>'+avgOff+(avgOff!=='--'?'d':'')+'</td><td>'+stabPct+(stabPct!=='--'?'%':'')+'</td></tr>';
+    });
+  }
+  s5+='</tbody></table>';
+  html+=collapsible('ins-prediction','Estimation Quality &mdash; Are we getting better at predicting?',s5);
+
+  el.innerHTML=html;
+}
+
 /* ── Init ───────────────────────────────────────────── */
 function init(){
   const fp=document.getElementById('fPerson');
@@ -2305,8 +2495,10 @@ function init(){
     const gBody=document.getElementById('ganttCollapseBody');
     const gHdr=document.getElementById('ganttCollapseHdr');
     if(tabName==='gantt'&&gBody&&gHdr){gBody.style.display='';gHdr.classList.add('open');renderGantt()}
-    /* Hide summary sections on Gantt/Scrum — show only on KPI tabs */
-    const isFullscreen=tabName==='gantt'||tabName==='scrum';
+    /* Insights collapse uses display:none (same as Gantt — for sticky compatibility) */
+    if(tabName==='insights'){renderInsights()}
+    /* Hide summary sections on Gantt/Scrum/Insights — show only on KPI tabs */
+    const isFullscreen=tabName==='gantt'||tabName==='scrum'||tabName==='insights';
     const custSection=document.getElementById('customerKPISection');
     const topStrip=document.getElementById('topStrip');
     const memberCards=document.getElementById('memberCards');

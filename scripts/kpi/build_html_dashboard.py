@@ -2008,7 +2008,8 @@ function renderScrumCards(){
       if(sig==='ontrack')green++;
       else if(sig==='overdue')overdue++;
       else if(sig==='paused'){/* counted separately via pausedCount */}
-      else if(sig==='atrisk'||sig==='rework')yellow++;
+      else if(sig==='atrisk')yellow++;
+      else if(sig==='rework'){/* counted separately via reworkCount */}
       else if(sig==='blocked')red++;
       if(needsResponse(t))needsResponseCount++;
     });

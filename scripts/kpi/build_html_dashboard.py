@@ -182,6 +182,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .audit-table .perf-on-time{color:var(--green);font-weight:600}
 .audit-table .perf-late{color:var(--red);font-weight:600}
 .audit-table .perf-on-track{color:#2563eb;font-weight:600}
+.audit-table .perf-on-hold{color:#d97706;font-weight:600}
 .audit-table .perf-overdue{color:var(--yellow);font-weight:600}
 .audit-table .perf-na{color:var(--light)}
 .audit-table .perf-not-started{color:#a78bfa;font-weight:500}
@@ -474,6 +475,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
           <option value="Blocked">Blocked</option>
           <option value="N/A">N/A</option>
           <option value="Not Started">Not Started</option>
+          <option value="On Hold">On Hold</option>
         </select>
         <select id="auditFilterCustomer" style="background:var(--gray-bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.72em;font-weight:600;color:var(--dim);cursor:pointer" onchange="renderAuditTable()">
           <option value="ALL">All Customers</option>
@@ -1198,7 +1200,7 @@ function populateAuditFilters(){
 const AUDIT_COLS=['#','Person','Week','Ticket','Focus/Task','Status','Category','Demand Type','Customer','Date Added','ETA','Delivery','Performance','Rework','Duration','Source','Ticket URL','Milestone','Parent'];
 
 function perfClass(v){
-  if(v==='On Time')return'perf-on-time';if(v==='Late')return'perf-late';if(v==='On Track')return'perf-on-track';
+  if(v==='On Time')return'perf-on-time';if(v==='Late')return'perf-late';if(v==='On Track')return'perf-on-track';if(v==='On Hold')return'perf-on-hold';
   if(v==='Not Started')return'perf-not-started';
   return'perf-na';
 }
@@ -1496,7 +1498,7 @@ function showGuide(){
             <span class="g-badge" style="background:#f3f4f6;color:#9ca3af">N/A (Canceled)</span>
           </div>
           <p style="margin-top:8px;font-size:.88em;color:#64748b">
-            <b>Late</b> = ETA passed (delivered after or not delivered yet). <b>No ETA</b> = active work without a due date set. <b>Not Started</b> = ticket in Backlog/Todo/Triage — ETA not applicable yet. <b>B.B.C</b> = Blocked By Customer — excluded from accuracy. <b>N/A</b> = Canceled or not measurable.
+            <b>Late</b> = ETA passed (delivered after or not delivered yet). <b>No ETA</b> = active work without a due date set. <b>Not Started</b> = ticket in Backlog/Todo/Triage — ETA not applicable yet. <b>B.B.C</b> = Blocked By Customer — excluded from accuracy. <b>On Hold</b> = Paused — excluded from accuracy. <b>N/A</b> = Canceled or not measurable.
           </p>
         </div>
       </div>
@@ -1554,6 +1556,7 @@ function showGuide(){
             <div class="g-grid-item"><b>No ETA</b><span>Active work (In Progress/Done) without a due date set</span></div>
             <div class="g-grid-item"><b>Not Started</b><span>Ticket in Backlog/Todo/Triage — ETA not applicable yet</span></div>
             <div class="g-grid-item"><b>On Track</b><span>In progress, ETA is in the future</span></div>
+            <div class="g-grid-item"><b>On Hold</b><span>Ticket paused — excluded from accuracy calculation</span></div>
             <div class="g-grid-item"><b>B.B.C</b><span>Blocked By Customer — excluded from accuracy</span></div>
             <div class="g-grid-item"><b>Core Week</b><span>A week within the rolling 4-month window</span></div>
             <div class="g-grid-item"><b>Rework</b><span>Task re-implemented after delivery (rework:implementation label)</span></div>
@@ -1671,6 +1674,8 @@ function gtTipHtml(r){
   h+='<span style="color:#94a3b8">Status:</span> <span class="tip-pct '+cls+'">'+esc(r.status||'')+'</span> · '+esc(r.perf||'')+'<br>';
   h+='<span style="color:#94a3b8">Start:</span> '+esc(s||'\u2014')+' · <span style="color:#94a3b8">ETA:</span> '+esc(r.eta||'\u2014')+' · <span style="color:#94a3b8">Done:</span> '+esc(r.delivery||'\u2014')+'<br>';
   if(dur!==null)h+='<span style="color:#94a3b8">Duration:</span> '+dur+'d<br>';
+  if(r.originalEta&&r.originalEta!==r.eta)h+='<span style="color:#818cf8;font-size:.85em">Original ETA: '+esc(r.originalEta)+' &rarr; Final: '+esc(r.eta||'\u2014')+'</span><br>';
+  if((r.etaChanges||0)>0)h+='<span style="color:#fbbf24;font-size:.85em">ETA changed '+r.etaChanges+'x</span><br>';
   if(r.ticketId)h+='<span style="color:#94a3b8">Ticket:</span> '+esc(r.ticketId||'');
   return h;
 }

@@ -149,6 +149,30 @@ class TestCalcPerf(unittest.TestCase):
         result = calc_perf('Todo', past_eta, '')
         self.assertEqual(result, 'Late')
 
+    # ── Paused / On Hold ────────────────────────────────────────────────────
+
+    def test_paused_returns_on_hold(self):
+        result = calc_perf('Paused', '2026-03-20', '')
+        self.assertEqual(result, 'On Hold')
+
+    def test_on_hold_returns_on_hold(self):
+        result = calc_perf('On Hold', '2026-03-20', '')
+        self.assertEqual(result, 'On Hold')
+
+    def test_paused_no_eta_returns_on_hold(self):
+        result = calc_perf('Paused', '', '')
+        self.assertEqual(result, 'On Hold')
+
+    # ── Blocked ──────────────────────────────────────────────────────────────
+
+    def test_bbc_returns_blocked(self):
+        result = calc_perf('B.B.C', '2026-03-20', '')
+        self.assertEqual(result, 'Blocked')
+
+    def test_blocked_returns_blocked(self):
+        result = calc_perf('Blocked', '2026-01-01', '')
+        self.assertEqual(result, 'Blocked')
+
     # ── Edge cases ────────────────────────────────────────────────────────────
 
     def test_empty_status_no_eta_returns_no_eta(self):

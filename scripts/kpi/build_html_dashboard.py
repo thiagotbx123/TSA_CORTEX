@@ -1922,8 +1922,13 @@ function renderScrumCards(){
   function needsResponse(t){
     if(!t.lastActorId)return false;
     if(KPI_IDS.has(t.lastActorId))return false;
-    if(['In Progress','Todo'].includes(t.status))return true;
-    return false;
+    /* Only flag if: status is active (not backlog/todo) AND updated in last 7 days */
+    if(!['In Progress','In Review'].includes(t.status))return false;
+    if(!t.updatedAt)return false;
+    const updated=(t.updatedAt||'').slice(0,10);
+    const cutoff=new Date(today);cutoff.setDate(cutoff.getDate()-7);
+    if(updated<cutoff.toISOString().slice(0,10))return false;
+    return true;
   }
 
   /* #2: Age-in-status helper */

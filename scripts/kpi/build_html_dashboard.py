@@ -2114,7 +2114,12 @@ function renderScrumCards(){
         const hasDrift=t.etaChanges&&t.etaChanges>0&&t.originalEta&&t.originalEta!==t.eta;
         const etaInline=hasDrift?'':`<span style="color:var(--dim);font-size:.82em"> ETA:${fmtD(t.eta)}</span>`;
         const reviewNote=t.reassignedInReview?` <span style="color:#94a3b8;font-size:.72em">\u21a9 review</span>`:'';
-        let taskHtml=`<div class="sc-task">${rwTag}<span style="${statusStyle};font-size:.8em;font-weight:600">[${esc(t.status)}${age}]</span> ${tid}${esc(name)}${etaInline}${nrBadge}${reviewNote} <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
+        /* Compute filter tags for badge click filtering */
+        const filterTags=[sig];
+        if(!t.eta)filterTags.push('noeta');
+        if(needsResponse(t))filterTags.push('needsresponse');
+        if(t.status==='Paused')filterTags.push('paused');
+        let taskHtml=`<div class="sc-task" data-tags="${filterTags.join(',')}">${rwTag}<span style="${statusStyle};font-size:.8em;font-weight:600">[${esc(t.status)}${age}]</span> ${tid}${esc(name)}${etaInline}${nrBadge}${reviewNote} <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
         /* ETA drift on second line */
         if(hasDrift)taskHtml+=etaDriftHtml(t);
         return taskHtml;
@@ -2139,7 +2144,7 @@ function renderScrumCards(){
       htmlPaused.forEach(t=>{
         const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
         const name=cleanName(t.focus,t._cust);
-        html+=`<div class="sc-task" style="opacity:.5">\u23f8 ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(t._cust)})</span></div>`;
+        html+=`<div class="sc-task" data-tags="paused" style="opacity:.5">\u23f8 ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(t._cust)})</span></div>`;
       });
     }
     /* Done today with strikethrough line */
@@ -2151,7 +2156,7 @@ function renderScrumCards(){
           const name=cleanName(t.focus,cust);
           const delDate=t.deliveryDate||t.delivery;
           const rvDelay=t.reviewerDelay&&t.reviewerDelay>2?` <span style="color:#d97706;font-size:.78em">review ${t.reviewerDelay}d</span>`:'';
-          html+=`<div class="sc-task" style="text-decoration:line-through;opacity:.6">\u2705 ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)}) ${fmtD(delDate)}</span>${rvDelay}</div>`;
+          html+=`<div class="sc-task" data-tags="done" style="text-decoration:line-through;opacity:.6">\u2705 ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)}) ${fmtD(delDate)}</span>${rvDelay}</div>`;
         });
       });
     }
@@ -2166,22 +2171,55 @@ function renderScrumCards(){
       <div class="sc-header">
         <span class="sc-name">${c.person}</span>
         <div class="sc-stats">
-          ${c.done?`<span style="background:#059669;color:#fff">${c.done} done</span>`:''}
-          <span style="background:#065f46;color:#a7f3d0">${c.green} on track</span>
-          ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} at risk</span>`:''}
-          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a">${c.reworkCount} rework</span>`:''}
-          ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} blocked</span>`:''}
-          ${c.needsResponseCount?`<span style="background:#c2410c;color:#fff">${c.needsResponseCount} needs response</span>`:''}
-          ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe">${c.tbd} no eta</span>`:''}
-          ${c.overdue?`<span style="background:#374151;color:#d1d5db">${c.overdue} overdue</span>`:''}
-          ${c.pausedCount?`<span style="background:#374151;color:#9ca3af">${c.pausedCount} paused</span>`:''}
-          <span style="background:#78350f;color:#fde68a">${c.active} active</span>
+          ${c.done?`<span style="background:#059669;color:#fff;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'done')">${c.done} done</span>`:''}
+          <span style="background:#065f46;color:#a7f3d0;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'ontrack')">${c.green} on track</span>
+          ${c.yellow?`<span style="background:#92400e;color:#fde68a;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'atrisk')">${c.yellow} at risk</span>`:''}
+          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'rework')">${c.reworkCount} rework</span>`:''}
+          ${c.red?`<span style="background:#991b1b;color:#fecaca;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'blocked')">${c.red} blocked</span>`:''}
+          ${c.needsResponseCount?`<span style="background:#c2410c;color:#fff;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'needsresponse')">${c.needsResponseCount} needs response</span>`:''}
+          ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'noeta')">${c.tbd} no eta</span>`:''}
+          ${c.overdue?`<span style="background:#374151;color:#d1d5db;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'overdue')">${c.overdue} overdue</span>`:''}
+          ${c.pausedCount?`<span style="background:#374151;color:#9ca3af;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'paused')">${c.pausedCount} paused</span>`:''}
+          <span style="background:#78350f;color:#fde68a;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'all')">${c.active} active</span>
         </div>
       </div>
       <div class="sc-body">${c.html}</div>
       <div class="sc-copy-hint">Click to copy Slack-ready text</div>
     </div>
   `).join('');
+}
+
+function scFilterCard(badge,filterTag){
+  const card=badge.closest('.scrum-card');
+  if(!card)return;
+  const tasks=card.querySelectorAll('.sc-task[data-tags]');
+  const customers=card.querySelectorAll('.sc-customer');
+  const sections=card.querySelectorAll('.sc-eta-drift,.sc-stale-collapse');
+  /* Toggle: click same badge again → show all */
+  const current=card.dataset.activeFilter||'';
+  const isToggleOff=current===filterTag;
+  card.dataset.activeFilter=isToggleOff?'':filterTag;
+  /* Highlight active badge */
+  card.querySelectorAll('.sc-stats span').forEach(s=>{s.style.opacity=isToggleOff||s===badge?'1':'.4'});
+  if(isToggleOff){badge.style.opacity='1'}
+  /* Show/hide tasks */
+  tasks.forEach(t=>{
+    if(isToggleOff||filterTag==='all'){t.style.display='';return}
+    const tags=(t.dataset.tags||'').split(',');
+    t.style.display=tags.includes(filterTag)?'':'none';
+  });
+  /* Show/hide customer headers — hide if all tasks under them are hidden */
+  customers.forEach(c=>{
+    let next=c.nextElementSibling;let anyVisible=false;
+    while(next&&!next.classList.contains('sc-customer')&&next.style){
+      if(next.classList.contains('sc-task')&&next.style.display!=='none')anyVisible=true;
+      next=next.nextElementSibling;
+      if(!next||next.tagName==='DIV'&&next.style.borderTop)break;
+    }
+    c.style.display=(isToggleOff||filterTag==='all')?'':anyVisible?'':'none';
+  });
+  /* Hide section separators when filtering */
+  sections.forEach(s=>{s.style.display=(isToggleOff||filterTag==='all')?'':'none'});
 }
 
 function copyScrumCard(el){

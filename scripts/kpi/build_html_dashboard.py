@@ -216,9 +216,13 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .scrum-card .sc-stats{display:flex;gap:8px;font-size:.7em}
 .scrum-card .sc-stats span{padding:2px 8px;border-radius:10px}
 .scrum-card .sc-body{padding:12px 16px;font-size:.82em;line-height:1.7;font-family:'Consolas','Menlo',monospace;white-space:pre-wrap;color:#334155;max-height:400px;overflow-y:auto}
-.scrum-card .sc-customer{color:#6366f1;font-weight:700;margin-top:6px}
-.scrum-card .sc-task{padding-left:4px}
+.scrum-card .sc-task{padding-left:4px;margin-bottom:4px}
+.scrum-card .sc-customer{color:#6366f1;font-weight:700;margin-top:8px;margin-bottom:4px}
 .scrum-card .sc-g{color:#059669}.scrum-card .sc-y{color:#d97706}.scrum-card .sc-r{color:#dc2626}
+.scrum-card .sc-eta-drift{display:block;padding-left:18px;font-size:.75em;color:#94a3b8;margin-top:-2px;margin-bottom:2px}
+.scrum-card .sc-needs-response{display:inline-block;background:#f97316;color:#fff;font-size:.68em;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px}
+.scrum-card .sc-stale-collapse{color:#94a3b8;font-size:.82em;cursor:pointer;padding:2px 0 2px 8px;user-select:none}
+.scrum-card .sc-stale-collapse:hover{color:#64748b}
 .scrum-card .sc-copy-hint{text-align:center;padding:6px;font-size:.68em;color:var(--light);border-top:1px solid var(--gray-l)}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* ── Gantt chart styles (gt- prefix) ───────────── */
@@ -1873,6 +1877,17 @@ function renderScrumCards(){
   const todayStr=new Date().toISOString().slice(0,10);
   const today=new Date(todayStr);
 
+  /* KPI team member IDs — for needs-response detection */
+  const KPI_IDS=new Set([
+    'a6063009-d822-49f1-a638-6cebfe59e89e',
+    'b13ca864-e0f4-4ff6-b020-ec3f4491643e',
+    '19b6975e-3026-450b-bc01-f468ad543028',
+    '717e7b13-d840-41c0-baeb-444354c8ff91',
+    'd9745bdb-7138-4345-9303-516aa6e4ec39',
+    '0879df15-56d6-477f-944d-df033121641a',
+    'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
+  ]);
+
   /* Split: active (In Progress/In Review/Paused/Todo) + completed today — respects person filter */
   const pf=state.person;
   const active=RAW.filter(r=>r.source==='linear'&&['In Progress','In Review','Paused','Todo'].includes(r.status)&&(pf==='ALL'||r.tsa===pf));
@@ -1903,6 +1918,14 @@ function renderScrumCards(){
   function htmlDot(sig){return sig==='blocked'?'🔴':sig==='rework'?'♻️':sig==='atrisk'?'🟡':'🟢'}
   function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='rework'?'sc-y':sig==='atrisk'?'sc-y':'sc-g'}
 
+  /* Needs-response detection: last actor is NOT on our team and ticket is active */
+  function needsResponse(t){
+    if(!t.lastActorId)return false;
+    if(KPI_IDS.has(t.lastActorId))return false;
+    if(['In Progress','Todo'].includes(t.status))return true;
+    return false;
+  }
+
   /* #2: Age-in-status helper */
   function ageDays(dateStr){if(!dateStr)return 0;try{return Math.floor((today-new Date(dateStr))/864e5)}catch(e){return 0}}
   function ageLabel(t){
@@ -1919,21 +1942,26 @@ function renderScrumCards(){
     if(d>14)return'#ef4444';if(d>7)return'#d97706';return'';
   }
 
-  /* #1: ETA drift helper */
+  /* Stale Todo detection (>14d since dateAdd) */
+  function isStaleTodo(t){
+    return t.status==='Todo'&&t.dateAdd&&ageDays(t.dateAdd)>14;
+  }
+
+  /* #1: ETA drift helper — now returns second-line HTML */
   function etaDriftHtml(t){
     if(!t.etaChanges||t.etaChanges===0||!t.originalEta||t.originalEta===t.eta)return'';
-    return` <span style="color:#94a3b8;font-size:.78em;text-decoration:line-through">${fmtD(t.originalEta)}</span><span style="color:#fbbf24;font-size:.78em">→${fmtD(t.eta)} (${t.etaChanges}x)</span>`;
+    return`<div class="sc-eta-drift">ETA: <span style="text-decoration:line-through">${fmtD(t.originalEta)}</span> <span style="color:#fbbf24">\u2192 ${fmtD(t.eta)} (moved ${t.etaChanges}x)</span></div>`;
   }
   function etaDriftSlack(t){
     if(!t.etaChanges||t.etaChanges===0||!t.originalEta||t.originalEta===t.eta)return'';
-    return` (was ${fmtD(t.originalEta)}, moved ${t.etaChanges}x)`;
+    return`\n    ETA: ${fmtD(t.originalEta)} \u2192 ${fmtD(t.eta)} (moved ${t.etaChanges}x)`;
   }
 
   function cleanName(focus,cust){
     let s=focus;
     s=s.replace(/^\[.*?\]\s*/,'');
-    if(cust&&s.toLowerCase().startsWith(cust.toLowerCase()))s=s.slice(cust.length).replace(/^\s*[-–—:]\s*/,'');
-    return s.slice(0,75)||focus.slice(0,75);
+    if(cust&&s.toLowerCase().startsWith(cust.toLowerCase()))s=s.slice(cust.length).replace(/^\s*[-\u2013\u2014:]\s*/,'');
+    return s.slice(0,55)||focus.slice(0,55);
   }
 
   const cards=people.map(person=>{
@@ -1957,13 +1985,15 @@ function renderScrumCards(){
 
     let green=0,yellow=0,red=0;
     const tbd=myActive.filter(t=>!t.eta).length;
+    let needsResponseCount=0;
     myActive.forEach(t=>{
       const sig=taskSignal(t);
       if(sig==='ontrack')green++;else if(sig==='atrisk')yellow++;else red++;
+      if(needsResponse(t))needsResponseCount++;
     });
 
     /* Build Slack text */
-    let text=`[Daily Agenda – ${todayStr}]\n`;
+    let text=`[Daily Agenda \u2013 ${todayStr}]\n`;
     /* Sort: TBD (no ETA) first, then by ETA oldest→newest */
     const sortTasks=arr=>arr.sort((a,b)=>{if(!a.eta&&b.eta)return-1;if(a.eta&&!b.eta)return 1;return(a.eta||'').localeCompare(b.eta||'')});
     /* Sort customers by urgency: most at-risk/blocked first, then by task count */
@@ -1992,13 +2022,14 @@ function renderScrumCards(){
         const name=cleanName(t.focus,cust);
         const age=ageLabel(t);
         const rw=t.rework==='yes'?':recycle: [REWORK] ':'';
+        const nr=needsResponse(t)?':warning: needs response ':'';
         const drift=etaDriftSlack(t);
         const tid=t.ticketId?t.ticketId+' ':'';
-        text+=`  :black_small_square: ${rw}[${t.status}${age}] ${tid}${name} ETA:${fmtD(t.eta)}${drift} ${slackEmoji(taskSignal(t))}\n`;
+        text+=`  :black_small_square: ${nr}${rw}[${t.status}${age}] ${tid}${name} ETA:${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}${drift}\n`;
       });
     });
     if(pausedList.length>0){
-      text+=`\n——— Paused ———\n`;
+      text+=`\n\u2014\u2014\u2014 Paused \u2014\u2014\u2014\n`;
       pausedList.forEach(t=>{
         const name=cleanName(t.focus,t._cust);
         text+=`  :pause_button: ${t.ticketId||''} ${name} (${t._cust}) ETA:${fmtD(t.eta)}\n`;
@@ -2007,7 +2038,7 @@ function renderScrumCards(){
     /* Done today section */
     const allDoneCusts=Object.keys(doneByCust).sort();
     if(allDoneCusts.length>0){
-      text+=`\n———— Recently Completed ————\n`;
+      text+=`\n\u2014\u2014\u2014\u2014 Recently Completed \u2014\u2014\u2014\u2014\n`;
       allDoneCusts.forEach(cust=>{
         doneByCust[cust].forEach(t=>{
           const name=cleanName(t.focus,cust);
@@ -2016,9 +2047,9 @@ function renderScrumCards(){
       });
     }
 
-    /* Build HTML preview — #1-#5 improvements */
+    /* Build HTML preview */
     let html='';
-    /* #5: Separate active from paused */
+    /* Separate active from paused */
     const htmlActiveCusts={};const htmlPaused=[];
     custKeys.forEach(cust=>{
       const tasks=byCust[cust]||[];
@@ -2027,42 +2058,70 @@ function renderScrumCards(){
       if(act.length)htmlActiveCusts[cust]=act;
       pau.forEach(p=>htmlPaused.push({...p,_cust:cust}));
     });
+
+    /* Unique collapse ID counter */
+    let collapseIdx=0;
+
     /* Active tasks by customer */
     Object.keys(htmlActiveCusts).sort((a,b)=>{
       const urgA=htmlActiveCusts[a].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'||s==='rework'}).length;
       const urgB=htmlActiveCusts[b].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'||s==='rework'}).length;
       if(urgB!==urgA)return urgB-urgA;return htmlActiveCusts[b].length-htmlActiveCusts[a].length;
     }).forEach(cust=>{
-      /* #6: Milestone callout */
+      /* Milestone callout */
       const milestones=[...new Set(htmlActiveCusts[cust].map(t=>t.milestone).filter(Boolean))];
       const msBadge=milestones.length?` <span style="color:#6366f1;font-size:.72em;font-weight:400">[${esc(milestones[0])}]</span>`:'';
       html+=`<div class="sc-customer">${esc(cust)}${msBadge}</div>`;
-      sortTasks(htmlActiveCusts[cust]).forEach(t=>{
+
+      const sorted=sortTasks(htmlActiveCusts[cust]);
+      /* Stale-task collapse: if >3 stale Todo items for this customer, show first 3 then collapse */
+      const staleTodos=sorted.filter(t=>isStaleTodo(t));
+      const nonStale=sorted.filter(t=>!isStaleTodo(t));
+      const showStale=staleTodos.slice(0,3);
+      const hiddenStale=staleTodos.slice(3);
+
+      /* Render non-stale tasks first, then stale */
+      const renderTask=(t)=>{
         const sig=taskSignal(t);
         const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
         const name=cleanName(t.focus,cust);
-        /* #2: Age-in-status */
         const age=ageLabel(t);
         const ac=ageColor(t);
-        const statusColor=t.status==='In Progress'?'#3b82f6':t.status==='In Review'?'#8b5cf6':t.status==='Todo'?'#94a3b8':'#64748b';
+        const statusColor=t.status==='In Progress'?'#3b82f6':t.status==='In Review'?'#8b5cf6':t.status==='Todo'?'#94a3b8':t.status==='Rework'?'#f59e0b':'#6b7280';
         const statusStyle=ac?`color:${ac}`:`color:${statusColor}`;
-        /* #3: Rework flag */
-        const rwTag=t.rework==='yes'?`<span style="color:#f59e0b;font-size:.78em;font-weight:700">♻️ </span>`:'';
-        /* #1: ETA drift */
-        const drift=etaDriftHtml(t);
-        const etaDisplay=drift?drift:` <span style="color:var(--dim)">ETA:${fmtD(t.eta)}</span>`;
-        /* #4/#8: Review info */
-        const reviewNote=t.reassignedInReview?` <span style="color:#94a3b8;font-size:.72em">↩ review</span>`:'';
-        html+=`<div class="sc-task">${rwTag}<span style="${statusStyle};font-size:.8em;font-weight:600">[${esc(t.status)}${age}]</span> ${tid}${esc(name)}${etaDisplay}${reviewNote} <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
-      });
+        const rwTag=t.rework==='yes'?`<span style="color:#f59e0b;font-size:.78em;font-weight:700">\u267b\ufe0f </span>`:'';
+        /* Needs-response badge */
+        const nrBadge=needsResponse(t)?`<span class="sc-needs-response">\u26a0 needs response</span>`:'';
+        /* ETA on main line (no drift) or simple ETA */
+        const hasDrift=t.etaChanges&&t.etaChanges>0&&t.originalEta&&t.originalEta!==t.eta;
+        const etaInline=hasDrift?'':`<span style="color:var(--dim);font-size:.82em"> ETA:${fmtD(t.eta)}</span>`;
+        const reviewNote=t.reassignedInReview?` <span style="color:#94a3b8;font-size:.72em">\u21a9 review</span>`:'';
+        let taskHtml=`<div class="sc-task">${rwTag}<span style="${statusStyle};font-size:.8em;font-weight:600">[${esc(t.status)}${age}]</span> ${tid}${esc(name)}${etaInline}${nrBadge}${reviewNote} <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
+        /* ETA drift on second line */
+        if(hasDrift)taskHtml+=etaDriftHtml(t);
+        return taskHtml;
+      };
+
+      nonStale.forEach(t=>{html+=renderTask(t)});
+      showStale.forEach(t=>{html+=renderTask(t)});
+
+      /* Collapsed stale todos */
+      if(hiddenStale.length>0){
+        const cid=`stale_${person}_${collapseIdx++}`;
+        const oldestDays=Math.max(...hiddenStale.map(t=>ageDays(t.dateAdd)));
+        html+=`<div class="sc-stale-collapse" onclick="(function(e){var d=document.getElementById('${cid}');var a=e.target||e.srcElement;if(d.style.display==='none'){d.style.display='block';a.textContent='\u25be '+a.textContent.slice(2)}else{d.style.display='none';a.textContent='\u25b8 '+a.textContent.slice(2)}})(event)">\u25b8 ${hiddenStale.length} more stale Todo tickets (oldest: ${oldestDays}d)</div>`;
+        html+=`<div id="${cid}" style="display:none">`;
+        hiddenStale.forEach(t=>{html+=renderTask(t)});
+        html+=`</div>`;
+      }
     });
-    /* #5: Paused section */
+    /* Paused section */
     if(htmlPaused.length>0){
       html+=`<div style="border-top:1px dashed #94a3b8;margin:8px 0 4px;position:relative"><span style="position:absolute;top:-8px;left:12px;background:var(--white);padding:0 6px;font-size:.65em;font-weight:600;color:#94a3b8;text-transform:uppercase">Paused</span></div>`;
       htmlPaused.forEach(t=>{
         const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
         const name=cleanName(t.focus,t._cust);
-        html+=`<div class="sc-task" style="opacity:.5">⏸ ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(t._cust)})</span></div>`;
+        html+=`<div class="sc-task" style="opacity:.5">\u23f8 ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(t._cust)})</span></div>`;
       });
     }
     /* Done today with strikethrough line */
@@ -2074,14 +2133,14 @@ function renderScrumCards(){
           const name=cleanName(t.focus,cust);
           const delDate=t.deliveryDate||t.delivery;
           const rvDelay=t.reviewerDelay&&t.reviewerDelay>2?` <span style="color:#d97706;font-size:.78em">review ${t.reviewerDelay}d</span>`:'';
-          html+=`<div class="sc-task" style="text-decoration:line-through;opacity:.6">✅ ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)}) ${fmtD(delDate)}</span>${rvDelay}</div>`;
+          html+=`<div class="sc-task" style="text-decoration:line-through;opacity:.6">\u2705 ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)}) ${fmtD(delDate)}</span>${rvDelay}</div>`;
         });
       });
     }
 
     const reworkCount=myActive.filter(t=>t.rework==='yes').length;
     const pausedCount=myActive.filter(t=>t.status==='Paused').length;
-    return{person,active:myActive.length,done:myDone.length,green,yellow,red,tbd,reworkCount,pausedCount,text,html};
+    return{person,active:myActive.length,done:myDone.length,green,yellow,red,tbd,reworkCount,pausedCount,needsResponseCount,text,html};
   });
 
   el.innerHTML=cards.map(c=>`
@@ -2089,14 +2148,15 @@ function renderScrumCards(){
       <div class="sc-header">
         <span class="sc-name">${c.person}</span>
         <div class="sc-stats">
-          <span style="background:#065f46;color:#a7f3d0">${c.green} 🟢</span>
-          ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} 🟡</span>`:''}
-          ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} 🔴</span>`:''}
-          ${c.done?`<span style="background:#059669;color:#fff">✅ ${c.done}</span>`:''}
+          <span style="background:#065f46;color:#a7f3d0">${c.green} \ud83d\udfe2</span>
+          ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} \ud83d\udfe1</span>`:''}
+          ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} \ud83d\udd34</span>`:''}
+          ${c.done?`<span style="background:#059669;color:#fff">\u2705 ${c.done}</span>`:''}
           <span style="background:${c.active>=6?'#7f1d1d':c.active>=4?'#78350f':'#1e293b'};color:${c.active>=6?'#fecaca':c.active>=4?'#fde68a':'#94a3b8'}">${c.active} active</span>
           ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe">${c.tbd} TBD</span>`:''}
-          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a">♻️ ${c.reworkCount}</span>`:''}
-          ${c.pausedCount?`<span style="background:#374151;color:#9ca3af">⏸ ${c.pausedCount}</span>`:''}
+          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a">\u267b\ufe0f ${c.reworkCount}</span>`:''}
+          ${c.pausedCount?`<span style="background:#374151;color:#9ca3af">\u23f8 ${c.pausedCount}</span>`:''}
+          ${c.needsResponseCount?`<span style="background:#c2410c;color:#fff">\u26a0 ${c.needsResponseCount} needs response</span>`:''}
         </div>
       </div>
       <div class="sc-body">${c.html}</div>

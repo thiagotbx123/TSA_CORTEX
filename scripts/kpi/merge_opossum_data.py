@@ -74,6 +74,8 @@ def extract_history_fields(issue):
         'reviewAssignee': None,
         'originalAssigneeId': None,    # First person assigned to this ticket
         'originalAssigneeName': None,
+        'lastActorId': None,           # Actor of the most recent history event
+        'lastActorName': None,
     }
 
     if not history:
@@ -144,6 +146,12 @@ def extract_history_fields(issue):
                     result['originalEta'] = h['fromDueDate']
                 else:
                     result['originalEta'] = h['toDueDate']
+
+    # Last actor: who made the most recent history event
+    if sorted_history:
+        last_event = sorted_history[-1]
+        result['lastActorId'] = last_event.get('actorId', '')
+        result['lastActorName'] = last_event.get('actorName', '')
 
     # A32c: When rework detected, use the LAST Done date (not first delivery date)
     if result['reworkDetected'] and done_date:
@@ -520,6 +528,9 @@ for iss in issues:
         'reviewAssignee': hist_fields.get('reviewAssignee', ''),
         'weekByStart': week_by_start or '',
         'weekRangeByStart': wrange_by_start,
+        'updatedAt': (iss.get('updatedAt', '')[:10] if iss.get('updatedAt') else ''),
+        'lastActorId': hist_fields.get('lastActorId', ''),
+        'lastActorName': hist_fields.get('lastActorName', ''),
     }
     new_records.append(record)
 

@@ -38,8 +38,19 @@ except json.JSONDecodeError as e:
     print(f"ERROR: Malformed JSON in {DATA_PATH}: {e}")
     sys.exit(1)
 
+# Load implementation timeline data
+TIMELINE_PATH = os.path.join(SCRIPT_DIR, 'implementation_timeline.json')
+try:
+    with open(TIMELINE_PATH, 'r', encoding='utf-8') as f:
+        timeline_raw = json.load(f)
+    timeline_json = json.dumps(timeline_raw, ensure_ascii=True)
+except (FileNotFoundError, json.JSONDecodeError):
+    timeline_raw = []
+    timeline_json = '[]'
+
 # H9: Sanitize JSON for safe inline injection — escape </script> sequences
 data_json_safe = data_json.replace('</script>', '<\\/script>').replace('</Script>', '<\\/Script>')
+timeline_json_safe = timeline_json.replace('</script>', '<\\/script>').replace('</Script>', '<\\/Script>')
 
 # M11: Record build timestamp for staleness detection
 build_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
@@ -314,12 +325,13 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 
 <div class="tabs" id="tabBar">
   <div class="tab active" data-tab="accuracy">ETA Accuracy</div>
+  <div class="tab" data-tab="implementation">Customer Onboarding</div>
+  <div class="tab" data-tab="reliability">Implementation Reliability</div>
   <div class="tab" data-tab="velocity">Execution Time</div>
-  <div class="tab" data-tab="reliability">Reliability</div>
   <div class="tab" data-tab="activity">Team Activity</div>
   <div class="tab" data-tab="scrum">Scrum Copy</div>
-  <div class="tab" data-tab="gantt">Gantt</div>
   <div class="tab" data-tab="insights">Insights</div>
+  <div class="tab" data-tab="gantt">Gantt</div>
 </div>
 
 <div class="tab-panel active" id="panel-accuracy">
@@ -456,6 +468,15 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   </div>
 </div>
 
+<div class="tab-panel" id="panel-implementation">
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;margin-top:0">
+    <div class="audit-header" style="cursor:default">
+      <h3 style="font-weight:800"><span class="dot" style="background:#059669;position:relative;top:0"></span>Customer Onboarding</h3>
+    </div>
+    <div id="implementationBody" style="padding:16px 20px"></div>
+  </div>
+</div>
+
 <div class="tooltip" id="tooltip"></div>
 
 <div class="audit-section" id="customerKPISection" style="margin-top:20px">
@@ -507,14 +528,12 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   </div>
 </div>
 
-<div class="footer">
-  KPI Dashboard &nbsp;&middot;&nbsp; Source: Linear + Spreadsheet (backlog) &nbsp;&middot;&nbsp; Generated __DATE__ &nbsp;&middot;&nbsp; Latest data: __LATEST_DATA__
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script>
 const RAW = __DATA__;
+const TIMELINE = __TIMELINE__;
 const BUILD_DATE = '__DATE__';
 const LATEST_DATA = '__LATEST_DATA__';
 
@@ -1954,11 +1973,14 @@ function renderScrumCards(){
   }
 
   /* #2: Age-in-status helper */
-  function ageDays(dateStr){if(!dateStr)return 0;try{return Math.floor((today-new Date(dateStr))/864e5)}catch(e){return 0}}
+  function ageDays(dateStr){if(!dateStr)return 0;try{return Math.max(0,Math.floor((today-new Date(dateStr))/864e5))}catch(e){return 0}}
   function ageLabel(t){
     if(t.status==='In Review'&&t.inReviewDate){const d=ageDays(t.inReviewDate);return d>0?` · ${d}d in review`:'';}
     if(t.status==='In Progress'&&t.startedAt){const d=ageDays(t.startedAt);return d>0?` · ${d}d`:'';}
-    if(t.status==='Todo'&&t.dateAdd){const d=ageDays(t.dateAdd);return d>14?` · stale ${d}d`:'';}
+    if(t.status==='Todo'&&t.dateAdd){const d=ageDays(t.dateAdd);return d>14?` · stale ${d}d`:` · ${ageDays(t.dateAdd)}d`;}
+    /* Fallback: any other status — use statusChangedAt, then updatedAt, then dateAdd */
+    const fallback=t.statusChangedAt||t.updatedAt||t.dateAdd;
+    if(fallback){const d=ageDays(fallback);return d>0?` · ${d}d`:'';}
     return'';
   }
   function ageColor(t){
@@ -1966,6 +1988,7 @@ function renderScrumCards(){
     if(t.status==='In Review'&&t.inReviewDate)d=ageDays(t.inReviewDate);
     else if(t.status==='In Progress'&&t.startedAt)d=ageDays(t.startedAt);
     else if(t.status==='Todo'&&t.dateAdd)d=ageDays(t.dateAdd);
+    else{const fb=t.statusChangedAt||t.updatedAt||t.dateAdd;if(fb)d=ageDays(fb);}
     if(d>14)return'#ef4444';if(d>7)return'#d97706';return'';
   }
 
@@ -2473,6 +2496,239 @@ function init(){
     debouncedRender();
   });
 
+  /* ── Implementation Timeline Tab ──────────────────── */
+  function renderImplementation(){
+    const el=document.getElementById('implementationBody');
+    if(!el)return;
+
+    /* Parse Mon/YY to a Date for duration calc */
+    const MON_MAP={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    function parseMonYY(s){
+      if(!s)return null;
+      const m=s.match(/^([A-Za-z]{3})\/(\d{2})$/);
+      if(!m)return null;
+      const mo=MON_MAP[m[1]];
+      if(mo===undefined)return null;
+      return new Date(2000+parseInt(m[2]),mo,1);
+    }
+    function monthsDiff(a,b){
+      if(!a||!b)return null;
+      const da=parseMonYY(a),db=parseMonYY(b);
+      if(!da||!db)return null;
+      return (db.getFullYear()-da.getFullYear())*12+(db.getMonth()-da.getMonth());
+    }
+
+    /* Status badge */
+    const statusColors={live:'#059669',maintenance:'#0284c7',in_progress:'#d97706',starting:'#7c3aed',stalled:'#dc2626',churned:'#991b1b',pre_sales:'#6b7280',interrupted:'#9f1239'};
+    const statusLabels={live:'Live',maintenance:'Maintenance',in_progress:'In Progress',starting:'Starting',stalled:'Stalled',churned:'Churned',pre_sales:'Pre-sales',interrupted:'Interrupted'};
+    function badge(st){
+      const c=statusColors[st]||'#6b7280';
+      const l=statusLabels[st]||st;
+      return '<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:.75em;font-weight:700;color:#fff;background:'+c+'">'+l+'</span>';
+    }
+
+    /* Sort: live first, then in_progress, then rest. Within group: by kickoff desc */
+    const order={live:0,maintenance:1,in_progress:2,starting:3,interrupted:4,stalled:5,pre_sales:6,churned:7};
+    const sorted=[...TIMELINE].sort((a,b)=>{
+      const oa=(order[a.status]??9)-(order[b.status]??9);
+      if(oa!==0)return oa;
+      /* Within same status: oldest kickoff first, no-kickoff last */
+      function toNum(s){if(!s)return 9999;const m=s.match(/^([A-Za-z]{3})\/(\d{2})$/);if(!m)return 9999;const mo=MON_MAP[m[1]];return mo!==undefined?(2000+parseInt(m[2]))*100+mo:9999;}
+      return toNum(a.kickoff)-toNum(b.kickoff);
+    });
+
+    /* Logo domains for favicons */
+    const LOGO_DOMAINS={Dixa:'dixa.com',Syncari:'syncari.com',Assignar:'assignar.com',CallRail:'callrail.com',Gong:'gong.io',Brevo:'brevo.com',QuickBooks:'quickbooks.intuit.com',Tropic:'tropicapp.io',Onyx:'onyx.app','People.ai':'people.ai',Tabs:'tabs.inc',Archer:'archerirm.com',Gainsight:'gainsight.com',Siteimprove:'siteimprove.com',Mailchimp:'mailchimp.com',Gem:'gem.com',WFS:'quickbooks.intuit.com',Apollo:'apollo.io'};
+    const TBX_ICON='<img src="https://www.google.com/s2/favicons?domain=testbox.com&sz=32" width="14" height="14" style="border-radius:2px;opacity:.18;vertical-align:middle">';
+
+    /* Compute duration for each */
+    sorted.forEach(r=>{
+      if(r.kickoff&&r.goLive){
+        r._months=monthsDiff(r.kickoff,r.goLive);
+      } else if(r.kickoff&&!r.goLive&&['in_progress','starting'].includes(r.status)){
+        /* Ongoing — calc from kickoff to now */
+        const now=new Date();
+        const kd=parseMonYY(r.kickoff);
+        if(kd)r._monthsOngoing=(now.getFullYear()-kd.getFullYear())*12+(now.getMonth()-kd.getMonth());
+      }
+    });
+
+    /* Stats */
+    const completed=sorted.filter(r=>r.goLive&&r._months!==null);
+    const avgMonths=completed.length>0?Math.round(completed.reduce((s,r)=>s+r._months,0)/completed.length*10)/10:0;
+    const fastest=completed.length>0?completed.reduce((a,b)=>a._months<b._months?a:b):null;
+    const liveCount=sorted.filter(r=>['live','maintenance'].includes(r.status)).length;
+    const inProgCount=sorted.filter(r=>['in_progress','starting'].includes(r.status)).length;
+    const intCount=sorted.filter(r=>r.status==='interrupted').length;
+
+    /* TSA Team stats — projects kicked off Sep/25 or later (current team era) */
+    /* TSA Team stats — projects kicked off Sep/25 or later (current team era) */
+    const TSA_CUTOFF=202508; /* Sep=8 in 0-indexed MON_MAP */
+    function kickoffNum(r){if(!r.kickoff)return null;const m=r.kickoff.match(/^([A-Za-z]{3})\/(\d{2})$/);if(!m)return null;const mo=MON_MAP[m[1]];return mo!==undefined?(2000+parseInt(m[2]))*100+mo:null;}
+    /* Include WFS (deal Mar/26 but no kickoff yet) */
+    const tsaProjects=sorted.filter(r=>{const kn=kickoffNum(r);return(kn&&kn>=TSA_CUTOFF)||(r.customer==='WFS');});
+    const tsaCompleted=tsaProjects.filter(r=>r.goLive&&r._months!==null);
+    const tsaAvg=tsaCompleted.length>0?Math.round(tsaCompleted.reduce((s,r)=>s+r._months,0)/tsaCompleted.length*10)/10:null;
+
+    let html='';
+
+    /* 3-column layout: table | cards | charts — all bordered sections */
+    const stalledCount=sorted.filter(r=>r.status==='stalled').length;
+    html+='<div style="display:grid;grid-template-columns:minmax(0,520px) 140px 1fr;gap:0;align-items:stretch;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">';
+
+    /* COL 1: Table */
+    function dateCell(val,src){
+      if(!val)return '<td style="color:#cbd5e1;text-align:center;padding:3px 4px">—</td>';
+      if(src)return '<td style="text-align:center;padding:3px 4px;cursor:help" title="'+esc(src)+'">'+esc(val)+'</td>';
+      return '<td style="text-align:center;padding:3px 4px">'+esc(val)+'</td>';
+    }
+    const th='style="text-align:center;padding:3px 4px;font-size:.64em;text-transform:uppercase;letter-spacing:.03em;color:#64748b;font-weight:600"';
+    html+='<div style="padding:8px 10px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.76em"><thead><tr style="border-bottom:2px solid #e2e8f0">';
+    html+='<th style="text-align:left;padding:3px 4px;font-size:.64em;text-transform:uppercase;letter-spacing:.03em;color:#64748b;font-weight:600">Customer</th>';
+    html+='<th '+th+'>Deal</th><th '+th+'>Kickoff</th><th '+th+'>Go-Live</th><th '+th+'>Time</th><th '+th+'>Status</th>';
+    html+='</tr></thead><tbody>';
+    sorted.forEach((r,i)=>{
+      let dur='<span style="color:#cbd5e1">—</span>';
+      if(r._months!==null&&r._months!==undefined)dur='<b>'+r._months+'mo</b>';
+      else if(r._monthsOngoing)dur='<span style="color:#d97706;font-weight:600">'+r._monthsOngoing+'mo+</span>';
+      const dimRow=['churned','interrupted','stalled'].includes(r.status)?'opacity:.45;':'';
+      const zebra=i%2===0?'background:#f8fafc;':'';
+      html+='<tr style="'+zebra+dimRow+'">';
+      const cDom=LOGO_DOMAINS[r.customer];
+      const cIcon=cDom?'<img src="https://www.google.com/s2/favicons?domain='+cDom+'&sz=32" width="14" height="14" style="border-radius:2px;vertical-align:middle;margin-right:4px" onerror="this.style.display=\'none\'">':'';
+      html+='<td style="padding:2px 4px;font-weight:600;white-space:nowrap">'+cIcon+esc(r.customer)+'</td>';
+      html+=dateCell(r.dealSigned,r.srcDeal);
+      html+=dateCell(r.kickoff,r.srcKickoff);
+      html+=dateCell(r.goLive,r.srcGoLive);
+      html+='<td style="text-align:center;padding:2px 4px">'+dur+'</td>';
+      html+='<td style="text-align:center;padding:2px 4px">'+badge(r.status)+'</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+
+    /* COL 2: Summary cards — bordered left */
+    html+='<div style="border-left:1px solid #e2e8f0;padding:6px 5px;display:flex;flex-direction:column;gap:4px;justify-content:space-between;background:#fafbfc">';
+    html+='<div style="text-align:center;padding:8px 4px;background:#ecfdf5;border-radius:6px"><div style="font-size:1.2em;font-weight:800;color:#059669">'+liveCount+'</div><div style="font-size:.6em;color:#065f46">Live / Maint.</div></div>';
+    html+='<div style="text-align:center;padding:8px 4px;background:#fef3c7;border-radius:6px"><div style="font-size:1.2em;font-weight:800;color:#d97706">'+inProgCount+'</div><div style="font-size:.6em;color:#92400e">In Progress</div></div>';
+    html+='<div style="text-align:center;padding:8px 4px;background:#ede9fe;border-radius:6px"><div style="font-size:1.2em;font-weight:800;color:#7c3aed">'+(avgMonths>0?avgMonths+'mo':'—')+'</div><div style="font-size:.6em;color:#5b21b6">Avg Onboarding</div></div>';
+    html+='<div style="text-align:center;padding:8px 4px;background:#eef2ff;border-radius:6px"><div style="font-size:1.2em;font-weight:800;color:#4338ca">'+(tsaAvg!==null?tsaAvg+'mo':'—')+'</div><div style="font-size:.6em;color:#3730a3">TSA Team Avg</div><div style="font-size:.5em;color:#6366f1">since Sep/25</div></div>';
+    html+='<div style="text-align:center;padding:8px 4px;background:#f0fdf4;border-radius:6px"><div style="font-size:1.2em;font-weight:800;color:#059669">'+(fastest?fastest._months+'mo':'—')+'</div><div style="font-size:.6em;color:#065f46">Fastest ('+(fastest?fastest.customer:'—')+')</div></div>';
+    html+='<div style="text-align:center;padding:8px 4px;background:#fff1f2;border-radius:6px"><div style="font-size:1.2em;font-weight:800;color:#9f1239">'+(intCount+stalledCount)+'</div><div style="font-size:.6em;color:#881337">Interrupted / Stalled</div></div>';
+    html+='</div>';
+
+    /* COL 3: Three sections stacked — bordered left */
+    html+='<div style="border-left:1px solid #e2e8f0;display:flex;flex-direction:column">';
+
+    /* Section 1: Portfolio status as compact table with color dots */
+    const statusCounts=[
+      {label:'Live',count:sorted.filter(r=>r.status==='live').length,color:'#059669',customers:sorted.filter(r=>r.status==='live').map(r=>r.customer)},
+      {label:'Maintenance',count:sorted.filter(r=>r.status==='maintenance').length,color:'#0284c7',customers:sorted.filter(r=>r.status==='maintenance').map(r=>r.customer)},
+      {label:'In Progress',count:sorted.filter(r=>['in_progress','starting'].includes(r.status)).length,color:'#d97706',customers:sorted.filter(r=>['in_progress','starting'].includes(r.status)).map(r=>r.customer)},
+      {label:'Interrupted',count:intCount,color:'#9f1239',customers:sorted.filter(r=>r.status==='interrupted').map(r=>r.customer)},
+      {label:'Stalled',count:stalledCount,color:'#dc2626',customers:sorted.filter(r=>r.status==='stalled').map(r=>r.customer)}
+    ].filter(s=>s.count>0);
+    /* Two mini-tables side by side */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
+
+    /* Left: Portfolio Breakdown */
+    html+='<div style="padding:10px 12px">';
+    html+='<div style="font-size:.65em;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">By Status</div>';
+    statusCounts.forEach(s=>{
+      html+='<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:.73em">';
+      html+='<span style="width:7px;height:7px;border-radius:50%;background:'+s.color+';flex-shrink:0"></span>';
+      html+='<span style="font-weight:600;width:70px">'+s.label+'</span>';
+      html+='<span style="font-weight:800;width:16px;text-align:center">'+s.count+'</span>';
+      html+='<span style="color:#94a3b8;font-size:.88em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.customers.join(', ')+'</span>';
+      html+='</div>';
+    });
+    html+='</div>';
+
+    /* Right: Go-Lives per Year */
+    const glByYear={};
+    sorted.filter(r=>r.goLive).forEach(r=>{
+      const y='20'+r.goLive.slice(4);
+      if(!glByYear[y])glByYear[y]={count:0,names:[]};
+      glByYear[y].count++;
+      glByYear[y].names.push(r.customer);
+    });
+    const years=Object.keys(glByYear).sort();
+    html+='<div style="padding:10px 12px;border-left:1px solid #f1f5f9">';
+    html+='<div style="font-size:.65em;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Go-Lives by Year</div>';
+    years.forEach(y=>{
+      const d=glByYear[y];
+      html+='<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:.73em">';
+      html+='<span style="font-weight:700;color:#334155;width:32px">'+y+'</span>';
+      html+='<span style="font-weight:800;color:#059669;width:16px;text-align:center">'+d.count+'</span>';
+      html+='<span style="color:#64748b;font-size:.88em">'+d.names.join(', ')+'</span>';
+      html+='</div>';
+    });
+    html+='</div>';
+
+    html+='</div>'; /* close 2-col mini grid */
+
+    /* Section 3: Bar chart — onboarding time */
+    html+='<div style="padding:10px 14px;border-top:1px solid #e2e8f0;flex:1">';
+    html+='<div style="font-size:.68em;font-weight:700;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Onboarding Time</div>';
+    if(completed.length>0){
+      const maxM=Math.max(...completed.map(r=>r._months));
+      completed.sort((a,b)=>a._months-b._months);
+      completed.forEach(r=>{
+        const pct=maxM>0?Math.round(r._months/maxM*100):0;
+        const barColor=r._months<=3?'#059669':r._months<=6?'#0284c7':r._months<=12?'#d97706':'#dc2626';
+        html+='<div style="display:flex;align-items:center;margin-bottom:4px;gap:5px">';
+        html+='<div style="width:72px;font-size:.72em;font-weight:600;text-align:right;color:#334155;white-space:nowrap">'+esc(r.customer)+'</div>';
+        html+='<div style="flex:1;background:#f1f5f9;border-radius:3px;height:17px;position:relative">';
+        html+='<div style="width:'+Math.max(pct,8)+'%;background:'+barColor+';height:100%;border-radius:3px"></div>';
+        html+='<span style="position:absolute;right:5px;top:0;font-size:.68em;font-weight:700;color:#334155;line-height:17px">'+r._months+'mo</span>';
+        html+='</div></div>';
+      });
+    }
+    html+='</div>';
+
+
+    html+='</div>'; /* close col 3 */
+    html+='</div>'; /* close 3-col grid */
+
+    /* Audit log — collapsible source table */
+    html+='<div style="margin-top:16px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">';
+    html+='<div style="padding:8px 14px;background:#f8fafc;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:.76em;font-weight:700;color:#475569" onclick="var b=this.nextElementSibling;var a=this.querySelector(\'.tgl\');if(b.style.display===\'none\'){b.style.display=\'\';a.textContent=\'\\u25BE\'}else{b.style.display=\'none\';a.textContent=\'\\u25B8\'}">';
+    html+='<span class="tgl" style="font-size:1.1em">&#9656;</span> Data Sources & Audit Log</div>';
+    html+='<div style="display:none">';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:.72em">';
+    html+='<thead><tr style="border-bottom:2px solid #e2e8f0;background:#f8fafc">';
+    html+='<th style="text-align:left;padding:5px 8px;color:#64748b;font-weight:600">Customer</th>';
+    html+='<th style="text-align:left;padding:5px 8px;color:#64748b;font-weight:600">Field</th>';
+    html+='<th style="text-align:left;padding:5px 8px;color:#64748b;font-weight:600">Value</th>';
+    html+='<th style="text-align:left;padding:5px 8px;color:#64748b;font-weight:600">Source & Evidence</th>';
+    html+='</tr></thead><tbody>';
+    sorted.forEach((r,i)=>{
+      const fields=[
+        {field:'Deal Signed',val:r.dealSigned,src:r.srcDeal},
+        {field:'Kickoff',val:r.kickoff,src:r.srcKickoff},
+        {field:'Go-Live',val:r.goLive,src:r.srcGoLive}
+      ];
+      const rowCount=fields.filter(f=>f.val||f.src).length;
+      let first=true;
+      fields.forEach(f=>{
+        if(!f.val&&!f.src)return;
+        const zebra=i%2===0?'background:#fafbfc;':'';
+        html+='<tr style="border-bottom:1px solid #f1f5f9;'+zebra+'">';
+        if(first){
+          html+='<td style="padding:4px 8px;font-weight:700;vertical-align:top" rowspan="'+rowCount+'">'+esc(r.customer)+'</td>';
+          first=false;
+        }
+        html+='<td style="padding:4px 8px;color:#64748b">'+f.field+'</td>';
+        html+='<td style="padding:4px 8px;font-weight:600">'+(f.val||'—')+'</td>';
+        html+='<td style="padding:4px 8px;color:#6b7280;max-width:500px">'+esc(f.src||'No source available')+'</td>';
+        html+='</tr>';
+      });
+    });
+    html+='</tbody></table>';
+    html+='</div></div>';
+
+    el.innerHTML=html;
+  }
+
   function switchTab(tabName){
     document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabName));
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -2489,14 +2745,17 @@ function init(){
     if(tabName==='gantt'&&gBody&&gHdr){gBody.style.display='';gHdr.classList.add('open');renderGantt()}
     /* Insights collapse uses display:none (same as Gantt — for sticky compatibility) */
     if(tabName==='insights'){renderInsights()}
-    /* Hide summary sections on Gantt/Scrum/Insights — show only on KPI tabs */
-    const isFullscreen=tabName==='gantt'||tabName==='scrum'||tabName==='insights';
+    if(tabName==='implementation'){renderImplementation()}
+    /* Hide summary sections on Gantt/Scrum/Insights/Implementation — show only on KPI tabs */
+    const isFullscreen=tabName==='gantt'||tabName==='scrum'||tabName==='insights'||tabName==='implementation';
     const custSection=document.getElementById('customerKPISection');
     const topStrip=document.getElementById('topStrip');
     const memberCards=document.getElementById('memberCards');
+    const auditSec=document.getElementById('auditSection');
     if(custSection)custSection.style.display=isFullscreen?'none':'';
     if(topStrip)topStrip.style.display=isFullscreen?'none':'';
     if(memberCards)memberCards.style.display=isFullscreen?'none':'';
+    if(auditSec)auditSec.style.display=isFullscreen?'none':'';
     /* Render the newly active tab */
     render();
   }
@@ -2533,7 +2792,7 @@ init();
 </html>"""
 
 # Inject data and date
-html = HTML.replace('__DATA__', data_json_safe).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('${BUILD_DATE}', build_date)
+html = HTML.replace('__DATA__', data_json_safe).replace('__TIMELINE__', timeline_json_safe).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('${BUILD_DATE}', build_date)
 
 # C3: Atomic write
 tmp_path = OUTPUT + '.tmp'

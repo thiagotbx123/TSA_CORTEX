@@ -11,9 +11,9 @@ import os, json, requests
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from kpi_auth import get_access_token
 
-DASHBOARD_FILE = os.path.join(os.path.expanduser('~'), 'Downloads', 'TSA_WAKI_KPI_DASHBOARD.html')
-FILE_NAME = 'TSA_WAKI_KPI_DASHBOARD.html'
-RACCOONS_FOLDER = '1-gV_79q7nawK6XAQN2cRFwnW-pSncx7Q'  # 09. Raccoons Daily Routine
+DASHBOARD_FILE = os.path.join(os.path.expanduser('~'), 'Downloads', 'RACCOONS_KPI_DASHBOARD.html')
+FILE_NAME = 'RACCOONS_KPI_DASHBOARD.html'
+RACCOONS_FOLDER = '1TY3aoQHbZf8f21V_BoPEyw4aPF6mgZaV'  # TSA KPI Dashboard (shared with team)
 
 token = get_access_token()
 headers = {'Authorization': f'Bearer {token}'}

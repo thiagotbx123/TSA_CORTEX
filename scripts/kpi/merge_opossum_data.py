@@ -60,8 +60,10 @@ def extract_history_fields(issue):
       reviewerDelay: days between In Review → Done (if applicable)
       etaChanges: number of times dueDate was changed
       inReviewDate: date when status moved to In Review (if applicable)
+      statusChangedAt: date of the LAST transition to the current status
     """
     history = issue.get('history', [])
+    current_status = issue.get('status', '')
     result = {
         'deliveryDate': None,
         'originalEta': None,
@@ -69,6 +71,7 @@ def extract_history_fields(issue):
         'reviewerDelay': None,
         'etaChanges': 0,
         'inReviewDate': None,
+        'statusChangedAt': None,
         'reworkDetected': False,
         'reassignedInReview': False,
         'reviewAssignee': None,
@@ -96,6 +99,15 @@ def extract_history_fields(issue):
         if not to_state and state_id:
             _all_unknown_state_ids.add(state_id)
         ts = h.get('createdAt', '')[:10]
+
+        # Track last transition to current status (for age-in-status on all statuses)
+        # Match by name when known, or track last state change for unknown teams
+        if state_id and ts:
+            if to_state == current_status:
+                result['statusChangedAt'] = ts
+            elif not to_state:
+                # Unknown team state — track the last state transition as best guess
+                result['_lastStateChangeAt'] = ts
 
         # Track first time moved to In Review or Done
         if to_state in DELIVERY_STATES and first_delivery_date is None and ts:
@@ -160,6 +172,11 @@ def extract_history_fields(issue):
     else:
         result['deliveryDate'] = first_delivery_date
     result['inReviewDate'] = in_review_date
+
+    # Fallback for unknown-team statuses: use last state change date
+    if result['statusChangedAt'] is None and result.get('_lastStateChangeAt'):
+        result['statusChangedAt'] = result['_lastStateChangeAt']
+    result.pop('_lastStateChangeAt', None)
 
     # If no originalEta found in history, use current dueDate
     if result['originalEta'] is None:
@@ -376,7 +393,6 @@ def _compute_last_touch(hist_fields, comments):
         'lastCommentById': last_comment_id,
         'lastCommentByName': last_comment_name,
         'lastCommentDate': last_comment_date,
-        'lastCommentDate': '',
     }
 
 
@@ -407,31 +423,22 @@ for iss in issues:
     hist_fields = extract_history_fields(iss)
 
     # D.LIE23: Ownership logic — who does this ticket belong to?
-    # Rule: The OWNER is determined at creation time:
-    #   1. If creator == first assignee → creator owns it forever (even if "lent" to others)
-    #   2. If creator != first assignee → first assignee owns it (creator made it for someone else)
-    #   3. If no history → fall back to current assignee
+    # Rule: Current assignee is the owner UNLESS the ticket was reassigned
+    # at/after In Review (D.LIE24 — "lent" to a reviewer, implementor still owns it).
+    #   1. If reassigned during/after In Review → original assignee (implementor) owns it
+    #   2. Otherwise → current assignee owns it (reassignment = real handoff)
     creator_id = iss.get('createdById', '')
     current_assignee = iss.get('assignee', '')
     current_id = iss.get('assigneeId', '')
     original_id = hist_fields.get('originalAssigneeId')
 
     owner_id = None
-    if original_id:
-        # We know who the first assignee was
-        if creator_id == original_id:
-            # Creator assigned to themselves → it's theirs forever
-            owner_id = creator_id
-        else:
-            # Creator assigned to someone else → that someone else owns it
-            owner_id = original_id
+    if hist_fields.get('reassignedInReview') and original_id:
+        # Reassigned at/after In Review — implementor (original) still owns it
+        owner_id = original_id
     else:
-        # No reassignment history — check if creator is current assignee
-        if creator_id == current_id:
-            owner_id = creator_id
-        else:
-            # Creator made it for current assignee
-            owner_id = current_id
+        # Normal case — current assignee is the real owner
+        owner_id = current_id
 
     if owner_id and owner_id in PERSON_MAP_BY_ID:
         tsa = PERSON_MAP_BY_ID[owner_id]
@@ -560,6 +567,7 @@ for iss in issues:
         'reviewerDelay': hist_fields['reviewerDelay'],
         'etaChanges': hist_fields['etaChanges'],
         'inReviewDate': hist_fields['inReviewDate'] or '',
+        'statusChangedAt': hist_fields['statusChangedAt'] or '',
         'reassignedInReview': hist_fields.get('reassignedInReview', False),
         'reviewAssignee': hist_fields.get('reviewAssignee', ''),
         'weekByStart': week_by_start or '',

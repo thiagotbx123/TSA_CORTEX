@@ -33,6 +33,7 @@ REQUIRED = {
     'milestone': '', 'parentId': '', 'rework': '', 'startedAt': '',
     'deliveryDate': '', 'originalEta': '', 'finalEta': '',
     'reviewerDelay': None, 'etaChanges': 0, 'inReviewDate': '',
+    'weekByStart': '', 'weekRangeByStart': '',
 }
 
 # M6: Unified customer mapping — Staircase is the correct name (Gabi's reference)
@@ -99,6 +100,9 @@ def calc_perf(status, eta, delivery):
     # D.LIE10: B.B.C. (Blocked By Customer) should not be penalized
     if status == 'B.B.C':
         return 'Blocked'
+    # A32: Paused / On Hold tasks are not active — treat as On Hold (not Late)
+    if status in ('Paused', 'On Hold'):
+        return 'On Hold'
     if not eta:
         # D.LIE17: Not-started tickets without ETA = N/A (not actionable yet)
         # Only flag "No ETA" for active/completed work
@@ -146,6 +150,9 @@ def calc_perf_with_history(record):
         return 'N/A'
     if status == 'B.B.C':
         return 'Blocked'
+    # A32: Paused / On Hold tasks are not active — treat as On Hold (not Late)
+    if status in ('Paused', 'On Hold'):
+        return 'On Hold'
     if not final_eta:
         if status in ('Backlog', 'Todo', 'Triage'):
             return 'Not Started'

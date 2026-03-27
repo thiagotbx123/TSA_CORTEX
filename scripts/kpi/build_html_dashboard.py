@@ -1381,7 +1381,8 @@ function showGuide(){
               <span>Total tasks in period</span>
             </div>
           </div>
-          <div class="g-formula">ETA Accuracy = On Time / (On Time + Late)<br><span style="font-size:.85em;color:#6366f1;font-weight:400">Late = past ETA (delivered or not). Excludes: On Track, No ETA, Not Started, Blocked (B.B.C), N/A</span></div>
+          <div class="g-formula">ETA Accuracy = On Time / (On Time + Late)<br><span style="font-size:.85em;color:#6366f1;font-weight:400">Late = past ETA (delivered or not). Excludes: On Track, No ETA, Not Started, Blocked (B.B.C), N/A</span><br>
+<span style="font-size:.85em;color:#6366f1;font-weight:400">Measured against Original ETA (first deadline set). If the ETA was extended, accuracy is still measured against the original commitment — this reflects prediction quality, not delivery against revised dates.</span></div>
         </div>
       </div>
 

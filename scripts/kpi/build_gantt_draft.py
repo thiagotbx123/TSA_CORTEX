@@ -1,4 +1,9 @@
-"""Build TSA Gantt Chart — grouped by Customer with collapse.
+"""Build TSA Gantt Chart — STANDALONE DRAFT (deprecated).
+
+NOTE: The Gantt chart is now embedded in the main KPI Dashboard
+(build_html_dashboard.py, panel-gantt tab). This standalone version
+is kept for reference but may diverge from the embedded version.
+For production use, always use the embedded Gantt via the main dashboard.
 
 Layout:
 - Rows grouped by Customer (collapsible)

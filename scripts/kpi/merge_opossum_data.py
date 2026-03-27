@@ -446,6 +446,13 @@ for iss in issues:
     week = date_to_week(week_date)
     wrange = week_range(week_date)
 
+    # A24: weekByStart — week when work actually started (for activity heatmap).
+    # Uses startedAt (Linear's started date) or dateAdd (creation date) as fallback.
+    # This is separate from `week` (which is ETA-based) so charts can choose either.
+    start_week_date = started_at if started_at else created
+    week_by_start = date_to_week(start_week_date)
+    wrange_by_start = week_range(start_week_date)
+
     # D.LIE24+D.LIE25: In Review = implementor delivered.
     # When a ticket moves to In Review, the implementor's delivery date is the
     # In Review date — regardless of whether it was reassigned or not.
@@ -511,6 +518,8 @@ for iss in issues:
         'inReviewDate': hist_fields['inReviewDate'] or '',
         'reassignedInReview': hist_fields.get('reassignedInReview', False),
         'reviewAssignee': hist_fields.get('reviewAssignee', ''),
+        'weekByStart': week_by_start or '',
+        'weekRangeByStart': wrange_by_start,
     }
     new_records.append(record)
 

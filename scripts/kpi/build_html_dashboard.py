@@ -799,7 +799,7 @@ function tipAccuracy(person,week,calc,rows){
       const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d late</span>`:(!r.delivery?' <span class="tip-delay" style="color:#f87171">NOT DELIVERED</span>':'');
       /* ETA timeline: show original → final → delivery */
       let timeline='';
-      if(r.originalEta&&r.originalEta!==r.eta){
+      if(r.originalEta&&(r.originalEta||'').slice(0,10)!==(r.eta||'').slice(0,10)){
         timeline=`<span class="tip-dates">ETA: ${fmtDate(r.originalEta)} <span style="color:#fbbf24">→ ${fmtDate(r.eta)}</span> (changed ${r.etaChanges||1}x)${r.delivery?' → Delivered '+fmtDate(r.delivery):''}</span>`;
       } else {
         timeline=r.eta?`<span class="tip-dates">ETA: ${fmtDate(r.eta)}${r.delivery?' → Delivered '+fmtDate(r.delivery):''}</span>`:'';
@@ -816,7 +816,7 @@ function tipAccuracy(person,week,calc,rows){
       const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> `:'';
       const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
       let timeline='';
-      if(r.originalEta&&r.originalEta!==r.eta){
+      if(r.originalEta&&(r.originalEta||'').slice(0,10)!==(r.eta||'').slice(0,10)){
         timeline=`<br><span class="tip-dates">ETA: ${fmtDate(r.originalEta)} <span style="color:#fbbf24">→ ${fmtDate(r.eta)}</span> (changed ${r.etaChanges||1}x)</span>`;
       }
       html+=`<div class="tip-task tip-ontime">${tid}${cust}${esc(r.focus.slice(0,45))}${timeline}</div>`;
@@ -1685,7 +1685,7 @@ function gtTipHtml(r){
   h+='<span style="color:#94a3b8">Status:</span> <span class="tip-pct '+cls+'">'+esc(r.status||'')+'</span> · '+esc(r.perf||'')+'<br>';
   h+='<span style="color:#94a3b8">Start:</span> '+esc(s||'\u2014')+' · <span style="color:#94a3b8">ETA:</span> '+esc(r.eta||'\u2014')+' · <span style="color:#94a3b8">Done:</span> '+esc(r.delivery||'\u2014')+'<br>';
   if(dur!==null)h+='<span style="color:#94a3b8">Duration:</span> '+dur+'d<br>';
-  if(r.originalEta&&r.originalEta!==r.eta)h+='<span style="color:#818cf8;font-size:.85em">Original ETA: '+esc(r.originalEta)+' &rarr; Final: '+esc(r.eta||'\u2014')+'</span><br>';
+  if(r.originalEta&&(r.originalEta||'').slice(0,10)!==(r.eta||'').slice(0,10))h+='<span style="color:#818cf8;font-size:.85em">Original ETA: '+esc(r.originalEta)+' &rarr; Final: '+esc(r.eta||'\u2014')+'</span><br>';
   if((r.etaChanges||0)>0)h+='<span style="color:#fbbf24;font-size:.85em">ETA changed '+r.etaChanges+'x</span><br>';
   if(r.ticketId)h+='<span style="color:#94a3b8">Ticket:</span> '+esc(r.ticketId||'');
   return h;
@@ -1947,13 +1947,14 @@ function renderScrumCards(){
     return t.status==='Todo'&&t.dateAdd&&ageDays(t.dateAdd)>14;
   }
 
-  /* #1: ETA drift helper — now returns second-line HTML */
+  /* #1: ETA drift helper — compare dates by first 10 chars (YYYY-MM-DD) to avoid timestamp mismatch */
+  function sameDate(a,b){return(a||'').slice(0,10)===(b||'').slice(0,10)}
   function etaDriftHtml(t){
-    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||t.originalEta===t.eta)return'';
+    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||sameDate(t.originalEta,t.eta))return'';
     return`<div class="sc-eta-drift">ETA: <span style="text-decoration:line-through">${fmtD(t.originalEta)}</span> <span style="color:#fbbf24">\u2192 ${fmtD(t.eta)} (moved ${t.etaChanges}x)</span></div>`;
   }
   function etaDriftSlack(t){
-    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||t.originalEta===t.eta)return'';
+    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||sameDate(t.originalEta,t.eta))return'';
     return`\n    ETA: ${fmtD(t.originalEta)} \u2192 ${fmtD(t.eta)} (moved ${t.etaChanges}x)`;
   }
 

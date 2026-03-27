@@ -92,7 +92,7 @@
     "dealSigned": "Dec/23",
     "kickoff": "Jan/24",
     "goLive": "Apr/25",
-    "status": "maintenance",
+    "status": "live",
     "srcDeal": "Slack #testbox-team: Danny closed deal Dec 31 2023",
     "srcKickoff": "Slack #customer-success: Mason — kickoff call Jan 11 2024",
     "srcGoLive": "Slack #external-testbox-apollo: Waki — reimplementation launched Apr 23 2025. 90% weekly usage by Jun",

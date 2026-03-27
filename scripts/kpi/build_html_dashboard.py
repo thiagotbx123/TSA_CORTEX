@@ -2166,15 +2166,15 @@ function renderScrumCards(){
       <div class="sc-header">
         <span class="sc-name">${c.person}</span>
         <div class="sc-stats">
-          <span style="background:#065f46;color:#a7f3d0">${c.green} on track</span>
-          ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} at risk</span>`:''}
-          ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} blocked</span>`:''}
-          ${c.overdue?`<span style="background:#374151;color:#d1d5db">${c.overdue} overdue</span>`:''}
           ${c.done?`<span style="background:#059669;color:#fff">${c.done} done</span>`:''}
+          <span style="background:#065f46;color:#a7f3d0">${c.green} on track</span>
           <span style="background:${c.active>=6?'#7f1d1d':c.active>=4?'#78350f':'#1e293b'};color:${c.active>=6?'#fecaca':c.active>=4?'#fde68a':'#94a3b8'}">${c.active} active</span>
           ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe">${c.tbd} no eta</span>`:''}
-          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a">${c.reworkCount} rework</span>`:''}
           ${c.pausedCount?`<span style="background:#374151;color:#9ca3af">${c.pausedCount} paused</span>`:''}
+          ${c.overdue?`<span style="background:#374151;color:#d1d5db">${c.overdue} overdue</span>`:''}
+          ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} at risk</span>`:''}
+          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a">${c.reworkCount} rework</span>`:''}
+          ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} blocked</span>`:''}
           ${c.needsResponseCount?`<span style="background:#c2410c;color:#fff">${c.needsResponseCount} needs response</span>`:''}
         </div>
       </div>

@@ -790,25 +790,32 @@ function tipAccuracy(person,week,calc,rows){
     html+=`<div class="tip-section"><span class="tip-label">Late</span>`;
     lateOnes.slice(0,5).forEach(r=>{
       const delay=r.eta&&r.delivery?daysBetween(r.eta,r.delivery):null;
-      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
-      const etaLabel=r.originalEta&&r.originalEta!==r.eta?`Original ETA ${fmtDate(r.originalEta)} → Final ${fmtDate(r.eta)}`:`ETA ${fmtDate(r.eta)}`;
-      const dates=r.eta?`<span class="tip-dates">${etaLabel}${r.delivery?' → '+fmtDate(r.delivery):''}</span>`:'';
-      const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d</span>`:(!r.delivery?' <span class="tip-delay" style="color:#f87171">NOT DELIVERED</span>':'');
+      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> `:'';
       const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
-      const etaTag=(r.etaChanges||0)>0?` <span style="color:#fbbf24;font-size:.78em">ETA changed ${r.etaChanges}x</span>`:'';
-      html+=`<div class="tip-task tip-late">${tid}${cust}${esc(r.focus.slice(0,50))}${delayTag}${etaTag}<br>${dates}</div>`;
+      const delayTag=delay!==null&&delay>0?` <span class="tip-delay">+${delay}d late</span>`:(!r.delivery?' <span class="tip-delay" style="color:#f87171">NOT DELIVERED</span>':'');
+      /* ETA timeline: show original → final → delivery */
+      let timeline='';
+      if(r.originalEta&&r.originalEta!==r.eta){
+        timeline=`<span class="tip-dates">ETA: ${fmtDate(r.originalEta)} <span style="color:#fbbf24">→ ${fmtDate(r.eta)}</span> (changed ${r.etaChanges||1}x)${r.delivery?' → Delivered '+fmtDate(r.delivery):''}</span>`;
+      } else {
+        timeline=r.eta?`<span class="tip-dates">ETA: ${fmtDate(r.eta)}${r.delivery?' → Delivered '+fmtDate(r.delivery):''}</span>`:'';
+      }
+      html+=`<div class="tip-task tip-late">${tid}${cust}${esc(r.focus.slice(0,45))}${delayTag}<br>${timeline}</div>`;
     });
     if(lateOnes.length>5)html+=`<div style="color:#64748b;font-size:.85em;padding-left:10px">+ ${lateOnes.length-5} more</div>`;
     html+=`</div>`;
   }
   const onTimeOnes=rows.filter(r=>r.perf==='On Time');
-  if(onTimeOnes.length>0&&onTimeOnes.length<=3){
+  if(onTimeOnes.length>0&&onTimeOnes.length<=5){
     html+=`<div class="tip-section"><span class="tip-label">On time</span>`;
     onTimeOnes.forEach(r=>{
-      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> &middot; `:'';
+      const cust=r.customer?`<span class="tip-cust">${esc(r.customer)}</span> `:'';
       const tid=r.ticketId?`<span style="color:#818cf8;font-size:.85em;font-weight:600">${esc(r.ticketId)}</span> `:'';
-      const etaTag=(r.etaChanges||0)>0?` <span style="color:#fbbf24;font-size:.78em">ETA changed ${r.etaChanges}x</span>`:'';
-      html+=`<div class="tip-task tip-ontime">${tid}${cust}${esc(r.focus.slice(0,50))}${etaTag}</div>`;
+      let timeline='';
+      if(r.originalEta&&r.originalEta!==r.eta){
+        timeline=`<br><span class="tip-dates">ETA: ${fmtDate(r.originalEta)} <span style="color:#fbbf24">→ ${fmtDate(r.eta)}</span> (changed ${r.etaChanges||1}x)</span>`;
+      }
+      html+=`<div class="tip-task tip-ontime">${tid}${cust}${esc(r.focus.slice(0,45))}${timeline}</div>`;
     });
     html+=`</div>`;
   }

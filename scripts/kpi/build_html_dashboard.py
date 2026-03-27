@@ -1907,8 +1907,9 @@ function renderScrumCards(){
 
   function taskSignal(t){
     if(t.perf==='Blocked'||t.status==='B.B.C')return'blocked';
+    if(t.status==='Paused'||t.status==='On Hold')return'paused';
     if(t.rework==='yes')return'rework';
-    /* Todo/Backlog with past ETA = overdue (gray, not yellow) — not actively at risk */
+    /* Todo/Backlog with past ETA = overdue (gray) — not actively at risk */
     if(['Todo','Backlog','Triage'].includes(t.status)){
       if(t.eta){try{if(new Date(t.eta)<today)return'overdue'}catch(e){}}
       return'ontrack';
@@ -1919,9 +1920,9 @@ function renderScrumCards(){
     }
     return'ontrack';
   }
-  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='rework'?':recycle:':sig==='atrisk'?':large_yellow_circle:':sig==='overdue'?':white_circle:':':large_green_circle:'}
-  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='rework'?'♻️':sig==='atrisk'?'🟡':sig==='overdue'?'⚪':'🟢'}
-  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='rework'?'sc-y':sig==='atrisk'?'sc-y':sig==='overdue'?'':'sc-g'}
+  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='rework'?':recycle:':sig==='atrisk'?':large_yellow_circle:':sig==='overdue'?':white_circle:':sig==='paused'?':pause_button:':':large_green_circle:'}
+  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='rework'?'♻️':sig==='atrisk'?'🟡':sig==='overdue'?'⚪':sig==='paused'?'⏸':'🟢'}
+  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='rework'?'sc-y':sig==='atrisk'?'sc-y':sig==='overdue'?'':sig==='paused'?'':'sc-g'}
 
   /* Needs-response detection: last actor is NOT on our team and ticket is active */
   function needsResponse(t){
@@ -1999,12 +2000,13 @@ function renderScrumCards(){
     });
 
     let green=0,yellow=0,red=0,overdue=0;
-    const tbd=myActive.filter(t=>!t.eta).length;
+    const tbd=myActive.filter(t=>!t.eta&&t.status!=='Paused').length;
     let needsResponseCount=0;
     myActive.forEach(t=>{
       const sig=taskSignal(t);
       if(sig==='ontrack')green++;
       else if(sig==='overdue')overdue++;
+      else if(sig==='paused'){/* counted separately via pausedCount */}
       else if(sig==='atrisk'||sig==='rework')yellow++;
       else if(sig==='blocked')red++;
       if(needsResponse(t))needsResponseCount++;
@@ -2180,7 +2182,6 @@ function renderScrumCards(){
           ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'noeta')">${c.tbd} no eta</span>`:''}
           ${c.overdue?`<span style="background:#374151;color:#d1d5db;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'overdue')">${c.overdue} overdue</span>`:''}
           ${c.pausedCount?`<span style="background:#374151;color:#9ca3af;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'paused')">${c.pausedCount} paused</span>`:''}
-          <span style="background:#78350f;color:#fde68a;cursor:pointer" onclick="event.stopPropagation();scFilterCard(this,'all')">${c.active} active</span>
         </div>
       </div>
       <div class="sc-body">${c.html}</div>

@@ -1908,15 +1908,20 @@ function renderScrumCards(){
   function taskSignal(t){
     if(t.perf==='Blocked'||t.status==='B.B.C')return'blocked';
     if(t.rework==='yes')return'rework';
+    /* Todo/Backlog with past ETA = overdue (gray, not yellow) — not actively at risk */
+    if(['Todo','Backlog','Triage'].includes(t.status)){
+      if(t.eta){try{if(new Date(t.eta)<today)return'overdue'}catch(e){}}
+      return'ontrack';
+    }
     if(t.perf==='Late')return'atrisk';
     if(t.eta&&t.status!=='Done'){
       try{const eta=new Date(t.eta);if(eta<today)return'atrisk'}catch(e){}
     }
     return'ontrack';
   }
-  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='rework'?':recycle:':sig==='atrisk'?':large_yellow_circle:':':large_green_circle:'}
-  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='rework'?'♻️':sig==='atrisk'?'🟡':'🟢'}
-  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='rework'?'sc-y':sig==='atrisk'?'sc-y':'sc-g'}
+  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='rework'?':recycle:':sig==='atrisk'?':large_yellow_circle:':sig==='overdue'?':white_circle:':':large_green_circle:'}
+  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='rework'?'♻️':sig==='atrisk'?'🟡':sig==='overdue'?'⚪':'🟢'}
+  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='rework'?'sc-y':sig==='atrisk'?'sc-y':sig==='overdue'?'':'sc-g'}
 
   /* Needs-response detection: last actor is NOT on our team and ticket is active */
   function needsResponse(t){
@@ -1993,12 +1998,15 @@ function renderScrumCards(){
       doneByCust[c].push(t);
     });
 
-    let green=0,yellow=0,red=0;
+    let green=0,yellow=0,red=0,overdue=0;
     const tbd=myActive.filter(t=>!t.eta).length;
     let needsResponseCount=0;
     myActive.forEach(t=>{
       const sig=taskSignal(t);
-      if(sig==='ontrack')green++;else if(sig==='atrisk')yellow++;else red++;
+      if(sig==='ontrack')green++;
+      else if(sig==='overdue')overdue++;
+      else if(sig==='atrisk'||sig==='rework')yellow++;
+      else if(sig==='blocked')red++;
       if(needsResponse(t))needsResponseCount++;
     });
 
@@ -2150,7 +2158,7 @@ function renderScrumCards(){
 
     const reworkCount=myActive.filter(t=>t.rework==='yes').length;
     const pausedCount=myActive.filter(t=>t.status==='Paused').length;
-    return{person,active:myActive.length,done:myDone.length,green,yellow,red,tbd,reworkCount,pausedCount,needsResponseCount,text,html};
+    return{person,active:myActive.length,done:myDone.length,green,yellow,red,overdue,tbd,reworkCount,pausedCount,needsResponseCount,text,html};
   });
 
   el.innerHTML=cards.map(c=>`
@@ -2161,6 +2169,7 @@ function renderScrumCards(){
           <span style="background:#065f46;color:#a7f3d0">${c.green} \ud83d\udfe2</span>
           ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} \ud83d\udfe1</span>`:''}
           ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} \ud83d\udd34</span>`:''}
+          ${c.overdue?`<span style="background:#374151;color:#d1d5db">${c.overdue} \u26aa overdue</span>`:''}
           ${c.done?`<span style="background:#059669;color:#fff">\u2705 ${c.done}</span>`:''}
           <span style="background:${c.active>=6?'#7f1d1d':c.active>=4?'#78350f':'#1e293b'};color:${c.active>=6?'#fecaca':c.active>=4?'#fde68a':'#94a3b8'}">${c.active} active</span>
           ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe">${c.tbd} TBD</span>`:''}

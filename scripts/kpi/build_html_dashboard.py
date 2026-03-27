@@ -2628,10 +2628,10 @@ function init(){
       {label:'Interrupted',count:intCount,color:'#9f1239',customers:sorted.filter(r=>r.status==='interrupted').map(r=>r.customer)},
       {label:'Stalled',count:stalledCount,color:'#dc2626',customers:sorted.filter(r=>r.status==='stalled').map(r=>r.customer)}
     ].filter(s=>s.count>0);
-    /* Two mini-tables side by side */
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
+    /* Three mini-tables side by side */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">';
 
-    /* Left: Portfolio Breakdown */
+    /* Col 1: Portfolio Breakdown */
     html+='<div style="padding:10px 12px">';
     html+='<div style="font-size:.65em;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">By Status</div>';
     statusCounts.forEach(s=>{
@@ -2639,12 +2639,12 @@ function init(){
       html+='<span style="width:7px;height:7px;border-radius:50%;background:'+s.color+';flex-shrink:0"></span>';
       html+='<span style="font-weight:600;width:70px">'+s.label+'</span>';
       html+='<span style="font-weight:800;width:16px;text-align:center">'+s.count+'</span>';
-      html+='<span style="color:#94a3b8;font-size:.88em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.customers.join(', ')+'</span>';
+      html+='<span style="color:#94a3b8;font-size:.85em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.customers.join(', ')+'</span>';
       html+='</div>';
     });
     html+='</div>';
 
-    /* Right: Go-Lives per Year */
+    /* Col 2: Go-Lives per Year */
     const glByYear={};
     sorted.filter(r=>r.goLive).forEach(r=>{
       const y='20'+r.goLive.slice(4);
@@ -2660,12 +2660,37 @@ function init(){
       html+='<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:.73em">';
       html+='<span style="font-weight:700;color:#334155;width:32px">'+y+'</span>';
       html+='<span style="font-weight:800;color:#059669;width:16px;text-align:center">'+d.count+'</span>';
-      html+='<span style="color:#64748b;font-size:.88em">'+d.names.join(', ')+'</span>';
+      html+='<span style="color:#64748b;font-size:.85em">'+d.names.join(', ')+'</span>';
       html+='</div>';
     });
     html+='</div>';
 
-    html+='</div>'; /* close 2-col mini grid */
+    /* Col 3: Speed Tiers — how fast were implementations? */
+    const tiers=[
+      {label:'Fast',range:'1-3mo',color:'#059669',items:completed.filter(r=>r._months<=3)},
+      {label:'Standard',range:'4-6mo',color:'#0284c7',items:completed.filter(r=>r._months>=4&&r._months<=6)},
+      {label:'Complex',range:'7-12mo',color:'#d97706',items:completed.filter(r=>r._months>=7&&r._months<=12)},
+      {label:'Extended',range:'13mo+',color:'#dc2626',items:completed.filter(r=>r._months>=13)}
+    ].filter(t=>t.items.length>0);
+    html+='<div style="padding:10px 12px;border-left:1px solid #f1f5f9">';
+    html+='<div style="font-size:.65em;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Speed Tiers</div>';
+    tiers.forEach(t=>{
+      html+='<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:.73em">';
+      html+='<span style="font-weight:600;color:'+t.color+';width:55px">'+t.label+'</span>';
+      html+='<span style="color:#94a3b8;width:38px;font-size:.85em">'+t.range+'</span>';
+      html+='<span style="font-weight:800;width:16px;text-align:center">'+t.items.length+'</span>';
+      html+='<span style="color:#64748b;font-size:.85em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.items.map(r=>r.customer).join(', ')+'</span>';
+      html+='</div>';
+    });
+    /* Median line */
+    if(completed.length>0){
+      const sortedDur=[...completed].sort((a,b)=>a._months-b._months);
+      const median=sortedDur[Math.floor(sortedDur.length/2)]._months;
+      html+='<div style="margin-top:6px;padding-top:5px;border-top:1px solid #f1f5f9;font-size:.68em;color:#64748b">Median: <b style="color:#334155">'+median+'mo</b> · Fastest: <b style="color:#059669">'+sortedDur[0]._months+'mo</b> · Slowest: <b style="color:#dc2626">'+sortedDur[sortedDur.length-1]._months+'mo</b></div>';
+    }
+    html+='</div>';
+
+    html+='</div>'; /* close 3-col mini grid */
 
     /* Section 3: Bar chart — onboarding time */
     html+='<div style="padding:10px 14px;border-top:1px solid #e2e8f0;flex:1">';

@@ -1949,13 +1949,15 @@ function renderScrumCards(){
 
   /* #1: ETA drift helper — compare dates by first 10 chars (YYYY-MM-DD) to avoid timestamp mismatch */
   function sameDate(a,b){return(a||'').slice(0,10)===(b||'').slice(0,10)}
+  /* Only show drift when ETA was PUSHED BACK (delayed). Brought forward = merit, no flag */
+  function etaWasDelayed(t){return t.etaChanges&&t.etaChanges>0&&t.originalEta&&!sameDate(t.originalEta,t.eta)&&(t.eta||'').slice(0,10)>(t.originalEta||'').slice(0,10)}
   function etaDriftHtml(t){
-    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||sameDate(t.originalEta,t.eta))return'';
-    return`<div class="sc-eta-drift">ETA: <span style="text-decoration:line-through">${fmtD(t.originalEta)}</span> <span style="color:#fbbf24">\u2192 ${fmtD(t.eta)} (moved ${t.etaChanges}x)</span></div>`;
+    if(!etaWasDelayed(t))return'';
+    return`<div class="sc-eta-drift">ETA: <span style="text-decoration:line-through">${fmtD(t.originalEta)}</span> <span style="color:#fbbf24">\u2192 ${fmtD(t.eta)} (delayed ${t.etaChanges}x)</span></div>`;
   }
   function etaDriftSlack(t){
-    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||sameDate(t.originalEta,t.eta))return'';
-    return`\n    ETA: ${fmtD(t.originalEta)} \u2192 ${fmtD(t.eta)} (moved ${t.etaChanges}x)`;
+    if(!etaWasDelayed(t))return'';
+    return`\n    ETA: ${fmtD(t.originalEta)} \u2192 ${fmtD(t.eta)} (delayed ${t.etaChanges}x)`;
   }
 
   function cleanName(focus,cust){

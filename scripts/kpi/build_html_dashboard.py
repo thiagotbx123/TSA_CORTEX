@@ -1892,18 +1892,42 @@ function renderScrumCards(){
 
   function taskSignal(t){
     if(t.perf==='Blocked'||t.status==='B.B.C')return'blocked';
+    if(t.rework==='yes')return'rework';
     if(t.perf==='Late')return'atrisk';
-    /* If task has an ETA in the past and status is still active (not Done), flag as at risk
-       This catches reassigned-in-review tickets where the original delivery was on time
-       but the review is still pending past ETA */
     if(t.eta&&t.status!=='Done'){
       try{const eta=new Date(t.eta);if(eta<today)return'atrisk'}catch(e){}
     }
     return'ontrack';
   }
-  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='atrisk'?':large_yellow_circle:':':large_green_circle:'}
-  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='atrisk'?'🟡':'🟢'}
-  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='atrisk'?'sc-y':'sc-g'}
+  function slackEmoji(sig){return sig==='blocked'?':red_circle:':sig==='rework'?':recycle:':sig==='atrisk'?':large_yellow_circle:':':large_green_circle:'}
+  function htmlDot(sig){return sig==='blocked'?'🔴':sig==='rework'?'♻️':sig==='atrisk'?'🟡':'🟢'}
+  function htmlCls(sig){return sig==='blocked'?'sc-r':sig==='rework'?'sc-y':sig==='atrisk'?'sc-y':'sc-g'}
+
+  /* #2: Age-in-status helper */
+  function ageDays(dateStr){if(!dateStr)return 0;try{return Math.floor((today-new Date(dateStr))/864e5)}catch(e){return 0}}
+  function ageLabel(t){
+    if(t.status==='In Review'&&t.inReviewDate){const d=ageDays(t.inReviewDate);return d>0?` · ${d}d in review`:'';}
+    if(t.status==='In Progress'&&t.startedAt){const d=ageDays(t.startedAt);return d>0?` · ${d}d`:'';}
+    if(t.status==='Todo'&&t.dateAdd){const d=ageDays(t.dateAdd);return d>14?` · stale ${d}d`:'';}
+    return'';
+  }
+  function ageColor(t){
+    let d=0;
+    if(t.status==='In Review'&&t.inReviewDate)d=ageDays(t.inReviewDate);
+    else if(t.status==='In Progress'&&t.startedAt)d=ageDays(t.startedAt);
+    else if(t.status==='Todo'&&t.dateAdd)d=ageDays(t.dateAdd);
+    if(d>14)return'#ef4444';if(d>7)return'#d97706';return'';
+  }
+
+  /* #1: ETA drift helper */
+  function etaDriftHtml(t){
+    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||t.originalEta===t.eta)return'';
+    return` <span style="color:#94a3b8;font-size:.78em;text-decoration:line-through">${fmtD(t.originalEta)}</span><span style="color:#fbbf24;font-size:.78em">→${fmtD(t.eta)} (${t.etaChanges}x)</span>`;
+  }
+  function etaDriftSlack(t){
+    if(!t.etaChanges||t.etaChanges===0||!t.originalEta||t.originalEta===t.eta)return'';
+    return` (was ${fmtD(t.originalEta)}, moved ${t.etaChanges}x)`;
+  }
 
   function cleanName(focus,cust){
     let s=focus;
@@ -1949,13 +1973,37 @@ function renderScrumCards(){
       if(urgB!==urgA)return urgB-urgA;
       return byCust[b].length-byCust[a].length;
     });
+    /* #5: Split active vs paused for Slack */
+    const activeCusts={};const pausedList=[];
     custKeys.forEach(cust=>{
+      const tasks=byCust[cust]||[];
+      const act=tasks.filter(t=>t.status!=='Paused');
+      const pau=tasks.filter(t=>t.status==='Paused');
+      if(act.length)activeCusts[cust]=act;
+      pau.forEach(p=>pausedList.push({...p,_cust:cust}));
+    });
+    Object.keys(activeCusts).sort((a,b)=>{
+      const urgA=activeCusts[a].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'||s==='rework'}).length;
+      const urgB=activeCusts[b].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'||s==='rework'}).length;
+      if(urgB!==urgA)return urgB-urgA;return activeCusts[b].length-activeCusts[a].length;
+    }).forEach(cust=>{
       text+=`\n${cust}\n`;
-      sortTasks(byCust[cust]).forEach(t=>{
+      sortTasks(activeCusts[cust]).forEach(t=>{
         const name=cleanName(t.focus,cust);
-        text+=`  :black_small_square: [${t.status}] ${name} ETA: ${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}\n`;
+        const age=ageLabel(t);
+        const rw=t.rework==='yes'?':recycle: [REWORK] ':'';
+        const drift=etaDriftSlack(t);
+        const tid=t.ticketId?t.ticketId+' ':'';
+        text+=`  :black_small_square: ${rw}[${t.status}${age}] ${tid}${name} ETA:${fmtD(t.eta)}${drift} ${slackEmoji(taskSignal(t))}\n`;
       });
     });
+    if(pausedList.length>0){
+      text+=`\n——— Paused ———\n`;
+      pausedList.forEach(t=>{
+        const name=cleanName(t.focus,t._cust);
+        text+=`  :pause_button: ${t.ticketId||''} ${name} (${t._cust}) ETA:${fmtD(t.eta)}\n`;
+      });
+    }
     /* Done today section */
     const allDoneCusts=Object.keys(doneByCust).sort();
     if(allDoneCusts.length>0){
@@ -1968,18 +2016,55 @@ function renderScrumCards(){
       });
     }
 
-    /* Build HTML preview */
+    /* Build HTML preview — #1-#5 improvements */
     let html='';
+    /* #5: Separate active from paused */
+    const htmlActiveCusts={};const htmlPaused=[];
     custKeys.forEach(cust=>{
-      html+=`<div class="sc-customer">${esc(cust)}</div>`;
-      sortTasks(byCust[cust]).forEach(t=>{
+      const tasks=byCust[cust]||[];
+      const act=tasks.filter(t=>t.status!=='Paused');
+      const pau=tasks.filter(t=>t.status==='Paused');
+      if(act.length)htmlActiveCusts[cust]=act;
+      pau.forEach(p=>htmlPaused.push({...p,_cust:cust}));
+    });
+    /* Active tasks by customer */
+    Object.keys(htmlActiveCusts).sort((a,b)=>{
+      const urgA=htmlActiveCusts[a].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'||s==='rework'}).length;
+      const urgB=htmlActiveCusts[b].filter(t=>{const s=taskSignal(t);return s==='atrisk'||s==='blocked'||s==='rework'}).length;
+      if(urgB!==urgA)return urgB-urgA;return htmlActiveCusts[b].length-htmlActiveCusts[a].length;
+    }).forEach(cust=>{
+      /* #6: Milestone callout */
+      const milestones=[...new Set(htmlActiveCusts[cust].map(t=>t.milestone).filter(Boolean))];
+      const msBadge=milestones.length?` <span style="color:#6366f1;font-size:.72em;font-weight:400">[${esc(milestones[0])}]</span>`:'';
+      html+=`<div class="sc-customer">${esc(cust)}${msBadge}</div>`;
+      sortTasks(htmlActiveCusts[cust]).forEach(t=>{
         const sig=taskSignal(t);
         const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
         const name=cleanName(t.focus,cust);
+        /* #2: Age-in-status */
+        const age=ageLabel(t);
+        const ac=ageColor(t);
         const statusColor=t.status==='In Progress'?'#3b82f6':t.status==='In Review'?'#8b5cf6':t.status==='Todo'?'#94a3b8':'#64748b';
-        html+=`<div class="sc-task"><span style="color:${statusColor};font-size:.8em;font-weight:600">[${esc(t.status)}]</span> ${tid}${esc(name)} <span style="color:var(--dim)">ETA:${fmtD(t.eta)}</span> <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
+        const statusStyle=ac?`color:${ac}`:`color:${statusColor}`;
+        /* #3: Rework flag */
+        const rwTag=t.rework==='yes'?`<span style="color:#f59e0b;font-size:.78em;font-weight:700">♻️ </span>`:'';
+        /* #1: ETA drift */
+        const drift=etaDriftHtml(t);
+        const etaDisplay=drift?drift:` <span style="color:var(--dim)">ETA:${fmtD(t.eta)}</span>`;
+        /* #4/#8: Review info */
+        const reviewNote=t.reassignedInReview?` <span style="color:#94a3b8;font-size:.72em">↩ review</span>`:'';
+        html+=`<div class="sc-task">${rwTag}<span style="${statusStyle};font-size:.8em;font-weight:600">[${esc(t.status)}${age}]</span> ${tid}${esc(name)}${etaDisplay}${reviewNote} <span class="${htmlCls(sig)}">${htmlDot(sig)}</span></div>`;
       });
     });
+    /* #5: Paused section */
+    if(htmlPaused.length>0){
+      html+=`<div style="border-top:1px dashed #94a3b8;margin:8px 0 4px;position:relative"><span style="position:absolute;top:-8px;left:12px;background:var(--white);padding:0 6px;font-size:.65em;font-weight:600;color:#94a3b8;text-transform:uppercase">Paused</span></div>`;
+      htmlPaused.forEach(t=>{
+        const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
+        const name=cleanName(t.focus,t._cust);
+        html+=`<div class="sc-task" style="opacity:.5">⏸ ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(t._cust)})</span></div>`;
+      });
+    }
     /* Done today with strikethrough line */
     if(allDoneCusts.length>0){
       html+=`<div style="border-top:2px dashed var(--green);margin:10px 0 6px;position:relative"><span style="position:absolute;top:-9px;left:12px;background:var(--white);padding:0 8px;font-size:.7em;font-weight:700;color:var(--green);text-transform:uppercase">Recently Completed</span></div>`;
@@ -1987,12 +2072,16 @@ function renderScrumCards(){
         doneByCust[cust].forEach(t=>{
           const tid=t.ticketId?`<a href="${esc(t.ticketUrl||'')}" target="_blank" style="color:#818cf8;text-decoration:none;font-size:.85em">${esc(t.ticketId)}</a> `:'';
           const name=cleanName(t.focus,cust);
-          html+=`<div class="sc-task" style="text-decoration:line-through;opacity:.6">✅ ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)})</span></div>`;
+          const delDate=t.deliveryDate||t.delivery;
+          const rvDelay=t.reviewerDelay&&t.reviewerDelay>2?` <span style="color:#d97706;font-size:.78em">review ${t.reviewerDelay}d</span>`:'';
+          html+=`<div class="sc-task" style="text-decoration:line-through;opacity:.6">✅ ${tid}${esc(name)} <span style="color:var(--dim)">(${esc(cust)}) ${fmtD(delDate)}</span>${rvDelay}</div>`;
         });
       });
     }
 
-    return{person,active:myActive.length,done:myDone.length,green,yellow,red,tbd,text,html};
+    const reworkCount=myActive.filter(t=>t.rework==='yes').length;
+    const pausedCount=myActive.filter(t=>t.status==='Paused').length;
+    return{person,active:myActive.length,done:myDone.length,green,yellow,red,tbd,reworkCount,pausedCount,text,html};
   });
 
   el.innerHTML=cards.map(c=>`
@@ -2004,8 +2093,10 @@ function renderScrumCards(){
           ${c.yellow?`<span style="background:#92400e;color:#fde68a">${c.yellow} 🟡</span>`:''}
           ${c.red?`<span style="background:#991b1b;color:#fecaca">${c.red} 🔴</span>`:''}
           ${c.done?`<span style="background:#059669;color:#fff">✅ ${c.done}</span>`:''}
-          <span style="background:#1e293b;color:#94a3b8">${c.active} active</span>
+          <span style="background:${c.active>=6?'#7f1d1d':c.active>=4?'#78350f':'#1e293b'};color:${c.active>=6?'#fecaca':c.active>=4?'#fde68a':'#94a3b8'}">${c.active} active</span>
           ${c.tbd?`<span style="background:#1e3a8a;color:#bfdbfe">${c.tbd} TBD</span>`:''}
+          ${c.reworkCount?`<span style="background:#92400e;color:#fde68a">♻️ ${c.reworkCount}</span>`:''}
+          ${c.pausedCount?`<span style="background:#374151;color:#9ca3af">⏸ ${c.pausedCount}</span>`:''}
         </div>
       </div>
       <div class="sc-body">${c.html}</div>

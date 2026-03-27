@@ -84,6 +84,12 @@ query($teamId: ID!, $cursor: String) {
       parent { identifier }
       team { name id key }
       estimate
+      comments(first: 5, orderBy: createdAt) {
+        nodes {
+          createdAt
+          user { name id }
+        }
+      }
       history(first: 200) {
         nodes {
           createdAt
@@ -137,6 +143,12 @@ query($assigneeId: ID!, $cursor: String) {
       parent { identifier }
       team { name id key }
       estimate
+      comments(first: 5, orderBy: createdAt) {
+        nodes {
+          createdAt
+          user { name id }
+        }
+      }
       history(first: 200) {
         nodes {
           createdAt
@@ -190,6 +202,12 @@ query($creatorId: ID!, $cursor: String) {
       parent { identifier }
       team { name id key }
       estimate
+      comments(first: 5, orderBy: createdAt) {
+        nodes {
+          createdAt
+          user { name id }
+        }
+      }
       history(first: 200) {
         nodes {
           createdAt
@@ -225,6 +243,16 @@ def parse_issue_node(node):
     labels_raw = node.get('labels', {}).get('nodes', [])
     desc_raw = (node.get('description') or '')
     desc = desc_raw[:2000] + ('...' if len(desc_raw) > 2000 else '')  # L1: truncation indicator
+
+    # Parse comments (last 5, for needs-response detection)
+    comments_raw = node.get('comments', {}).get('nodes', [])
+    comments = []
+    for c in comments_raw:
+        comments.append({
+            'createdAt': c.get('createdAt', ''),
+            'userId': c.get('user', {}).get('id', '') if c.get('user') else '',
+            'userName': c.get('user', {}).get('name', '') if c.get('user') else '',
+        })
 
     history_raw = node.get('history', {}).get('nodes', [])
     history = []
@@ -274,6 +302,7 @@ def parse_issue_node(node):
         'team': node.get('team', {}).get('name', '') if node.get('team') else '',
         'teamId': node.get('team', {}).get('id', '') if node.get('team') else '',
         'history': history,
+        'comments': comments,
     }
 
 

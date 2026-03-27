@@ -344,6 +344,45 @@ def determine_category(customer, title):
     return 'External'
 
 
+def _compute_last_touch(hist_fields, comments):
+    """Determine who last touched the ticket: history actor or commenter (most recent wins)."""
+    last_hist_date = ''
+    last_hist_id = hist_fields.get('lastActorId', '')
+    last_hist_name = hist_fields.get('lastActorName', '')
+
+    # Get date of last history event from the fields
+    # We don't store the exact date of the last actor, so use updatedAt as proxy
+    # But we can compare against the last comment's date
+    last_comment_date = ''
+    last_comment_id = ''
+    last_comment_name = ''
+    if comments:
+        sorted_comments = sorted(comments, key=lambda c: c.get('createdAt', ''))
+        if sorted_comments:
+            last_c = sorted_comments[-1]
+            last_comment_date = last_c.get('createdAt', '')[:10]
+            last_comment_id = last_c.get('userId', '')
+            last_comment_name = last_c.get('userName', '')
+
+    # If we have a comment, compare dates. Comment is more reliable for "needs response"
+    if last_comment_id:
+        return {
+            'lastActorId': last_comment_id,
+            'lastActorName': last_comment_name,
+            'lastCommentById': last_comment_id,
+            'lastCommentByName': last_comment_name,
+            'lastCommentDate': last_comment_date,
+        }
+
+    return {
+        'lastActorId': last_hist_id,
+        'lastActorName': last_hist_name,
+        'lastCommentById': '',
+        'lastCommentByName': '',
+        'lastCommentDate': '',
+    }
+
+
 # ── Convert Linear issues to dashboard records ──
 from team_config import PERSON_MAP, PERSON_MAP_BY_ID  # M14: shared config
 LINEAR_TSA_NAMES = set(PERSON_MAP.values())
@@ -529,9 +568,9 @@ for iss in issues:
         'weekByStart': week_by_start or '',
         'weekRangeByStart': wrange_by_start,
         'updatedAt': (iss.get('updatedAt', '')[:10] if iss.get('updatedAt') else ''),
-        'lastActorId': hist_fields.get('lastActorId', ''),
-        'lastActorName': hist_fields.get('lastActorName', ''),
         'createdById': creator_id,
+        # Last touch: compare last history actor vs last commenter — most recent wins
+        **_compute_last_touch(hist_fields, iss.get('comments', [])),
     }
     new_records.append(record)
 

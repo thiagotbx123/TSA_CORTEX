@@ -2596,7 +2596,8 @@ function init(){
       html+='<tr style="'+zebra+dimRow+'">';
       const cDom=LOGO_DOMAINS[r.customer];
       const cIcon=cDom?'<img src="https://www.google.com/s2/favicons?domain='+cDom+'&sz=32" width="14" height="14" style="border-radius:2px;vertical-align:middle;margin-right:4px" onerror="this.style.display=\'none\'">':'';
-      html+='<td style="padding:2px 4px;font-weight:600;white-space:nowrap">'+cIcon+esc(r.customer)+'</td>';
+      const msTip=r.milestones?'<span title="'+esc(r.milestones.replace(/\|/g,'\n'))+'" style="cursor:help;font-size:.7em;color:#94a3b8;margin-left:3px;vertical-align:middle">&#9670;</span>':'';
+      html+='<td style="padding:2px 4px;font-weight:600;white-space:nowrap">'+cIcon+esc(r.customer)+msTip+'</td>';
       html+=dateCell(r.dealSigned,r.srcDeal);
       html+=dateCell(r.kickoff,r.srcKickoff);
       html+=dateCell(r.goLive,r.srcGoLive);

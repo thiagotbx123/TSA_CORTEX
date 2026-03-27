@@ -663,7 +663,7 @@ function heatDays(val){
 /* M15: Format with sample size threshold */
 function fmtPct(v,n){
   if(v===null||v===undefined) return '—';
-  if(n!==undefined && n < 3) return n===0 ? '—' : '(' + n + ')';
+  if(n!==undefined && n===0) return '—';
   return (v*100).toFixed(0)+'%';
 }
 function fmtDays(v){return(v===null||v===undefined||isNaN(v))?'—':v.toFixed(0)+'d'}

@@ -309,9 +309,9 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 
 <div class="top-strip" id="topStrip">
   <div class="strip-group filters-group">
-    <button class="segment-btn active" data-seg="ALL">All<span class="seg-count" id="segAll"></span></button>
-    <button class="segment-btn" data-seg="Internal">Internal<span class="seg-count" id="segInt"></span></button>
-    <button class="segment-btn" data-seg="External">External<span class="seg-count" id="segExt"></span></button>
+    <button class="segment-btn" data-seg="ALL" style="display:none">All<span class="seg-count" id="segAll"></span></button>
+    <button class="segment-btn" data-seg="Internal" style="display:none">Internal<span class="seg-count" id="segInt"></span></button>
+    <button class="segment-btn active" data-seg="External">External<span class="seg-count" id="segExt"></span></button>
   </div>
   <div class="strip-group kpi-group">
     <div class="kpi-cell kpi-active" id="kpiCell1" data-tab="accuracy"></div>
@@ -588,7 +588,7 @@ const MONTHS=groupByMonth(CORE_WEEKS);
 })();
 
 /* ── State — M12: default to ALL ──────────────────── */
-let state={person:'ALL',category:'ALL',month:'ALL'};
+let state={person:'ALL',category:'External',month:'ALL'};
 const charts={};
 
 function getFiltered(){

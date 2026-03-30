@@ -1620,8 +1620,8 @@ function showGuide(){
 let _renderTimer=null;
 function debouncedRender(){clearTimeout(_renderTimer);_renderTimer=setTimeout(render,150)}
 function render(){
-  Object.keys(tipCache).forEach(k => delete tipCache[k]);
-  tipCounter = 0;
+  /* Keep tipCache across renders — only clear entries for the active tab's grid */
+  /* tipCounter continues incrementing to avoid ID collisions between tabs */
   const activeTab=document.querySelector('.tab.active');
   const activeTabName=activeTab?activeTab.dataset.tab:'accuracy';
   /* Always-run: shared across all tabs */
@@ -2538,7 +2538,7 @@ function init(){
     });
 
     /* Logo domains for favicons */
-    const LOGO_DOMAINS={Dixa:'dixa.com',Syncari:'syncari.com',Assignar:'assignar.com',CallRail:'callrail.com',Gong:'gong.io',Brevo:'brevo.com',QuickBooks:'quickbooks.intuit.com',Tropic:'tropicapp.io',Onyx:'onyx.app','People.ai':'people.ai',Tabs:'tabs.inc',Archer:'archerirm.com',Gainsight:'gainsight.com',Siteimprove:'siteimprove.com',Mailchimp:'mailchimp.com',Gem:'gem.com',WFS:'quickbooks.intuit.com',Apollo:'apollo.io'};
+    const LOGO_DOMAINS={Dixa:'dixa.com',Syncari:'syncari.com',Assignar:'assignar.com',CallRail:'callrail.com',Gong:'gong.io',Brevo:'brevo.com',QuickBooks:'quickbooks.intuit.com',Tropic:'tropicapp.io',Onyx:'onyx.app','People.ai':'people.ai',Tabs:'tabs.inc',Archer:'archerirm.com',Gainsight:'gainsight.com',Siteimprove:'siteimprove.com',Mailchimp:'mailchimp.com',Gem:'gem.com',WFS:'workforce.intuit.com',Apollo:'apollo.io'};
     const TBX_ICON='<img src="https://www.google.com/s2/favicons?domain=testbox.com&sz=32" width="14" height="14" style="border-radius:2px;opacity:.18;vertical-align:middle">';
 
     /* Compute duration for each */
@@ -2628,10 +2628,10 @@ function init(){
       {label:'Interrupted',count:intCount,color:'#9f1239',customers:sorted.filter(r=>r.status==='interrupted').map(r=>r.customer)},
       {label:'Stalled',count:stalledCount,color:'#dc2626',customers:sorted.filter(r=>r.status==='stalled').map(r=>r.customer)}
     ].filter(s=>s.count>0);
-    /* Three mini-tables side by side */
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">';
+    /* Two mini-tables side by side */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
 
-    /* Col 1: Portfolio Breakdown */
+    /* Left: Portfolio Breakdown */
     html+='<div style="padding:10px 12px">';
     html+='<div style="font-size:.65em;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">By Status</div>';
     statusCounts.forEach(s=>{
@@ -2644,7 +2644,7 @@ function init(){
     });
     html+='</div>';
 
-    /* Col 2: Go-Lives per Year */
+    /* Right: Go-Lives per Year */
     const glByYear={};
     sorted.filter(r=>r.goLive).forEach(r=>{
       const y='20'+r.goLive.slice(4);
@@ -2665,32 +2665,7 @@ function init(){
     });
     html+='</div>';
 
-    /* Col 3: Speed Tiers — how fast were implementations? */
-    const tiers=[
-      {label:'Fast',range:'1-3mo',color:'#059669',items:completed.filter(r=>r._months<=3)},
-      {label:'Standard',range:'4-6mo',color:'#0284c7',items:completed.filter(r=>r._months>=4&&r._months<=6)},
-      {label:'Complex',range:'7-12mo',color:'#d97706',items:completed.filter(r=>r._months>=7&&r._months<=12)},
-      {label:'Extended',range:'13mo+',color:'#dc2626',items:completed.filter(r=>r._months>=13)}
-    ].filter(t=>t.items.length>0);
-    html+='<div style="padding:10px 12px;border-left:1px solid #f1f5f9">';
-    html+='<div style="font-size:.65em;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Speed Tiers</div>';
-    tiers.forEach(t=>{
-      html+='<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:.73em">';
-      html+='<span style="font-weight:600;color:'+t.color+';width:55px">'+t.label+'</span>';
-      html+='<span style="color:#94a3b8;width:38px;font-size:.85em">'+t.range+'</span>';
-      html+='<span style="font-weight:800;width:16px;text-align:center">'+t.items.length+'</span>';
-      html+='<span style="color:#64748b;font-size:.85em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.items.map(r=>r.customer).join(', ')+'</span>';
-      html+='</div>';
-    });
-    /* Median line */
-    if(completed.length>0){
-      const sortedDur=[...completed].sort((a,b)=>a._months-b._months);
-      const median=sortedDur[Math.floor(sortedDur.length/2)]._months;
-      html+='<div style="margin-top:6px;padding-top:5px;border-top:1px solid #f1f5f9;font-size:.68em;color:#64748b">Median: <b style="color:#334155">'+median+'mo</b> · Fastest: <b style="color:#059669">'+sortedDur[0]._months+'mo</b> · Slowest: <b style="color:#dc2626">'+sortedDur[sortedDur.length-1]._months+'mo</b></div>';
-    }
-    html+='</div>';
-
-    html+='</div>'; /* close 3-col mini grid */
+    html+='</div>'; /* close 2-col mini grid */
 
     /* Section 3: Bar chart — onboarding time */
     html+='<div style="padding:10px 14px;border-top:1px solid #e2e8f0;flex:1">';

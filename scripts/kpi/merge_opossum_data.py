@@ -349,15 +349,28 @@ def calc_perf(status, eta, delivery):
             return 'N/A'
 
 
+INTERNAL_CUSTOMERS = {
+    '[Internal] TSA Operations', '[Internal] TSA Shared Repo', '[TSA] Diego Internal',
+    'Internal', 'DE Team', 'Worklog', 'TSA', 'General', 'Bug',
+    'Demo Scripts', 'Surface Editor', 'Sandbox UX', 'Sandbox Improvements',
+    'Sandbox Preview', 'Legacy Sandbox Preview', 'Tracking Events',
+    'Bulk Invite', 'Email Notifications', 'Basic Admin Permissions',
+    'Deals UX Modernization', 'Self-Serve Demo Environments Provisioning',
+    'UX for Partner Account Provisioning', 'Presenter Mode', 'Shortcut URL',
+    'Project noFrame', 'HISTORY',
+}
+
 def determine_category(customer, title):
     """Determine Internal vs External.
     M4/M5: If it has a real customer name, it's External.
-    Internal = improvements, standardizations, internal stuff."""
-    if customer in ('Internal', ''):
+    Internal = TestBox product work, internal operations, tooling."""
+    if not customer or customer in ('Internal', ''):
         if 'DE Team' in title or 'Internal' in title or 'Spike' in title.lower():
             return 'Internal'
         if re.match(r'\[', title):
             return 'External'
+        return 'Internal'
+    if customer in INTERNAL_CUSTOMERS:
         return 'Internal'
     return 'External'
 

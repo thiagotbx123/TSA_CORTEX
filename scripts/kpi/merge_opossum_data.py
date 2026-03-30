@@ -567,6 +567,11 @@ for iss in issues:
         'source': 'linear',
         'milestone': milestone,
         'parentId': parent_id,
+        # Detect retroactive ETA: dueDate matches delivery exactly AND ticket is Done
+        # This flags tickets where ETA was set after-the-fact (not a real commitment)
+        'retroactiveEta': 'yes' if (status == 'Done' and due and effective_delivery
+            and due[:10] == effective_delivery[:10]
+            and hist_fields['etaChanges'] <= 1) else '',
         'rework': has_rework,
         'startedAt': started_at,
         'deliveryDate': hist_fields['deliveryDate'] or '',

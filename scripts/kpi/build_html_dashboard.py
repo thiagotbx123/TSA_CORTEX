@@ -666,7 +666,11 @@ function calcAccuracy(rows){
   const ot=rows.filter(r=>r.perf==='On Time').length;
   const lt=rows.filter(r=>r.perf==='Late').length;
   const d=ot+lt; /* H2: On Time / (On Time + Late) — no Overdue concept, past ETA = Late */
-  return{val:d>0?ot/d:null,num:ot,den:d,n:rows.length,late:lt};
+  /* Organic accuracy: exclude retroactive ETAs (set after delivery) */
+  const orgOt=rows.filter(r=>r.perf==='On Time'&&r.retroactiveEta!=='yes').length;
+  const orgLt=rows.filter(r=>r.perf==='Late'&&r.retroactiveEta!=='yes').length;
+  const orgD=orgOt+orgLt;
+  return{val:d>0?ot/d:null,num:ot,den:d,n:rows.length,late:lt,orgVal:orgD>0?orgOt/orgD:null,orgNum:orgOt,orgDen:orgD};
 }
 function calcVelocity(rows){
   const durs=rows.filter(r=>r.delivery&&(r.startedAt||r.dateAdd)&&r.status==='Done').map(r=>daysBetween(r.startedAt||r.dateAdd,r.delivery)).filter(d=>d!==null&&d>=0);
@@ -1109,6 +1113,11 @@ function renderMemberCards(){
     /* H2: Same formula as KPI1 — On Time / (On Time + Late) */
     const measured=onTime+late;
     const accPct=measured>0?Math.round(onTime/measured*100):null;
+    /* Organic accuracy — excludes retroactive ETAs */
+    const orgOt=pr.filter(r=>r.perf==='On Time'&&r.retroactiveEta!=='yes').length;
+    const orgLt=pr.filter(r=>r.perf==='Late'&&r.retroactiveEta!=='yes').length;
+    const orgMeasured=orgOt+orgLt;
+    const orgAccPct=orgMeasured>0?Math.round(orgOt/orgMeasured*100):null;
 
     /* D.LIE12: ETA Coverage — only active statuses need ETA */
     const ACTIVE_STATUSES=['In Progress','In Review','Production QA','Blocked','Refinement','Ready to Deploy'];
@@ -1135,7 +1144,7 @@ function renderMemberCards(){
         <div class="mc-row"><span title="Active tickets (not Done or Canceled)">Open</span><b>${open}</b></div>
         <div class="mc-row"><span title="Delivered on or before the ETA deadline">On Time</span><b style="color:var(--green)">${onTime}</b></div>
         <div class="mc-row"><span title="Past ETA — delivered after deadline or still not delivered">Late</span><b style="color:${late>0?'var(--red)':'var(--dim)'}">${late}</b></div>
-        <div class="mc-row"><span title="On Time / (On Time + Late). Excludes: No ETA, Not Started, Blocked, N/A">Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b></div>
+        <div class="mc-row"><span title="On Time / (On Time + Late). Includes retroactive ETAs.${orgAccPct!==null?' Organic (pre-set ETAs only): '+orgAccPct+'% ('+orgOt+'/'+orgMeasured+')':''}">Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b>${orgAccPct!==null&&orgAccPct!==accPct?'<span style="font-size:.7em;color:#94a3b8;margin-left:4px" title="Organic: only tickets where ETA was set before delivery">('+orgAccPct+'% organic)</span>':''}</div>
         <div class="mc-row"><span title="% of active tickets (In Progress, In Review, Prod QA, Blocked) with ETA set">ETA Coverage</span><b style="color:${etaCov<80?'var(--yellow)':'var(--dim)'}">${etaCov}% (${activeWithEta}/${activeTotal})</b></div>
       </div>
       <div class="mc-bar"><div class="mc-bar-track"><div class="mc-bar-inner" style="width:${donePct}%;background:${barColor}"></div></div></div>

@@ -81,7 +81,7 @@
     "dealSigned": "Jun/24",
     "kickoff": "Jun/24",
     "goLive": "Nov/24",
-    "status": "maintenance",
+    "status": "live",
     "srcDeal": "Slack #testbox-team: Danny — Tropic officially a customer Jun 7 2024",
     "srcKickoff": "Linear: Project start Jun 17 2024",
     "srcGoLive": "Slack: James — SolCon launch Nov 5 2024",
@@ -90,13 +90,13 @@
   {
     "customer": "Apollo",
     "dealSigned": "Dec/23",
-    "kickoff": "Jan/24",
+    "kickoff": "Jan/25",
     "goLive": "Apr/25",
     "status": "live",
     "srcDeal": "Slack #testbox-team: Danny closed deal Dec 31 2023",
-    "srcKickoff": "Slack #customer-success: Mason — kickoff call Jan 11 2024",
-    "srcGoLive": "Slack #external-testbox-apollo: Waki — reimplementation launched Apr 23 2025. 90% weekly usage by Jun",
-    "milestones": "Apr/25: V1-to-V2 reimplementation (~3 months) — completely rebuilt from shared accounts to individual user login model with new Chrome extension and CI automation. Grew from ~140 to 200+ users with 90% weekly engagement by June"
+    "srcKickoff": "Slack #proj-noframing: Kevin confirmed re-implementation started Jan 14 2025",
+    "srcGoLive": "Slack #external-testbox-apollo: Waki — V2 reimplementation launched Apr 23 2025. Scott confirmed 90% weekly usage by Jun",
+    "milestones": "V1: Jan-Apr/24 (3mo) — original shared-account implementation, live Apr 2024. Renewal Nov/24 with 7% increase triggered V2 rebuild | V2: Jan-Apr/25 (4mo) — full reimplementation with individual user accounts, Chrome extension, CI. 200+ users"
   },
   {
     "customer": "Onyx",
@@ -140,18 +140,18 @@
     "srcDeal": "Slack #solutions_gsd: Sam kickoff planning Oct 2024",
     "srcKickoff": "Slack #taqueria: Leonardo taco — Archer kickoff Apr 7 2025",
     "srcGoLive": null,
-    "milestones": null
+    "milestones": "Apr-Jun/25: Enterprise + Third Party + Risk Recon delivered (3mo active build) | Jul-Sep/25: Gap — iframe dead-end + SA transition Ryan to Josh (~3mo idle) | Oct/25-present: Data gen with Thais/Gabrielle. Resilience 7%, Audit 0%. Contract renegotiation ongoing"
   },
   {
     "customer": "Gainsight",
     "dealSigned": "Mar/25",
     "kickoff": "Apr/25",
-    "goLive": null,
-    "status": "in_progress",
+    "goLive": "Sep/25",
+    "status": "live",
     "srcDeal": "Slack #gainsight-internal: Sam pre-kickoff prep early 2025",
     "srcKickoff": "Slack #external-testbox-gainsight: Chris kickoff call Apr 28 2025",
-    "srcGoLive": null,
-    "milestones": null
+    "srcGoLive": "Slack #external-testbox-gainsight: Emails go-live ~Sep 2 2025 for hero + 140 accounts",
+    "milestones": "Sep/25: Go-live emails only for 5 hero accounts + 140 generic accounts (5mo) | Nov/25: Support tickets delivered | Mar/26: Meetings finally working after SFDC security incident Dec/25 and VP Eng friction. JP expansion + 4 new products planned"
   },
   {
     "customer": "Siteimprove",

@@ -1110,9 +1110,13 @@ function renderMemberCards(){
     const measured=onTime+late;
     const accPct=measured>0?Math.round(onTime/measured*100):null;
 
-    /* D.LIE12: ETA Coverage */
-    const withEta=pr.filter(r=>r.eta&&r.eta.length>=10).length;
-    const etaCov=total>0?Math.round(withEta/total*100):0;
+    /* D.LIE12: ETA Coverage — only active statuses need ETA */
+    const ACTIVE_STATUSES=['In Progress','In Review','Production QA','Blocked','Refinement','Ready to Deploy'];
+    const activeTickets=pr.filter(r=>ACTIVE_STATUSES.includes(r.status));
+    const activeWithEta=activeTickets.filter(r=>r.eta&&r.eta.length>=10).length;
+    const activeTotal=activeTickets.length;
+    const withEta=activeWithEta;
+    const etaCov=activeTotal>0?Math.round(activeWithEta/activeTotal*100):100;
 
     const recent=pr.filter(r=>{const lw=CORE_WEEKS.slice(-2);return lw.includes(r.week)}).length;
 
@@ -1132,7 +1136,7 @@ function renderMemberCards(){
         <div class="mc-row"><span title="Delivered on or before the ETA deadline">On Time</span><b style="color:var(--green)">${onTime}</b></div>
         <div class="mc-row"><span title="Past ETA — delivered after deadline or still not delivered">Late</span><b style="color:${late>0?'var(--red)':'var(--dim)'}">${late}</b></div>
         <div class="mc-row"><span title="On Time / (On Time + Late). Excludes: No ETA, Not Started, Blocked, N/A">Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b></div>
-        <div class="mc-row"><span title="% of tickets with an ETA date set. Yellow when below 50%">ETA Coverage</span><b style="color:${etaCov<50?'var(--yellow)':'var(--dim)'}">${etaCov}% (${withEta}/${total})</b></div>
+        <div class="mc-row"><span title="% of active tickets (In Progress, In Review, Prod QA, Blocked) with ETA set">ETA Coverage</span><b style="color:${etaCov<80?'var(--yellow)':'var(--dim)'}">${etaCov}% (${activeWithEta}/${activeTotal})</b></div>
       </div>
       <div class="mc-bar"><div class="mc-bar-track"><div class="mc-bar-inner" style="width:${donePct}%;background:${barColor}"></div></div></div>
     </div>`;
@@ -1460,7 +1464,7 @@ function showGuide(){
             <div class="g-grid-item"><b>On Time <span style="color:#059669">(green)</span></b><span>Delivered on or before ETA</span></div>
             <div class="g-grid-item"><b>Late <span style="color:#dc2626">(red)</span></b><span>Past ETA — delivered after deadline or not delivered yet</span></div>
             <div class="g-grid-item"><b>Accuracy</b><span>On Time / (On Time + Late). Hover heatmap cells for detail</span></div>
-            <div class="g-grid-item"><b>ETA Coverage</b><span>% of tasks with ETA set. <span style="color:#d97706">Yellow</span> if &lt; 50%</span></div>
+            <div class="g-grid-item"><b>ETA Coverage</b><span>% of active tasks (In Progress, In Review, Prod QA, Blocked) with ETA set. <span style="color:#d97706">Yellow</span> if &lt; 80%</span></div>
             <div class="g-grid-item"><b>Progress Bar</b><span>Visual completion rate — green &ge; 80%, yellow &ge; 50%, red &lt; 50%</span></div>
           </div>
           <p style="margin-top:12px"><b>Badges:</b>

@@ -60,6 +60,10 @@ CUSTOMER_MAP = {
     'outreach': 'Outreach',
     'gainsight': 'Staircase',  # M6: Gainsight IS Staircase
     'tbx': 'TBX',
+    'tabs': 'Tabs',
+    'curbwaste': 'CurbWaste',
+    'zuper': 'Zuper', '[zuper] integration': 'Zuper',
+    'bill': 'Bill',
 }
 
 # Month maps (Portuguese + English + typos)
@@ -87,6 +91,7 @@ NOT_REAL_CLIENTS = {
     'Deals UX Modernization', 'Self-Serve Demo Environments Provisioning',
     'UX for Partner Account Provisioning', 'Presenter Mode', 'Shortcut URL',
     'Project noFrame', 'HISTORY',
+    '[ChurnZero] Integration',
 }
 
 # Real clients that must be External

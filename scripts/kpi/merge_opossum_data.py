@@ -349,30 +349,25 @@ def calc_perf(status, eta, delivery):
             return 'N/A'
 
 
-INTERNAL_CUSTOMERS = {
-    '[Internal] TSA Operations', '[Internal] TSA Shared Repo', '[TSA] Diego Internal',
-    'Internal', 'DE Team', 'Worklog', 'TSA', 'General', 'Bug',
-    'Demo Scripts', 'Surface Editor', 'Sandbox UX', 'Sandbox Improvements',
-    'Sandbox Preview', 'Legacy Sandbox Preview', 'Tracking Events',
-    'Bulk Invite', 'Email Notifications', 'Basic Admin Permissions',
-    'Deals UX Modernization', 'Self-Serve Demo Environments Provisioning',
-    'UX for Partner Account Provisioning', 'Presenter Mode', 'Shortcut URL',
-    'Project noFrame', 'HISTORY',
+REAL_CUSTOMERS = {
+    'QuickBooks', 'Gong', 'Archer', 'Siteimprove', 'Mailchimp', 'Gem', 'Apollo',
+    'Tropic', 'Brevo', 'Tabs', 'People.ai', 'CallRail', 'Gainsight', 'Staircase',
+    'WFS', 'Dixa', 'Assignar', 'Syncari', 'Onyx', 'CurbWaste', 'BILL', 'Bill',
+    'Zuper', 'HockeyStack', 'Outreach', 'mParticle', 'Monarch',
 }
 
 def determine_category(customer, title):
     """Determine Internal vs External.
-    M4/M5: If it has a real customer name, it's External.
-    Internal = TestBox product work, internal operations, tooling."""
+    External = ticket belongs to a real customer implementation.
+    Internal = everything else (TestBox product, tooling, ops)."""
     if not customer or customer in ('Internal', ''):
-        if 'DE Team' in title or 'Internal' in title or 'Spike' in title.lower():
-            return 'Internal'
-        if re.match(r'\[', title):
+        # No customer name — check title for customer brackets
+        if re.match(r'\[(Gem|Gong|QBO|Archer|Brevo|Mailchimp|Tabs|Tropic|WFS|Siteimprove|Apollo|People\.ai|Bill|BILL|CallRail)', title):
             return 'External'
         return 'Internal'
-    if customer in INTERNAL_CUSTOMERS:
-        return 'Internal'
-    return 'External'
+    if customer in REAL_CUSTOMERS:
+        return 'External'
+    return 'Internal'
 
 
 def _compute_last_touch(hist_fields, comments):

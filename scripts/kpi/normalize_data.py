@@ -76,8 +76,18 @@ INVALID_DATES = {'tbd', 'n/a', '-', 'na', 'none', ''}
 BBC_VARIANTS = {'B.B.C.', 'B.B.C', 'BBC', 'bbc', 'b.b.c.', 'b.b.c'}
 
 # Not real clients — Internal contexts
-NOT_REAL_CLIENTS = {'Waki', 'TBX', 'Routine', 'General', 'Coda', 'All',
-                    'Internal', "Internal \u2013 Sam's Board Meeting"}
+NOT_REAL_CLIENTS = {
+    'Waki', 'TBX', 'Routine', 'General', 'Coda', 'All',
+    'Internal', "Internal \u2013 Sam's Board Meeting",
+    '[Internal] TSA Operations', '[Internal] TSA Shared Repo', '[TSA] Diego Internal',
+    'DE Team', 'Worklog', 'TSA', 'Bug',
+    'Demo Scripts', 'Surface Editor', 'Sandbox UX', 'Sandbox Improvements',
+    'Sandbox Preview', 'Legacy Sandbox Preview', 'Tracking Events',
+    'Bulk Invite', 'Email Notifications', 'Basic Admin Permissions',
+    'Deals UX Modernization', 'Self-Serve Demo Environments Provisioning',
+    'UX for Partner Account Provisioning', 'Presenter Mode', 'Shortcut URL',
+    'Project noFrame', 'HISTORY',
+}
 
 # Real clients that must be External
 FORCE_EXTERNAL = {'Tabs'}

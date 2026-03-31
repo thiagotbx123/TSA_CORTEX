@@ -443,6 +443,9 @@ for iss in issues:
     owner_id = None
     if hist_fields.get('reassignedInReview') and original_id:
         # Reassigned at/after In Review — implementor (original) still owns it
+        # KNOWN LIMITATION (P3): In A→B→C chains where B implements and C reviews,
+        # originalAssigneeId=A (not B). This edge case is rare (~0 tickets currently)
+        # and would require tracking "assignee at time of In Review" to fix properly.
         owner_id = original_id
     else:
         # Normal case — current assignee is the real owner
@@ -632,6 +635,11 @@ if has_reviewer_delay:
 # ── Merge ──
 merged = existing + new_records
 print(f"\nMerged total: {len(merged)}")
+
+# P5: Data integrity checkpoint — warn if record count drops >5%
+_prev_count = sum(old_linear.values()) + len(existing) if old_linear else 0
+if _prev_count > 0 and len(merged) < _prev_count * 0.95:
+    print(f"  WARNING: Record count dropped from {_prev_count} to {len(merged)} ({len(merged)/_prev_count*100:.0f}%) — possible data loss")
 
 # C3: Atomic write
 tmp_path = OUTPUT_PATH + '.tmp'

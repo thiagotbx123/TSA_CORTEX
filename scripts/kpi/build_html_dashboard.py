@@ -27,6 +27,10 @@ import os, json, datetime
 
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
+
+# Import team config for KPI_IDS injection
+from team_config import PERSON_MAP_BY_ID
+KPI_IDS_JSON = json.dumps(list(PERSON_MAP_BY_ID.keys()))
 OUTPUT = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
 
 # L2: Validate JSON before processing
@@ -1120,7 +1124,7 @@ function renderMemberCards(){
     const orgAccPct=orgMeasured>0?Math.round(orgOt/orgMeasured*100):null;
 
     /* D.LIE12: ETA Coverage — only active statuses need ETA */
-    const ACTIVE_STATUSES=['In Progress','In Review','Production QA','Blocked','Refinement','Ready to Deploy'];
+    const ACTIVE_STATUSES=['In Progress','In Review','Production QA','Blocked','Refinement','Ready to Deploy','B.B.C'];
     const activeTickets=pr.filter(r=>ACTIVE_STATUSES.includes(r.status));
     const activeWithEta=activeTickets.filter(r=>r.eta&&r.eta.length>=10).length;
     const activeTotal=activeTickets.length;
@@ -1919,15 +1923,7 @@ function renderGantt(){
 });
 
 /* KPI team member IDs — global, used by Scrum and Insights */
-const KPI_IDS=new Set([
-  'a6063009-d822-49f1-a638-6cebfe59e89e',
-  'b13ca864-e0f4-4ff6-b020-ec3f4491643e',
-  '19b6975e-3026-450b-bc01-f468ad543028',
-  '717e7b13-d840-41c0-baeb-444354c8ff91',
-  'd9745bdb-7138-4345-9303-516aa6e4ec39',
-  '0879df15-56d6-477f-944d-df033121641a',
-  'df4a6bcf-c519-469d-bb40-b1a0e93d0041'
-]);
+const KPI_IDS=new Set(__KPI_IDS__);
 
 function renderScrumCards(){
   const todayStr=new Date().toISOString().slice(0,10);
@@ -2806,7 +2802,7 @@ init();
 </html>"""
 
 # Inject data and date
-html = HTML.replace('__DATA__', data_json_safe).replace('__TIMELINE__', timeline_json_safe).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('${BUILD_DATE}', build_date)
+html = HTML.replace('__DATA__', data_json_safe).replace('__TIMELINE__', timeline_json_safe).replace('__KPI_IDS__', KPI_IDS_JSON).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('${BUILD_DATE}', build_date)
 
 # C3: Atomic write
 tmp_path = OUTPUT + '.tmp'

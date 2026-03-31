@@ -1149,7 +1149,7 @@ function renderMemberCards(){
         <div class="mc-row"><span title="Delivered on or before the ETA deadline">On Time</span><b style="color:var(--green)">${onTime}</b></div>
         <div class="mc-row"><span title="Past ETA — delivered after deadline or still not delivered">Late</span><b style="color:${late>0?'var(--red)':'var(--dim)'}">${late}</b></div>
         <div class="mc-row"><span title="On Time / (On Time + Late). Includes retroactive ETAs.${orgAccPct!==null?' Organic (pre-set ETAs only): '+orgAccPct+'% ('+orgOt+'/'+orgMeasured+')':''}">Accuracy</span><b>${accPct!==null?accPct+'%':'—'}</b>${orgAccPct!==null&&orgAccPct!==accPct?'<span style="font-size:.7em;color:#94a3b8;margin-left:4px" title="Organic: only tickets where ETA was set before delivery">('+orgAccPct+'% organic)</span>':''}</div>
-        <div class="mc-row"><span title="% of active tickets (In Progress, In Review, Prod QA, Blocked) with ETA set">ETA Coverage</span><b style="color:${etaCov<80?'var(--yellow)':'var(--dim)'}">${etaCov}% (${activeWithEta}/${activeTotal})</b></div>
+        <div class="mc-row"><span title="% of active tickets (In Progress, In Review, Prod QA, Blocked) with ETA set">ETA Coverage</span><b style="color:${activeTotal===0?'var(--dim)':etaCov<80?'var(--yellow)':'var(--dim)'}">${activeTotal===0?'—':etaCov+'% ('+activeWithEta+'/'+activeTotal+')'}</b></div>
       </div>
       <div class="mc-bar"><div class="mc-bar-track"><div class="mc-bar-inner" style="width:${donePct}%;background:${barColor}"></div></div></div>
     </div>`;

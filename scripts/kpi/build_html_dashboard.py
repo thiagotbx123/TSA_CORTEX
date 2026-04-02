@@ -553,7 +553,9 @@ const API_REFRESH = '__API_REFRESH__';
 function parseWeek(w){const m=w.match(/(\d{2})-(\d{2})\s+W\.(\d+)/);return m?[+m[1],+m[2],+m[3]]:[99,99,99]}
 function weekSort(a,b){const[y1,m1,w1]=parseWeek(a),[y2,m2,w2]=parseWeek(b);return y1-y2||m1-m2||w1-w2}
 function daysBetween(a,b){if(!a||!b)return null;const d1=new Date(a),d2=new Date(b);if(isNaN(d1)||isNaN(d2))return null;return Math.round((d2-d1)/864e5)}
-function monthLabel(y,m){const names=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return(names[m]||'?')+' '+(y<50?'20'+y:'19'+y)}
+const MONTH_NAMES=['','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function monthLabel(y,m){return(MONTH_NAMES[m]||'?')+' - '+(y<50?'20'+y:'19'+y)}
+function fmtWeekPretty(w){const[y,m,wn]=parseWeek(w);if(y===99)return w;return(MONTH_NAMES[m]||'?')+' - '+(y<50?'20'+y:'19'+y)+' W'+wn}
 
 /* H1: Dynamic core period — rolling 4 months from latest data, never includes future weeks */
 function isCoreWeek(w){
@@ -812,9 +814,9 @@ function buildGrid(tableId, calcFn, fmtFn, heatFn, tipFn){
 /* ── Tip helpers ───────────────────────────────────── */
 function fmtDate(d){if(!d||d.length<10)return'';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]}
 function tipAccuracy(person,week,calc,rows){
-  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${fmtWeekPretty(week)}</span></div><span class="tip-label">No tasks this week</span>`;
   const pctCls=calc.val===null?'mid':calc.val>=.85?'good':calc.val>=.5?'mid':'bad';
-  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct ${pctCls}">${fmtPct(calc.val,calc.den)}</span></div>`;
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${fmtWeekPretty(week)}</b><span class="tip-pct ${pctCls}">${fmtPct(calc.val,calc.den)}</span></div>`;
   html+=`<div class="tip-stats">`;
   html+=`<div class="tip-stat"><b style="color:#34d399">${calc.num}</b><span>on time</span></div>`;
   html+=`<div class="tip-stat"><b style="color:#f87171">${calc.late||0}</b><span>late</span></div>`;
@@ -872,12 +874,12 @@ function tipAccuracy(person,week,calc,rows){
   return html;
 }
 function tipVelocity(person,week,calc,rows){
-  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
-  if(calc.n===0)return`<div class="tip-hdr"><b>${person} &middot; ${week}</b></div>${rows.length} tasks, none with delivery dates`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${fmtWeekPretty(week)}</span></div><span class="tip-label">No tasks this week</span>`;
+  if(calc.n===0)return`<div class="tip-hdr"><b>${person} &middot; ${fmtWeekPretty(week)}</b></div>${rows.length} tasks, none with delivery dates`;
   const sorted=[...calc.durs].sort((a,b)=>a-b);
   const med=sorted[Math.floor(sorted.length/2)];
   const min=sorted[0],max=sorted[sorted.length-1];
-  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct">${fmtDays(calc.val)}</span></div>`;
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${fmtWeekPretty(week)}</b><span class="tip-pct">${fmtDays(calc.val)}</span></div>`;
   html+=`<div class="tip-stats">`;
   html+=`<div class="tip-stat"><b>${med}d</b><span>median</span></div>`;
   html+=`<div class="tip-stat"><b>${min}d</b><span>fastest</span></div>`;
@@ -899,8 +901,8 @@ function tipVelocity(person,week,calc,rows){
   return html;
 }
 function tipReliability(person,week,calc,rows){
-  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
-  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct">${fmtPct(calc.val,calc.den)}</span></div>`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${fmtWeekPretty(week)}</span></div><span class="tip-label">No tasks this week</span>`;
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${fmtWeekPretty(week)}</b><span class="tip-pct">${fmtPct(calc.val,calc.den)}</span></div>`;
   html+=`<div class="tip-stats">`;
   html+=`<div class="tip-stat"><b style="color:#34d399">${calc.num}</b><span>clean</span></div>`;
   html+=`<div class="tip-stat"><b style="color:#f87171">${calc.reworked}</b><span>rework</span></div>`;
@@ -1087,8 +1089,8 @@ function heatVol(val){
   if(val<=7)return'heat-vol-3';if(val<=12)return'heat-vol-4';return'heat-vol-5';
 }
 function tipActivity(person,week,calc,rows){
-  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${week}</span></div><span class="tip-label">No tasks this week</span>`;
-  let html=`<div class="tip-hdr"><b>${person} &middot; ${week}</b><span class="tip-pct">${calc.n}</span></div>`;
+  if(rows.length===0)return`<div class="tip-hdr"><b>${person}</b><span style="color:#64748b">${fmtWeekPretty(week)}</span></div><span class="tip-label">No tasks this week</span>`;
+  let html=`<div class="tip-hdr"><b>${person} &middot; ${fmtWeekPretty(week)}</b><span class="tip-pct">${calc.n}</span></div>`;
   html+=`<div class="tip-stats">`;
   html+=`<div class="tip-stat"><b style="color:#34d399">${calc.done}</b><span>done</span></div>`;
   html+=`<div class="tip-stat"><b style="color:#60a5fa">${calc.open}</b><span>open</span></div>`;

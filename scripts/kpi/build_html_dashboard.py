@@ -518,7 +518,55 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;margin-top:0;padding:0">
     <div style="padding:14px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)">
       <h3 style="font-weight:800;font-size:.95em"><span class="dot" style="background:#f59e0b;position:relative;top:0"></span>Analytics</h3>
-      <span style="font-size:.72em;color:var(--dim)">Weekly Digest &middot; Organic Accuracy &middot; Trends &middot; Export</span>
+      <span style="font-size:.72em;color:var(--dim)">Adjust parameters below — numbers update live</span>
+    </div>
+    <div style="padding:16px 20px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;background:#fefce8;border-bottom:1px solid #fde68a">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="font-size:.68em;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Retroactive ETA = ?</label>
+        <select id="anRetroMode" style="padding:6px 10px;border:1px solid #fde68a;border-radius:6px;font-size:.82em;background:#fff;cursor:pointer;font-weight:600" onchange="renderAnalytics()">
+          <option value="any">Any ETA change</option>
+          <option value="post-delivery">Only post-delivery changes</option>
+          <option value="multi">2+ ETA changes only</option>
+        </select>
+        <span style="font-size:.62em;color:#a16207">Defines what counts as "retroactive" for Organic Accuracy</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="font-size:.68em;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Trend Window</label>
+        <select id="anTrendWindow" style="padding:6px 10px;border:1px solid #fde68a;border-radius:6px;font-size:.82em;background:#fff;cursor:pointer;font-weight:600" onchange="renderAnalytics()">
+          <option value="4">Last 4 weeks</option>
+          <option value="6">Last 6 weeks</option>
+          <option value="8" selected>Last 8 weeks</option>
+          <option value="12">Last 12 weeks</option>
+        </select>
+        <span style="font-size:.62em;color:#a16207">How many weeks of history for regression analysis</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="font-size:.68em;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Trend Sensitivity</label>
+        <select id="anSlopeThreshold" style="padding:6px 10px;border:1px solid #fde68a;border-radius:6px;font-size:.82em;background:#fff;cursor:pointer;font-weight:600" onchange="renderAnalytics()">
+          <option value="0.02">Sensitive (&plusmn;2%/wk)</option>
+          <option value="0.05" selected>Normal (&plusmn;5%/wk)</option>
+          <option value="0.10">Relaxed (&plusmn;10%/wk)</option>
+        </select>
+        <span style="font-size:.62em;color:#a16207">Threshold to classify improving vs declining</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="font-size:.68em;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Streak Alert</label>
+        <select id="anStreakWeeks" style="padding:6px 10px;border:1px solid #fde68a;border-radius:6px;font-size:.82em;background:#fff;cursor:pointer;font-weight:600" onchange="renderAnalytics()">
+          <option value="2" selected>2+ weeks &lt;50%</option>
+          <option value="3">3+ weeks &lt;50%</option>
+          <option value="2_40">2+ weeks &lt;40%</option>
+          <option value="3_40">3+ weeks &lt;40%</option>
+        </select>
+        <span style="font-size:.62em;color:#a16207">When to flag a person for sustained low accuracy</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <label style="font-size:.68em;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Export Format</label>
+        <select id="anExportFmt" style="padding:6px 10px;border:1px solid #fde68a;border-radius:6px;font-size:.82em;background:#fff;cursor:pointer;font-weight:600">
+          <option value="markdown" selected>Markdown (Slack/GitHub)</option>
+          <option value="slack-block">Slack Block Kit JSON</option>
+        </select>
+        <span style="font-size:.62em;color:#a16207">Output format for copy buttons</span>
+      </div>
     </div>
   </div>
   <div id="analyticsBody" style="margin-top:16px"></div>
@@ -578,6 +626,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS@3.12.0/dist/pptxgen.bundle.js"></script>
 <script>
 const RAW = __DATA__;
 const TIMELINE = __TIMELINE__;
@@ -2533,12 +2582,38 @@ function renderAnalytics(){
   const sortedWeeks=CORE_WEEKS.slice().sort(weekSort);
   const lastWeek=sortedWeeks.length>0?sortedWeeks[sortedWeeks.length-1]:null;
   const prevWeek=sortedWeeks.length>1?sortedWeeks[sortedWeeks.length-2]:null;
+  /* Read control panel values */
+  const retroMode=(document.getElementById('anRetroMode')||{}).value||'any';
+  const trendWin=+(document.getElementById('anTrendWindow')||{}).value||8;
+  const slopeT=+(document.getElementById('anSlopeThreshold')||{}).value||0.05;
+  const streakCfg=(document.getElementById('anStreakWeeks')||{}).value||'2';
+  const streakMinWeeks=+streakCfg.split('_')[0]||2;
+  const streakThreshold=(streakCfg.includes('_40')?0.4:0.5);
+  function isRetro(r){
+    if(retroMode==='any')return r.retroactiveEta==='yes';
+    if(retroMode==='post-delivery')return r.retroactiveEta==='yes'&&r.delivery&&r.eta&&r.eta.slice(0,10)!==((r.originalEta||r.eta)||'').slice(0,10);
+    if(retroMode==='multi')return(r.etaChanges||0)>=2;
+    return r.retroactiveEta==='yes';
+  }
+  function calcOrgAccuracy(rows){
+    const ot=rows.filter(r=>r.perf==='On Time'&&!isRetro(r)).length;
+    const lt=rows.filter(r=>r.perf==='Late'&&!isRetro(r)).length;
+    const d=ot+lt;return{orgVal:d>0?ot/d:null,orgNum:ot,orgDen:d};
+  }
   function anCollapse(id,icon,title,body,open){
     return '<div class="an-section" id="'+id+'"><div class="an-section-hdr'+(open?' open':'')+'" onclick="this.classList.toggle(\'open\');var b=this.nextElementSibling;b.style.display=this.classList.contains(\'open\')?\'block\':\'none\'"><span class="toggle">&#9660;</span><h3>'+icon+' '+title+'</h3></div><div class="an-section-body" style="display:'+(open?'block':'none')+'">'+body+'</div></div>';
   }
   function statCard(val,label,color,big){return '<div class="an-stat-card"'+(big?' style="min-width:180px"':'')+'><div class="an-stat-val" style="'+(big?'font-size:2em;':'')+'color:'+color+'">'+val+'</div><div class="an-stat-label">'+label+'</div></div>'}
   function accColor(v){return v>=.9?'var(--green)':v>=.7?'var(--yellow)':'var(--red)'}
   let html='';
+  const modeLabel={any:'any ETA change','post-delivery':'post-delivery changes only',multi:'2+ ETA changes'}[retroMode]||retroMode;
+  html+='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:.78em;display:flex;gap:16px;flex-wrap:wrap;align-items:center">';
+  html+='<span style="font-weight:700;color:#92400e">Active settings:</span>';
+  html+='<span>Retro = <b>'+esc(modeLabel)+'</b></span>';
+  html+='<span>Window = <b>'+trendWin+'w</b></span>';
+  html+='<span>Sensitivity = <b>&plusmn;'+(slopeT*100).toFixed(0)+'%/wk</b></span>';
+  html+='<span>Streak = <b>'+streakMinWeeks+'w &lt;'+(streakThreshold*100)+'%</b></span>';
+  html+='</div>';
 
   /* ── S1: Weekly Digest ── */
   let s1='';
@@ -2562,7 +2637,7 @@ function renderAnalytics(){
       const d=(pc.val!==null&&pp.val!==null)?(pc.val-pp.val):null;
       const ds=d!==null?((d>0?'+':'')+(d*100).toFixed(0)+'%'):'—';
       const dc=d===null?'':d>0.05?'color:var(--green);font-weight:700':d<-0.05?'color:var(--red);font-weight:700':'';
-      const rc=cwData.filter(r=>r.tsa===p&&r.retroactiveEta==='yes').length;
+      const rc=cwData.filter(r=>r.tsa===p&&isRetro(r)).length;
       s1+='<tr><td style="font-weight:600">'+esc(p)+'</td><td>'+fmtPct(pc.val,pc.den)+' <span style="font-size:.72em;color:var(--dim)">(n='+pc.den+')</span></td><td>'+fmtPct(pp.val,pp.den)+'</td><td style="'+dc+'">'+ds+'</td><td style="color:var(--red)">'+pc.late+'</td><td style="'+(rc>0?'color:#d97706;font-weight:700':'')+'">'+rc+'</td></tr>';
     });
     s1+='</tbody></table>';
@@ -2580,51 +2655,54 @@ function renderAnalytics(){
     }
     const streaks=[];
     (pf!=='ALL'?[pf]:PEOPLE_ALL).forEach(p=>{
-      let c=0;for(let i=sortedWeeks.length-1;i>=0;i--){const a=calcAccuracy(allData.filter(r=>r.tsa===p&&r.week===sortedWeeks[i]));if(a.val!==null&&a.val<0.5&&a.den>=2)c++;else break}
-      if(c>=2)streaks.push({p,c});
+      let c=0;for(let i=sortedWeeks.length-1;i>=0;i--){const a=calcAccuracy(allData.filter(r=>r.tsa===p&&r.week===sortedWeeks[i]));if(a.val!==null&&a.val<streakThreshold&&a.den>=2)c++;else break}
+      if(c>=streakMinWeeks)streaks.push({p,c});
     });
     if(streaks.length>0){
-      s1+='<div style="margin-top:16px;font-weight:700;font-size:.9em;color:#d97706">&#9888; Accuracy Below 50% for 2+ Consecutive Weeks</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">';
+      s1+='<div style="margin-top:16px;font-weight:700;font-size:.9em;color:#d97706">&#9888; Accuracy Below '+(streakThreshold*100)+'% for '+streakMinWeeks+'+ Consecutive Weeks</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">';
       streaks.forEach(s=>{s1+='<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;font-size:.85em"><b>'+esc(s.p)+'</b> — '+s.c+' weeks</div>'});
       s1+='</div>';
     }
-    const rTotal=allData.filter(r=>r.retroactiveEta==='yes'&&CORE_WEEKS.includes(r.week)).length;
+    const rTotal=allData.filter(r=>isRetro(r)&&CORE_WEEKS.includes(r.week)).length;
     const rBase=allData.filter(r=>CORE_WEEKS.includes(r.week)&&(r.perf==='On Time'||r.perf==='Late')).length;
-    if(rTotal>0)s1+='<div style="margin-top:12px;font-size:.78em;color:var(--dim)">&#128269; '+rTotal+' retroactive ETA change'+(rTotal>1?'s':'')+' detected ('+(rBase>0?(rTotal/rBase*100).toFixed(0):0)+'% of measured)</div>';
+    if(rTotal>0)s1+='<div style="margin-top:12px;font-size:.78em;color:var(--dim)">&#128269; '+rTotal+' retroactive ETA change'+(rTotal>1?'s':'')+' detected ('+(rBase>0?(rTotal/rBase*100).toFixed(0):0)+'% of measured) — mode: '+esc(modeLabel)+'</div>';
   } else {
     s1='<div style="color:var(--dim);text-align:center;padding:40px">No week data available</div>';
   }
   s1+='<div style="margin-top:16px;text-align:right"><button class="an-copy-btn" onclick="copyWeeklyDigest()">&#128203; Copy Digest to Clipboard</button></div>';
   html+=anCollapse('an-digest','&#128200;','Weekly Digest &mdash; '+(lastWeek?fmtWeekPretty(lastWeek):'N/A'),s1,true);
 
-  /* ── S2: Organic Accuracy ── */
+  /* ── S2: Organic Accuracy (uses control: retroMode via isRetro) ── */
   let s2='';
   const coreData=allData.filter(r=>r.week&&isCoreWeek(r.week));
   const tAcc=calcAccuracy(coreData);
+  const tOrg=calcOrgAccuracy(coreData);
   s2+='<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">';
   if(tAcc.val!==null)s2+=statCard(fmtPct(tAcc.val,tAcc.den),'Total Accuracy ('+tAcc.num+'/'+tAcc.den+')',accColor(tAcc.val),true);
-  if(tAcc.orgVal!==null)s2+=statCard(fmtPct(tAcc.orgVal,tAcc.orgDen),'Organic ('+tAcc.orgNum+'/'+tAcc.orgDen+')','#8b5cf6',true);
-  const gap=(tAcc.val!==null&&tAcc.orgVal!==null)?(tAcc.val-tAcc.orgVal):null;
+  if(tOrg.orgVal!==null)s2+=statCard(fmtPct(tOrg.orgVal,tOrg.orgDen),'Organic ('+tOrg.orgNum+'/'+tOrg.orgDen+')','#8b5cf6',true);
+  const gap=(tAcc.val!==null&&tOrg.orgVal!==null)?(tAcc.val-tOrg.orgVal):null;
   if(gap!==null)s2+=statCard((gap>0?'+':'')+(gap*100).toFixed(0)+'%','Inflation Gap',Math.abs(gap)<0.05?'var(--green)':'#d97706',true);
   s2+='</div>';
-  s2+='<div style="font-size:.78em;color:var(--dim);margin-bottom:12px">Organic excludes tickets where ETA was changed retroactively. Measures prediction accuracy without &ldquo;hindsight corrections.&rdquo;</div>';
+  s2+='<div style="font-size:.78em;color:var(--dim);margin-bottom:12px">Organic excludes tickets flagged as retroactive (' +esc(modeLabel)+').</div>';
   s2+='<table class="audit-table"><thead><tr><th>Person</th><th>Total Accuracy</th><th>Organic Accuracy</th><th>Gap</th><th>Retro Count</th><th>Retro %</th></tr></thead><tbody>';
   (pf!=='ALL'?[pf]:PEOPLE_ALL).forEach(p=>{
-    const pa=calcAccuracy(coreData.filter(r=>r.tsa===p));
-    const g=(pa.val!==null&&pa.orgVal!==null)?pa.val-pa.orgVal:null;
-    const rc=coreData.filter(r=>r.tsa===p&&r.retroactiveEta==='yes').length;
+    const pRows=coreData.filter(r=>r.tsa===p);
+    const pa=calcAccuracy(pRows);
+    const po=calcOrgAccuracy(pRows);
+    const g=(pa.val!==null&&po.orgVal!==null)?pa.val-po.orgVal:null;
+    const rc=pRows.filter(r=>isRetro(r)).length;
     const rp=pa.den>0?(rc/pa.den*100).toFixed(0):'0';
     const gs=g===null?'':'color:'+(Math.abs(g)<0.03?'var(--green)':g>0.1?'var(--red)':'#d97706')+';font-weight:700';
     const ts=pa.val===null?'':'color:'+accColor(pa.val)+';font-weight:700';
-    s2+='<tr><td style="font-weight:600">'+esc(p)+'</td><td style="'+ts+'">'+fmtPct(pa.val,pa.den)+' ('+pa.num+'/'+pa.den+')</td><td style="color:#8b5cf6;font-weight:700">'+fmtPct(pa.orgVal,pa.orgDen)+' ('+pa.orgNum+'/'+pa.orgDen+')</td><td style="'+gs+'">'+(g!==null?(g>0?'+':'')+(g*100).toFixed(0)+'%':'—')+'</td><td>'+rc+'</td><td>'+rp+'%</td></tr>';
+    s2+='<tr><td style="font-weight:600">'+esc(p)+'</td><td style="'+ts+'">'+fmtPct(pa.val,pa.den)+' ('+pa.num+'/'+pa.den+')</td><td style="color:#8b5cf6;font-weight:700">'+fmtPct(po.orgVal,po.orgDen)+' ('+po.orgNum+'/'+po.orgDen+')</td><td style="'+gs+'">'+(g!==null?(g>0?'+':'')+(g*100).toFixed(0)+'%':'—')+'</td><td>'+rc+'</td><td>'+rp+'%</td></tr>';
   });
   s2+='</tbody></table>';
-  html+=anCollapse('an-organic','&#127793;','Organic Accuracy &mdash; Excluding retroactive ETAs',s2,false);
+  html+=anCollapse('an-organic','&#127793;','Organic Accuracy &mdash; '+esc(modeLabel),s2,false);
 
-  /* ── S3: Trend Radar ── */
+  /* ── S3: Trend Radar (uses controls: trendWin, slopeT) ── */
   let s3='';
-  const tWeeks=sortedWeeks.slice(-8);
-  s3+='<div style="font-size:.78em;color:var(--dim);margin-bottom:16px">Linear regression over last '+tWeeks.length+' weeks. Slope &gt; +5%/wk = improving, &lt; -5% = declining.</div>';
+  const tWeeks=sortedWeeks.slice(-trendWin);
+  s3+='<div style="font-size:.78em;color:var(--dim);margin-bottom:16px">Linear regression over last '+tWeeks.length+' weeks. Slope &gt; +'+(slopeT*100).toFixed(0)+'%/wk = improving, &lt; -'+(slopeT*100).toFixed(0)+'% = declining.</div>';
   s3+='<div class="an-health-grid">';
   (pf!=='ALL'?[pf]:PEOPLE_ALL).forEach(p=>{
     const pts=[];
@@ -2635,8 +2713,8 @@ function renderAnalytics(){
       const sxy=pts.reduce((a,v)=>a+v.x*v.y,0),sxx=pts.reduce((a,v)=>a+v.x*v.x,0);
       const denom=n*sxx-sx*sx;
       if(denom!==0){slope=(n*sxy-sx*sy)/denom;const b=(sy-slope*sx)/n;proj=Math.max(0,Math.min(1,b+slope*tWeeks.length))}
-      if(slope>0.05){cls='improving';arrow='&#8593;';clr='var(--green)'}
-      else if(slope<-0.05){cls='declining';arrow='&#8595;';clr='var(--red)'}
+      if(slope>slopeT){cls='improving';arrow='&#8593;';clr='var(--green)'}
+      else if(slope<-slopeT){cls='declining';arrow='&#8595;';clr='var(--red)'}
     }
     const latest=pts.length>0?pts[pts.length-1]:null;
     let spark='<div class="an-spark">';
@@ -2654,6 +2732,7 @@ function renderAnalytics(){
 
   /* ── S4: Export ── */
   let s4='<div style="display:flex;gap:12px;flex-wrap:wrap">';
+  s4+='<button class="an-export-btn" style="background:linear-gradient(135deg,#c2410c,#ea580c);border-color:#ea580c" onclick="generateWeeklyPPT()"><span style="font-size:1.2em">&#127912;</span><div><b>Download Weekly PPT</b><div style="font-size:.72em;color:#fed7aa">PowerPoint for presentation</div></div></button>';
   s4+='<button class="an-export-btn" onclick="copyWeeklyDigest()"><span style="font-size:1.2em">&#128203;</span><div><b>Copy Weekly Digest</b><div style="font-size:.72em;color:#94a3b8">Markdown for Slack</div></div></button>';
   s4+='<button class="an-export-btn" onclick="copyTeamReport()"><span style="font-size:1.2em">&#128202;</span><div><b>Copy Full Report</b><div style="font-size:.72em;color:#94a3b8">All analytics as Markdown</div></div></button>';
   s4+='<button class="an-export-btn" onclick="copyLateTickets()"><span style="font-size:1.2em">&#9888;</span><div><b>Copy Late Tickets</b><div style="font-size:.72em;color:#94a3b8">Action items list</div></div></button>';
@@ -2735,6 +2814,126 @@ function copyLateTickets(){
     md+='- [ ] **'+r.ticketId+'** '+(r.focus||'')+' — '+r.customer+' — ETA: '+r.eta+' ('+od+'d overdue)\n';
   });
   navigator.clipboard.writeText(md).then(()=>anShowPreview(md));
+}
+
+function generateWeeklyPPT(){
+  if(typeof PptxGenJS==='undefined'){alert('PptxGenJS not loaded. Check network.');return}
+  const pptx=new PptxGenJS();
+  pptx.author='TSA KPI Dashboard';
+  pptx.subject='Weekly KPI Review';
+  const sw=CORE_WEEKS.slice().sort(weekSort);
+  const lw=sw[sw.length-1],pw=sw.length>1?sw[sw.length-2]:null;
+  const cat=state.category;
+  const all=RAW.filter(r=>(cat==='ALL'||r.category===cat));
+  const core=all.filter(r=>r.week&&isCoreWeek(r.week));
+  const tAcc=calcAccuracy(core);
+  const weekLabel=lw?fmtWeekPretty(lw):'N/A';
+  pptx.title='KPI Weekly — '+weekLabel;
+  const BG='0F172A',ACC='3B82F6',GRN='22C55E',RED='EF4444',YLW='F59E0B',DIM='94A3B8',WHT='FFFFFF';
+  function accHex(v){return v>=.9?GRN:v>=.7?YLW:RED}
+
+  /* ── Slide 1: Title ── */
+  let s1=pptx.addSlide();
+  s1.background={color:BG};
+  s1.addText('KPI Weekly Review',{x:0.6,y:1.0,w:8.8,h:1,fontSize:36,fontFace:'Segoe UI',color:WHT,bold:true});
+  s1.addText(weekLabel+'  |  TSA Team  |  '+BUILD_DATE,{x:0.6,y:2.0,w:8.8,h:0.5,fontSize:14,fontFace:'Segoe UI',color:DIM});
+  if(tAcc.val!==null){
+    s1.addText(fmtPct(tAcc.val,tAcc.den),{x:0.6,y:3.2,w:2.5,h:1,fontSize:48,fontFace:'Segoe UI',color:accHex(tAcc.val),bold:true});
+    s1.addText('Team Accuracy ('+tAcc.num+'/'+tAcc.den+')',{x:0.6,y:4.1,w:3,h:0.4,fontSize:12,fontFace:'Segoe UI',color:DIM});
+  }
+
+  /* ── Slide 2: Week-over-Week ── */
+  if(lw){
+    let s2=pptx.addSlide();
+    s2.background={color:BG};
+    s2.addText('Week-over-Week Comparison',{x:0.6,y:0.3,w:8.8,h:0.6,fontSize:22,fontFace:'Segoe UI',color:WHT,bold:true});
+    const cwData=all.filter(r=>r.week===lw);const pwData=pw?all.filter(r=>r.week===pw):[];
+    const rows=[['Person','This Week','Last Week','Delta','Late','Trend']];
+    const people=PEOPLE_ALL;
+    const retroMode=(document.getElementById('anRetroMode')||{}).value||'any';
+    const trendWin=+(document.getElementById('anTrendWindow')||{}).value||8;
+    const slopeT=+(document.getElementById('anSlopeThreshold')||{}).value||0.05;
+    function isRetroP(r){
+      if(retroMode==='any')return r.retroactiveEta==='yes';
+      if(retroMode==='multi')return(r.etaChanges||0)>=2;
+      return r.retroactiveEta==='yes';
+    }
+    const tWeeks=sw.slice(-trendWin);
+    people.forEach(p=>{
+      const pc=calcAccuracy(cwData.filter(r=>r.tsa===p));
+      const pp=calcAccuracy(pwData.filter(r=>r.tsa===p));
+      const d=(pc.val!==null&&pp.val!==null)?pc.val-pp.val:null;
+      const ds=d===null?'—':(d>0?'+':'')+(d*100).toFixed(0)+'%';
+      const pts=[];tWeeks.forEach((w,i)=>{const a=calcAccuracy(all.filter(r=>r.tsa===p&&r.week===w));if(a.val!==null&&a.den>=1)pts.push({x:i,y:a.val})});
+      let trend='stable';
+      if(pts.length>=3){const n=pts.length,sx=pts.reduce((a,v)=>a+v.x,0),sy=pts.reduce((a,v)=>a+v.y,0),sxy=pts.reduce((a,v)=>a+v.x*v.y,0),sxx=pts.reduce((a,v)=>a+v.x*v.x,0),dn=n*sxx-sx*sx;if(dn!==0){const sl=(n*sxy-sx*sy)/dn;if(sl>slopeT)trend='improving';else if(sl<-slopeT)trend='declining'}}
+      rows.push([p,fmtPct(pc.val,pc.den),fmtPct(pp.val,pp.den),ds,String(pc.late),trend]);
+    });
+    const colW=[2.2,1.5,1.5,1.2,0.8,1.5];
+    s2.addTable(rows,{x:0.4,y:1.1,w:8.7,colW:colW,fontSize:11,fontFace:'Segoe UI',color:WHT,border:{type:'solid',pt:0.5,color:'334155'},rowH:0.38,autoPage:false,
+      headerRow:true,headerRowColor:'1E293B',headerRowFontColor:ACC,headerRowFontBold:true});
+  }
+
+  /* ── Slide 3: Organic Accuracy ── */
+  let s3=pptx.addSlide();
+  s3.background={color:BG};
+  s3.addText('Organic Accuracy',{x:0.6,y:0.3,w:8.8,h:0.6,fontSize:22,fontFace:'Segoe UI',color:WHT,bold:true});
+  s3.addText('Excluding retroactive ETA changes',{x:0.6,y:0.8,w:8.8,h:0.3,fontSize:11,fontFace:'Segoe UI',color:DIM});
+  const orgRows=[['Person','Total','Organic','Gap','Retro %']];
+  PEOPLE_ALL.forEach(p=>{
+    const pRows=core.filter(r=>r.tsa===p);
+    const pa=calcAccuracy(pRows);
+    const orgOt=pRows.filter(r=>r.perf==='On Time'&&!(r.retroactiveEta==='yes')).length;
+    const orgLt=pRows.filter(r=>r.perf==='Late'&&!(r.retroactiveEta==='yes')).length;
+    const orgD=orgOt+orgLt;const orgV=orgD>0?orgOt/orgD:null;
+    const g=(pa.val!==null&&orgV!==null)?pa.val-orgV:null;
+    const rc=pRows.filter(r=>r.retroactiveEta==='yes').length;
+    const rp=pa.den>0?(rc/pa.den*100).toFixed(0)+'%':'0%';
+    orgRows.push([p,fmtPct(pa.val,pa.den),fmtPct(orgV,orgD),g!==null?(g>0?'+':'')+(g*100).toFixed(0)+'%':'—',rp]);
+  });
+  s3.addTable(orgRows,{x:0.4,y:1.3,w:8.7,colW:[2.2,1.8,1.8,1.2,1.2],fontSize:11,fontFace:'Segoe UI',color:WHT,border:{type:'solid',pt:0.5,color:'334155'},rowH:0.38,autoPage:false,
+    headerRow:true,headerRowColor:'1E293B',headerRowFontColor:'8B5CF6',headerRowFontBold:true});
+
+  /* ── Slide 4: Trend Radar ── */
+  let s4p=pptx.addSlide();
+  s4p.background={color:BG};
+  s4p.addText('Trend Radar',{x:0.6,y:0.3,w:8.8,h:0.6,fontSize:22,fontFace:'Segoe UI',color:WHT,bold:true});
+  const trendWinP=+(document.getElementById('anTrendWindow')||{}).value||8;
+  const slopeTP=+(document.getElementById('anSlopeThreshold')||{}).value||0.05;
+  const tWeeksP=sw.slice(-trendWinP);
+  s4p.addText('Linear regression over '+tWeeksP.length+' weeks | Threshold: ±'+(slopeTP*100).toFixed(0)+'%/wk',{x:0.6,y:0.8,w:8.8,h:0.3,fontSize:11,fontFace:'Segoe UI',color:DIM});
+  const trendRows=[['Person','Current','Slope','Projected','Status']];
+  PEOPLE_ALL.forEach(p=>{
+    const pts=[];tWeeksP.forEach((w,i)=>{const a=calcAccuracy(all.filter(r=>r.tsa===p&&r.week===w));if(a.val!==null&&a.den>=1)pts.push({x:i,y:a.val})});
+    let slope=0,cls='stable',proj=null;
+    if(pts.length>=3){const n=pts.length,sx=pts.reduce((a,v)=>a+v.x,0),sy=pts.reduce((a,v)=>a+v.y,0),sxy=pts.reduce((a,v)=>a+v.x*v.y,0),sxx=pts.reduce((a,v)=>a+v.x*v.x,0),dn=n*sxx-sx*sx;if(dn!==0){slope=(n*sxy-sx*sy)/dn;const b=(sy-slope*sx)/n;proj=Math.max(0,Math.min(1,b+slope*tWeeksP.length))}
+      if(slope>slopeTP)cls='IMPROVING';else if(slope<-slopeTP)cls='DECLINING';else cls='STABLE'}
+    const latest=pts.length>0?pts[pts.length-1]:null;
+    trendRows.push([p,latest?fmtPct(latest.y,1):'—',(slope*100).toFixed(1)+'%/wk',proj!==null?fmtPct(proj,1):'—',cls]);
+  });
+  s4p.addTable(trendRows,{x:0.4,y:1.3,w:8.7,colW:[2.2,1.5,1.5,1.5,1.5],fontSize:11,fontFace:'Segoe UI',color:WHT,border:{type:'solid',pt:0.5,color:'334155'},rowH:0.38,autoPage:false,
+    headerRow:true,headerRowColor:'1E293B',headerRowFontColor:GRN,headerRowFontBold:true});
+
+  /* ── Slide 5: Late Tickets ── */
+  const todayStr=new Date().toISOString().slice(0,10);
+  const late=all.filter(r=>r.perf==='Late'&&r.status!=='Done'&&r.eta&&r.eta.slice(0,10)<todayStr);
+  if(late.length>0){
+    let s5=pptx.addSlide();
+    s5.background={color:BG};
+    s5.addText('Late Tickets — Action Required ('+late.length+')',{x:0.6,y:0.3,w:8.8,h:0.6,fontSize:22,fontFace:'Segoe UI',color:RED,bold:true});
+    late.sort((a,b)=>(a.tsa||'').localeCompare(b.tsa||'')||(a.eta||'').localeCompare(b.eta||''));
+    const lateRows=[['Ticket','Focus','Person','Customer','ETA','Overdue']];
+    late.slice(0,18).forEach(r=>{
+      const od=daysBetween(r.eta,todayStr);
+      lateRows.push([r.ticketId||'—',(r.focus||'').slice(0,40),r.tsa||'—',r.customer||'—',r.eta||'—',od+'d']);
+    });
+    s5.addTable(lateRows,{x:0.4,y:1.1,w:9.0,colW:[1.2,2.8,1.3,1.5,1.1,0.8],fontSize:10,fontFace:'Segoe UI',color:WHT,border:{type:'solid',pt:0.5,color:'334155'},rowH:0.35,autoPage:false,
+      headerRow:true,headerRowColor:'1E293B',headerRowFontColor:RED,headerRowFontBold:true});
+    if(late.length>18)s5.addText('+'+(late.length-18)+' more — see full dashboard',{x:0.6,y:4.8,w:8,h:0.3,fontSize:10,fontFace:'Segoe UI',color:DIM});
+  }
+
+  const fname='KPI_Weekly_'+weekLabel.replace(/[^A-Za-z0-9]/g,'_')+'.pptx';
+  pptx.writeFile({fileName:fname}).then(()=>{anShowPreview('PPT downloaded: '+fname)});
 }
 
 /* ── Init ───────────────────────────────────────────── */

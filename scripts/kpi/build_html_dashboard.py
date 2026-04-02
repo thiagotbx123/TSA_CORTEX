@@ -294,7 +294,32 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .gt-bar-summary{background:linear-gradient(90deg,#1e40af33,#3b82f633);border-radius:4px;top:5px;height:16px;border:1px solid #3b82f644}
 .gt-today-marker{position:absolute;top:0;bottom:0;width:2px;background:#dc2626;z-index:3;pointer-events:none;opacity:.8}
 .gt-month-line{position:absolute;top:0;bottom:0;width:1px;background:#94a3b8;z-index:1;pointer-events:none;opacity:.6}
-@media(max-width:900px){.top-strip{flex-direction:column}.strip-group{flex-direction:row;flex-wrap:wrap}.heatmap{font-size:.7em}.audit-table{font-size:.65em}}
+/* ── Analytics tab styles (an- prefix) ────────── */
+.an-section{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.an-section-hdr{padding:14px 20px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid transparent;transition:all .15s;user-select:none}
+.an-section-hdr:hover{background:var(--gray-bg)}
+.an-section-hdr.open{border-bottom-color:var(--border)}
+.an-section-hdr .toggle{font-size:.6em;transition:transform .2s;color:var(--dim)}
+.an-section-hdr.open .toggle{transform:rotate(180deg)}
+.an-section-body{padding:16px 20px;overflow-x:auto}
+.an-stat-card{background:var(--gray-bg);border:1px solid var(--gray-l);border-radius:10px;padding:12px 18px;text-align:center;min-width:120px}
+.an-stat-val{font-size:1.5em;font-weight:800;line-height:1.2}
+.an-stat-label{font-size:.7em;color:var(--dim);margin-top:2px;font-weight:500}
+.an-health-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.an-health-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;transition:box-shadow .15s}
+.an-health-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.an-health-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.an-health-name{font-weight:700;font-size:.9em}
+.an-health-arrow{font-size:1.4em;font-weight:800}
+.an-health-current{font-size:1.8em;font-weight:800;color:var(--accent);margin-bottom:6px}
+.an-spark{display:flex;align-items:flex-end;gap:3px;height:36px;margin-bottom:8px}
+.an-spark-bar{width:100%;border-radius:2px;min-width:4px;transition:height .3s}
+.an-health-meta{margin-bottom:4px}
+.an-health-tag{font-size:.72em;font-weight:700;padding:2px 10px;border-radius:10px;display:inline-block}
+.an-copy-btn,.an-export-btn{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border:1px solid #475569;border-radius:8px;padding:8px 18px;font-size:.82em;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.an-copy-btn:hover,.an-export-btn:hover{background:linear-gradient(135deg,#0f172a,#1e293b);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.an-export-btn{min-width:200px;text-align:left}
+@media(max-width:900px){.top-strip{flex-direction:column}.strip-group{flex-direction:row;flex-wrap:wrap}.heatmap{font-size:.7em}.audit-table{font-size:.65em}.an-health-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -343,6 +368,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="tab" data-tab="scrum">Scrum Copy</div>
   <div class="tab" data-tab="insights">Insights</div>
   <div class="tab" data-tab="gantt">Gantt</div>
+  <div class="tab" data-tab="analytics">Analytics</div>
 </div>
 
 <div class="tab-panel active" id="panel-accuracy">
@@ -486,6 +512,16 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
     </div>
     <div id="implementationBody" style="padding:16px 20px"></div>
   </div>
+</div>
+
+<div class="tab-panel" id="panel-analytics">
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;margin-top:0;padding:0">
+    <div style="padding:14px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)">
+      <h3 style="font-weight:800;font-size:.95em"><span class="dot" style="background:#f59e0b;position:relative;top:0"></span>Analytics</h3>
+      <span style="font-size:.72em;color:var(--dim)">Weekly Digest &middot; Organic Accuracy &middot; Trends &middot; Export</span>
+    </div>
+  </div>
+  <div id="analyticsBody" style="margin-top:16px"></div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -2487,6 +2523,220 @@ function renderInsights(){
   el.innerHTML=html;
 }
 
+/* ── Analytics Tab ─────────────────────────────────── */
+function renderAnalytics(){
+  const el=document.getElementById('analyticsBody');
+  if(!el)return;
+  const todayStr=new Date().toISOString().slice(0,10);
+  const pf=state.person;const cat=state.category;
+  const allData=RAW.filter(r=>(pf==='ALL'||r.tsa===pf)&&(cat==='ALL'||r.category===cat));
+  const sortedWeeks=CORE_WEEKS.slice().sort(weekSort);
+  const lastWeek=sortedWeeks.length>0?sortedWeeks[sortedWeeks.length-1]:null;
+  const prevWeek=sortedWeeks.length>1?sortedWeeks[sortedWeeks.length-2]:null;
+  function anCollapse(id,icon,title,body,open){
+    return '<div class="an-section" id="'+id+'"><div class="an-section-hdr'+(open?' open':'')+'" onclick="this.classList.toggle(\'open\');var b=this.nextElementSibling;b.style.display=this.classList.contains(\'open\')?\'block\':\'none\'"><span class="toggle">&#9660;</span><h3>'+icon+' '+title+'</h3></div><div class="an-section-body" style="display:'+(open?'block':'none')+'">'+body+'</div></div>';
+  }
+  function statCard(val,label,color,big){return '<div class="an-stat-card"'+(big?' style="min-width:180px"':'')+'><div class="an-stat-val" style="'+(big?'font-size:2em;':'')+'color:'+color+'">'+val+'</div><div class="an-stat-label">'+label+'</div></div>'}
+  function accColor(v){return v>=.9?'var(--green)':v>=.7?'var(--yellow)':'var(--red)'}
+  let html='';
+
+  /* ── S1: Weekly Digest ── */
+  let s1='';
+  if(lastWeek){
+    const cwData=allData.filter(r=>r.week===lastWeek);
+    const pwData=prevWeek?allData.filter(r=>r.week===prevWeek):[];
+    const cwA=calcAccuracy(cwData),pwA=calcAccuracy(pwData);
+    const delta=(cwA.val!==null&&pwA.val!==null)?(cwA.val-pwA.val):null;
+    s1+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
+    s1+=statCard(fmtWeekPretty(lastWeek),'Current Week','var(--accent)',false);
+    if(cwA.val!==null)s1+=statCard(fmtPct(cwA.val,cwA.den),'Team Accuracy (n='+cwA.den+')',accColor(cwA.val),false);
+    if(delta!==null){const dc=delta>0.05?'var(--green)':delta<-0.05?'var(--red)':'var(--dim)';s1+=statCard((delta>0?'+':'')+(delta*100).toFixed(0)+'%','vs '+fmtWeekPretty(prevWeek),dc,false)}
+    s1+=statCard(cwA.late,'Late This Week','var(--red)',false);
+    if(cwA.orgVal!==null&&cwA.orgDen>0)s1+=statCard(fmtPct(cwA.orgVal,cwA.orgDen),'Organic (excl. retro)','#8b5cf6',false);
+    s1+='</div>';
+    s1+='<table class="audit-table"><thead><tr><th>Person</th><th>This Week</th><th>Last Week</th><th>Delta</th><th>Late</th><th>Retro ETA</th></tr></thead><tbody>';
+    const people=pf!=='ALL'?[pf]:PEOPLE_ALL;
+    people.forEach(p=>{
+      const pc=calcAccuracy(cwData.filter(r=>r.tsa===p));
+      const pp=calcAccuracy(pwData.filter(r=>r.tsa===p));
+      const d=(pc.val!==null&&pp.val!==null)?(pc.val-pp.val):null;
+      const ds=d!==null?((d>0?'+':'')+(d*100).toFixed(0)+'%'):'—';
+      const dc=d===null?'':d>0.05?'color:var(--green);font-weight:700':d<-0.05?'color:var(--red);font-weight:700':'';
+      const rc=cwData.filter(r=>r.tsa===p&&r.retroactiveEta==='yes').length;
+      s1+='<tr><td style="font-weight:600">'+esc(p)+'</td><td>'+fmtPct(pc.val,pc.den)+' <span style="font-size:.72em;color:var(--dim)">(n='+pc.den+')</span></td><td>'+fmtPct(pp.val,pp.den)+'</td><td style="'+dc+'">'+ds+'</td><td style="color:var(--red)">'+pc.late+'</td><td style="'+(rc>0?'color:#d97706;font-weight:700':'')+'">'+rc+'</td></tr>';
+    });
+    s1+='</tbody></table>';
+    const lateNow=allData.filter(r=>r.perf==='Late'&&r.status!=='Done'&&r.eta&&r.eta.slice(0,10)<todayStr);
+    if(lateNow.length>0){
+      s1+='<div style="margin-top:16px;font-weight:700;font-size:.9em;color:var(--red)">&#9888; Late Tickets Requiring Action ('+lateNow.length+')</div>';
+      s1+='<table class="audit-table" style="margin-top:8px"><thead><tr><th>Ticket</th><th>Title</th><th>Person</th><th>Customer</th><th>ETA</th><th>Overdue</th></tr></thead><tbody>';
+      lateNow.sort((a,b)=>(a.eta||'').localeCompare(b.eta||'')).forEach(r=>{
+        const lk=r.ticketUrl?'<a href="'+esc(r.ticketUrl)+'" target="_blank" style="color:var(--accent);font-weight:600">'+esc(r.ticketId||'--')+'</a>':esc(r.ticketId||'--');
+        const ti=(r.focus||'').length>50?esc(r.focus.slice(0,50))+'...':esc(r.focus||'--');
+        const od=daysBetween(r.eta,todayStr);
+        s1+='<tr><td>'+lk+'</td><td title="'+esc(r.focus||'')+'">'+ti+'</td><td>'+esc(r.tsa||'--')+'</td><td>'+esc(r.customer||'--')+'</td><td style="color:var(--red)">'+esc(r.eta||'--')+'</td><td style="color:var(--red);font-weight:700">'+od+'d</td></tr>';
+      });
+      s1+='</tbody></table>';
+    }
+    const streaks=[];
+    (pf!=='ALL'?[pf]:PEOPLE_ALL).forEach(p=>{
+      let c=0;for(let i=sortedWeeks.length-1;i>=0;i--){const a=calcAccuracy(allData.filter(r=>r.tsa===p&&r.week===sortedWeeks[i]));if(a.val!==null&&a.val<0.5&&a.den>=2)c++;else break}
+      if(c>=2)streaks.push({p,c});
+    });
+    if(streaks.length>0){
+      s1+='<div style="margin-top:16px;font-weight:700;font-size:.9em;color:#d97706">&#9888; Accuracy Below 50% for 2+ Consecutive Weeks</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">';
+      streaks.forEach(s=>{s1+='<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;font-size:.85em"><b>'+esc(s.p)+'</b> — '+s.c+' weeks</div>'});
+      s1+='</div>';
+    }
+    const rTotal=allData.filter(r=>r.retroactiveEta==='yes'&&CORE_WEEKS.includes(r.week)).length;
+    const rBase=allData.filter(r=>CORE_WEEKS.includes(r.week)&&(r.perf==='On Time'||r.perf==='Late')).length;
+    if(rTotal>0)s1+='<div style="margin-top:12px;font-size:.78em;color:var(--dim)">&#128269; '+rTotal+' retroactive ETA change'+(rTotal>1?'s':'')+' detected ('+(rBase>0?(rTotal/rBase*100).toFixed(0):0)+'% of measured)</div>';
+  } else {
+    s1='<div style="color:var(--dim);text-align:center;padding:40px">No week data available</div>';
+  }
+  s1+='<div style="margin-top:16px;text-align:right"><button class="an-copy-btn" onclick="copyWeeklyDigest()">&#128203; Copy Digest to Clipboard</button></div>';
+  html+=anCollapse('an-digest','&#128200;','Weekly Digest &mdash; '+(lastWeek?fmtWeekPretty(lastWeek):'N/A'),s1,true);
+
+  /* ── S2: Organic Accuracy ── */
+  let s2='';
+  const coreData=allData.filter(r=>r.week&&isCoreWeek(r.week));
+  const tAcc=calcAccuracy(coreData);
+  s2+='<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">';
+  if(tAcc.val!==null)s2+=statCard(fmtPct(tAcc.val,tAcc.den),'Total Accuracy ('+tAcc.num+'/'+tAcc.den+')',accColor(tAcc.val),true);
+  if(tAcc.orgVal!==null)s2+=statCard(fmtPct(tAcc.orgVal,tAcc.orgDen),'Organic ('+tAcc.orgNum+'/'+tAcc.orgDen+')','#8b5cf6',true);
+  const gap=(tAcc.val!==null&&tAcc.orgVal!==null)?(tAcc.val-tAcc.orgVal):null;
+  if(gap!==null)s2+=statCard((gap>0?'+':'')+(gap*100).toFixed(0)+'%','Inflation Gap',Math.abs(gap)<0.05?'var(--green)':'#d97706',true);
+  s2+='</div>';
+  s2+='<div style="font-size:.78em;color:var(--dim);margin-bottom:12px">Organic excludes tickets where ETA was changed retroactively. Measures prediction accuracy without &ldquo;hindsight corrections.&rdquo;</div>';
+  s2+='<table class="audit-table"><thead><tr><th>Person</th><th>Total Accuracy</th><th>Organic Accuracy</th><th>Gap</th><th>Retro Count</th><th>Retro %</th></tr></thead><tbody>';
+  (pf!=='ALL'?[pf]:PEOPLE_ALL).forEach(p=>{
+    const pa=calcAccuracy(coreData.filter(r=>r.tsa===p));
+    const g=(pa.val!==null&&pa.orgVal!==null)?pa.val-pa.orgVal:null;
+    const rc=coreData.filter(r=>r.tsa===p&&r.retroactiveEta==='yes').length;
+    const rp=pa.den>0?(rc/pa.den*100).toFixed(0):'0';
+    const gs=g===null?'':'color:'+(Math.abs(g)<0.03?'var(--green)':g>0.1?'var(--red)':'#d97706')+';font-weight:700';
+    const ts=pa.val===null?'':'color:'+accColor(pa.val)+';font-weight:700';
+    s2+='<tr><td style="font-weight:600">'+esc(p)+'</td><td style="'+ts+'">'+fmtPct(pa.val,pa.den)+' ('+pa.num+'/'+pa.den+')</td><td style="color:#8b5cf6;font-weight:700">'+fmtPct(pa.orgVal,pa.orgDen)+' ('+pa.orgNum+'/'+pa.orgDen+')</td><td style="'+gs+'">'+(g!==null?(g>0?'+':'')+(g*100).toFixed(0)+'%':'—')+'</td><td>'+rc+'</td><td>'+rp+'%</td></tr>';
+  });
+  s2+='</tbody></table>';
+  html+=anCollapse('an-organic','&#127793;','Organic Accuracy &mdash; Excluding retroactive ETAs',s2,false);
+
+  /* ── S3: Trend Radar ── */
+  let s3='';
+  const tWeeks=sortedWeeks.slice(-8);
+  s3+='<div style="font-size:.78em;color:var(--dim);margin-bottom:16px">Linear regression over last '+tWeeks.length+' weeks. Slope &gt; +5%/wk = improving, &lt; -5% = declining.</div>';
+  s3+='<div class="an-health-grid">';
+  (pf!=='ALL'?[pf]:PEOPLE_ALL).forEach(p=>{
+    const pts=[];
+    tWeeks.forEach((w,i)=>{const a=calcAccuracy(allData.filter(r=>r.tsa===p&&r.week===w));if(a.val!==null&&a.den>=1)pts.push({x:i,y:a.val,w,n:a.den})});
+    let slope=0,cls='stable',arrow='&#8594;',clr='var(--dim)',proj=null;
+    if(pts.length>=3){
+      const n=pts.length,sx=pts.reduce((a,v)=>a+v.x,0),sy=pts.reduce((a,v)=>a+v.y,0);
+      const sxy=pts.reduce((a,v)=>a+v.x*v.y,0),sxx=pts.reduce((a,v)=>a+v.x*v.x,0);
+      const denom=n*sxx-sx*sx;
+      if(denom!==0){slope=(n*sxy-sx*sy)/denom;const b=(sy-slope*sx)/n;proj=Math.max(0,Math.min(1,b+slope*tWeeks.length))}
+      if(slope>0.05){cls='improving';arrow='&#8593;';clr='var(--green)'}
+      else if(slope<-0.05){cls='declining';arrow='&#8595;';clr='var(--red)'}
+    }
+    const latest=pts.length>0?pts[pts.length-1]:null;
+    let spark='<div class="an-spark">';
+    tWeeks.forEach(w=>{const a=calcAccuracy(allData.filter(r=>r.tsa===p&&r.week===w));if(a.val===null){spark+='<div class="an-spark-bar" style="height:2px;background:var(--gray-l)"></div>'}else{const h=Math.max(4,Math.round(a.val*32));spark+='<div class="an-spark-bar" style="height:'+h+'px;background:'+accColor(a.val)+'"></div>'}});
+    spark+='</div>';
+    s3+='<div class="an-health-card"><div class="an-health-top"><span class="an-health-name">'+esc(p)+'</span><span class="an-health-arrow" style="color:'+clr+'">'+arrow+'</span></div>';
+    s3+='<div class="an-health-current" style="color:'+(latest?accColor(latest.y):'var(--dim)')+'">'+(latest?fmtPct(latest.y,latest.n):'—')+'</div>';
+    s3+=spark;
+    s3+='<div class="an-health-meta"><span class="an-health-tag" style="background:'+clr+'22;color:'+clr+'">'+cls+'</span>';
+    if(proj!==null)s3+=' <span style="font-size:.72em;color:var(--dim)">proj: '+fmtPct(proj,1)+'</span>';
+    s3+='</div><div style="font-size:.65em;color:var(--light)">slope: '+(slope*100).toFixed(1)+'%/wk &middot; '+pts.length+' pts</div></div>';
+  });
+  s3+='</div>';
+  html+=anCollapse('an-trends','&#128200;','Trend Radar &mdash; Per-person trajectory',s3,false);
+
+  /* ── S4: Export ── */
+  let s4='<div style="display:flex;gap:12px;flex-wrap:wrap">';
+  s4+='<button class="an-export-btn" onclick="copyWeeklyDigest()"><span style="font-size:1.2em">&#128203;</span><div><b>Copy Weekly Digest</b><div style="font-size:.72em;color:#94a3b8">Markdown for Slack</div></div></button>';
+  s4+='<button class="an-export-btn" onclick="copyTeamReport()"><span style="font-size:1.2em">&#128202;</span><div><b>Copy Full Report</b><div style="font-size:.72em;color:#94a3b8">All analytics as Markdown</div></div></button>';
+  s4+='<button class="an-export-btn" onclick="copyLateTickets()"><span style="font-size:1.2em">&#9888;</span><div><b>Copy Late Tickets</b><div style="font-size:.72em;color:#94a3b8">Action items list</div></div></button>';
+  s4+='</div><div id="anExportPreview" style="margin-top:16px;display:none;background:#0f172a;border-radius:8px;padding:16px;font-family:Consolas,monospace;font-size:.78em;color:#e2e8f0;white-space:pre-wrap;max-height:400px;overflow-y:auto"></div>';
+  html+=anCollapse('an-export','&#128230;','Export &mdash; Copy &amp; Share',s4,false);
+
+  el.innerHTML=html;
+}
+
+function anShowPreview(txt){
+  const p=document.getElementById('anExportPreview');
+  if(!p)return;p.textContent=txt;p.style.display='block';
+  setTimeout(()=>{p.style.display='none'},8000);
+}
+
+function copyWeeklyDigest(){
+  const sw=CORE_WEEKS.slice().sort(weekSort);
+  const lw=sw[sw.length-1],pw=sw.length>1?sw[sw.length-2]:null;
+  if(!lw)return;
+  const cat=state.category;
+  const all=RAW.filter(r=>(cat==='ALL'||r.category===cat));
+  const cw=all.filter(r=>r.week===lw),pws=pw?all.filter(r=>r.week===pw):[];
+  const ca=calcAccuracy(cw),pa=calcAccuracy(pws);
+  const d=(ca.val!==null&&pa.val!==null)?(ca.val-pa.val):null;
+  let md='## Weekly KPI Digest — '+fmtWeekPretty(lw)+'\n\n';
+  md+='**Team Accuracy:** '+fmtPct(ca.val,ca.den)+' ('+ca.num+'/'+ca.den+')';
+  if(d!==null)md+=' | Delta: '+(d>0?'+':'')+(d*100).toFixed(0)+'%';
+  md+='\n**Organic:** '+fmtPct(ca.orgVal,ca.orgDen)+' (excl. retro ETA)\n\n';
+  md+='| Person | This Week | Last Week | Delta | Late |\n|--------|-----------|-----------|-------|------|\n';
+  PEOPLE_ALL.forEach(p=>{
+    const pc=calcAccuracy(cw.filter(r=>r.tsa===p));
+    const pp=calcAccuracy(pws.filter(r=>r.tsa===p));
+    const dd=(pc.val!==null&&pp.val!==null)?(pc.val-pp.val):null;
+    md+='| '+p+' | '+fmtPct(pc.val,pc.den)+' | '+fmtPct(pp.val,pp.den)+' | '+(dd!==null?(dd>0?'+':'')+(dd*100).toFixed(0)+'%':'—')+' | '+pc.late+' |\n';
+  });
+  const late=all.filter(r=>r.perf==='Late'&&r.status!=='Done'&&r.eta);
+  if(late.length>0){md+='\n**Late Tickets ('+late.length+'):**\n';late.forEach(r=>{md+='- '+r.ticketId+': '+(r.focus||'')+' — '+r.tsa+' — ETA: '+r.eta+'\n'})}
+  navigator.clipboard.writeText(md).then(()=>anShowPreview(md));
+}
+
+function copyTeamReport(){
+  const sw=CORE_WEEKS.slice().sort(weekSort);
+  const lw=sw[sw.length-1];
+  const cat=state.category;
+  const all=RAW.filter(r=>(cat==='ALL'||r.category===cat));
+  const core=all.filter(r=>r.week&&isCoreWeek(r.week));
+  const tAcc=calcAccuracy(core);
+  let md='# Team KPI Report — '+fmtWeekPretty(lw||'')+'\n\n';
+  md+='## Overall\n- **Accuracy:** '+fmtPct(tAcc.val,tAcc.den)+' ('+tAcc.num+'/'+tAcc.den+')\n';
+  md+='- **Organic:** '+fmtPct(tAcc.orgVal,tAcc.orgDen)+' ('+tAcc.orgNum+'/'+tAcc.orgDen+')\n';
+  const gap=(tAcc.val!==null&&tAcc.orgVal!==null)?tAcc.val-tAcc.orgVal:null;
+  if(gap!==null)md+='- **Inflation Gap:** '+(gap>0?'+':'')+(gap*100).toFixed(0)+'%\n';
+  md+='\n## Per-Person Accuracy\n| Person | Total | Organic | Gap | Trend |\n|--------|-------|---------|-----|-------|\n';
+  const tWeeks=sw.slice(-8);
+  PEOPLE_ALL.forEach(p=>{
+    const pa=calcAccuracy(core.filter(r=>r.tsa===p));
+    const g=(pa.val!==null&&pa.orgVal!==null)?pa.val-pa.orgVal:null;
+    const pts=[];tWeeks.forEach((w,i)=>{const a=calcAccuracy(all.filter(r=>r.tsa===p&&r.week===w));if(a.val!==null&&a.den>=1)pts.push({x:i,y:a.val})});
+    let trend='stable';
+    if(pts.length>=3){const n=pts.length,sx=pts.reduce((a,v)=>a+v.x,0),sy=pts.reduce((a,v)=>a+v.y,0),sxy=pts.reduce((a,v)=>a+v.x*v.y,0),sxx=pts.reduce((a,v)=>a+v.x*v.x,0),dn=n*sxx-sx*sx;if(dn!==0){const sl=(n*sxy-sx*sy)/dn;if(sl>0.05)trend='improving';else if(sl<-0.05)trend='declining'}}
+    md+='| '+p+' | '+fmtPct(pa.val,pa.den)+' | '+fmtPct(pa.orgVal,pa.orgDen)+' | '+(g!==null?(g>0?'+':'')+(g*100).toFixed(0)+'%':'—')+' | '+trend+' |\n';
+  });
+  const late=all.filter(r=>r.perf==='Late'&&r.status!=='Done'&&r.eta);
+  if(late.length>0){md+='\n## Late Tickets ('+late.length+')\n';late.forEach(r=>{md+='- **'+r.ticketId+'**: '+(r.focus||'')+' — '+r.tsa+' (ETA: '+r.eta+')\n'})}
+  navigator.clipboard.writeText(md).then(()=>anShowPreview(md));
+}
+
+function copyLateTickets(){
+  const todayStr=new Date().toISOString().slice(0,10);
+  const cat=state.category;
+  const late=RAW.filter(r=>(cat==='ALL'||r.category===cat)&&r.perf==='Late'&&r.status!=='Done'&&r.eta&&r.eta.slice(0,10)<todayStr);
+  if(late.length===0){anShowPreview('No late tickets found.');return}
+  let md='## Late Tickets — Action Required ('+late.length+')\n\n';
+  late.sort((a,b)=>(a.tsa||'').localeCompare(b.tsa||'')||(a.eta||'').localeCompare(b.eta||''));
+  let curPerson='';
+  late.forEach(r=>{
+    if(r.tsa!==curPerson){curPerson=r.tsa;md+='\n### '+curPerson+'\n'}
+    const od=daysBetween(r.eta,todayStr);
+    md+='- [ ] **'+r.ticketId+'** '+(r.focus||'')+' — '+r.customer+' — ETA: '+r.eta+' ('+od+'d overdue)\n';
+  });
+  navigator.clipboard.writeText(md).then(()=>anShowPreview(md));
+}
+
 /* ── Init ───────────────────────────────────────────── */
 function init(){
   const fp=document.getElementById('fPerson');
@@ -2780,8 +3030,9 @@ function init(){
     /* Insights collapse uses display:none (same as Gantt — for sticky compatibility) */
     if(tabName==='insights'){renderInsights()}
     if(tabName==='implementation'){renderImplementation()}
-    /* Hide summary sections on Gantt/Scrum/Insights/Implementation — show only on KPI tabs */
-    const isFullscreen=tabName==='gantt'||tabName==='scrum'||tabName==='insights'||tabName==='implementation';
+    if(tabName==='analytics'){renderAnalytics()}
+    /* Hide summary sections on Gantt/Scrum/Insights/Implementation/Analytics — show only on KPI tabs */
+    const isFullscreen=tabName==='gantt'||tabName==='scrum'||tabName==='insights'||tabName==='implementation'||tabName==='analytics';
     const custSection=document.getElementById('customerKPISection');
     const topStrip=document.getElementById('topStrip');
     const memberCards=document.getElementById('memberCards');

@@ -408,7 +408,7 @@ else:
             if len(all_kpi_issues) < old_count * 0.5:
                 print(f"  CRITICAL: New count ({len(all_kpi_issues)}) is <50% of previous ({old_count}). Skipping save to protect data.")
                 sys.exit(1)
-        except:
+        except (json.JSONDecodeError, IOError, ValueError):
             pass
     atomic_write_json(kpi_path, all_kpi_issues)
     atomic_write_json(raccoons_compat_path, all_kpi_issues)  # backward compat

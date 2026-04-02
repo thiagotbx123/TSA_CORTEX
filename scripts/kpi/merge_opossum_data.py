@@ -273,25 +273,13 @@ def week_range(date_str):
 
 
 def extract_customer(title):
-    """Extract customer from [brackets] in title."""
+    """Extract customer from [brackets] in title. Uses shared CUSTOMER_MAP."""
     m = re.match(r'\[([^\]]+)\]', title)
     if m:
         cust = m.group(1).strip()
-        # L3: Use exact match (==) instead of substring (in) to avoid false positives
-        cust_map = {
-            'archer': 'Archer', 'gong': 'Gong', 'gem': 'Gem',
-            'people ai': 'People.ai', 'people.ai': 'People.ai',
-            'gainsight': 'Staircase',  # M6: unified to Staircase
-            'staircase': 'Staircase',
-            'mailchimp': 'Mailchimp',
-            'quickbooks': 'QuickBooks', 'qbo': 'QuickBooks',
-            'intuit quickbooks': 'QuickBooks', 'intuit': 'QuickBooks',
-            'de team': 'Internal',
-            'spike': None,
-        }
         cust_lower = cust.lower().strip()
-        if cust_lower in cust_map:
-            return cust_map[cust_lower] or ''
+        if cust_lower in CUSTOMER_MAP:
+            return CUSTOMER_MAP[cust_lower] or ''
         return cust
     return ''
 
@@ -312,49 +300,17 @@ def map_status(linear_status):
     return mapping.get(linear_status, linear_status)
 
 
-def calc_perf(status, eta, delivery):
-    """Calculate performance label.
-    L5: Removed unused date_add parameter."""
+def _placeholder_perf(status):
+    """A30-003: Lightweight placeholder — normalize_data.py is the single authority for perf calc.
+    This only sets obvious non-calculated statuses; everything else gets '' for normalize to handle."""
     if status == 'Canceled':
         return 'N/A'
-    # A09: B.B.C (Blocked By Customer) must not be penalized
-    if status == 'B.B.C' or status == 'Blocked':
+    if status in ('B.B.C', 'Blocked'):
         return 'Blocked'
-    # A32: Paused / On Hold statuses
-    if status == 'Paused' or status == 'On Hold':
+    if status in ('Paused', 'On Hold'):
         return 'On Hold'
-    if not eta:
-        return 'No ETA'
-    if status == 'Done':
-        if not delivery:
-            return 'No Delivery Date'
-        try:
-            d_eta = datetime.strptime(eta, '%Y-%m-%d')
-            d_del = datetime.strptime(delivery[:10], '%Y-%m-%d')
-            diff = (d_del - d_eta).days
-            if diff <= 0:
-                return 'On Time'
-            else:
-                return 'Late'
-        except ValueError:
-            return 'N/A'
-    else:
-        try:
-            d_eta = datetime.strptime(eta, '%Y-%m-%d').date()
-            if d_eta < datetime.now().date():
-                return 'Late'
-            else:
-                return 'On Track'
-        except ValueError:
-            return 'N/A'
+    return ''
 
-
-REAL_CUSTOMERS = {
-    'QuickBooks', 'Gong', 'Archer', 'Siteimprove', 'Mailchimp', 'Gem', 'Apollo',
-    'Tropic', 'Brevo', 'Tabs', 'People.ai', 'CallRail', 'Gainsight', 'Staircase',
-    'WFS', 'Dixa', 'Assignar', 'Syncari', 'Onyx', 'CurbWaste', 'BILL', 'Bill',
-    'Zuper', 'HockeyStack', 'Outreach', 'mParticle', 'Monarch',
-}
 
 def determine_category(customer, title):
     """Determine Internal vs External.
@@ -405,7 +361,8 @@ def _compute_last_touch(hist_fields, comments):
 
 
 # ── Convert Linear issues to dashboard records ──
-from team_config import PERSON_MAP, PERSON_MAP_BY_ID  # M14: shared config
+from team_config import (PERSON_MAP, PERSON_MAP_BY_ID, CUSTOMER_MAP,
+                         PROJECT_TO_CUSTOMER, LABEL_TO_CUSTOMER, REAL_CUSTOMERS)
 LINEAR_TSA_NAMES = set(PERSON_MAP.values())
 
 # D.LIE19: Identify parent tickets (have subtasks) — exclude from KPI
@@ -471,33 +428,12 @@ for iss in issues:
     customer = extract_customer(title)
     # D.LIE18: Fallback to Linear project name when title has no [bracket] customer
     if not customer and iss.get('project'):
-        proj = iss['project']
-        proj_map = {
-            'qbo': 'QuickBooks', '[quickbook] data gen': 'QuickBooks',
-            'intuit quickbooks': 'QuickBooks', '[intuit quickbooks]': 'QuickBooks',
-            'archer': 'Archer', 'gong implementation': 'Gong', '[gong]': 'Gong',
-            '[gem]': 'Gem', '[tabs] integration': 'Tabs',
-            '[tropic] implementation': 'Tropic', '[brevo] integration': 'Brevo',
-            '[mailchimp] integration': 'Mailchimp', 'mailchimp': 'Mailchimp',
-            '[people.ai] integration': 'People.ai',
-            '[wfs] workforce solutions': 'WFS',
-            '[gainsight] staircase ai integration': 'Staircase',
-            'gainsight staircase': 'Staircase',
-            '[siteimprove] integration': 'Siteimprove', 'siteimprove': 'Siteimprove',
-            '[apollo] integration': 'Apollo', 'apollo': 'Apollo',
-            'de team': 'Internal',
-        }
-        proj_lower = proj.lower().strip()
-        customer = proj_map.get(proj_lower, proj)
-    # Also check labels for customer hints
+        proj_lower = iss['project'].lower().strip()
+        customer = PROJECT_TO_CUSTOMER.get(proj_lower, iss['project'])
     if not customer:
-        labels = iss.get('labels', [])
-        label_map = {'QBO': 'QuickBooks', 'WFS': 'WFS', 'Gong': 'Gong', 'Archer': 'Archer',
-                     'Gem': 'Gem', 'Mailchimp': 'Mailchimp', 'Tropic': 'Tropic', 'Brevo': 'Brevo',
-                     'Tabs': 'Tabs', 'Siteimprove': 'Siteimprove', 'Apollo': 'Apollo'}
-        for lbl in labels:
-            if lbl in label_map:
-                customer = label_map[lbl]
+        for lbl in iss.get('labels', []):
+            if lbl in LABEL_TO_CUSTOMER:
+                customer = LABEL_TO_CUSTOMER[lbl]
                 break
     category = determine_category(customer, title)
 
@@ -524,7 +460,7 @@ for iss in issues:
         effective_delivery = hist_fields['inReviewDate']
         review_delivery_adjusted += 1
 
-    perf = calc_perf(status, due, effective_delivery)
+    perf = _placeholder_perf(status)
 
     # hist_fields already extracted above (for originalAssigneeId)
 

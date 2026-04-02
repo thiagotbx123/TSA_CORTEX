@@ -16,11 +16,16 @@ except Exception:
     pass
 
 def _safe_stream():
-    """Ensure stdout/stderr are writable — pythonw sets them to None."""
+    """Ensure stdout/stderr are writable — pythonw sets them to None.
+    Uses log rotation: 5MB max, 3 backups."""
+    from logging.handlers import RotatingFileHandler
+    import logging
     for attr in ('stdout', 'stderr'):
         stream = getattr(sys, attr, None)
         if stream is None:
             try:
+                handler = RotatingFileHandler(
+                    _LOG_PATH, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8')
                 f = open(_LOG_PATH, 'a', encoding='utf-8')
             except Exception:
                 f = io.StringIO()
@@ -68,8 +73,10 @@ _kill_old_instance()
 
 # ─── Config ───
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVE_DIR = os.path.join(os.path.expanduser('~'), 'Downloads', 'kpi-serve')
-DASHBOARD_SRC = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
+sys.path.insert(0, SCRIPT_DIR)
+from team_config import OUTPUT_DIR
+SERVE_DIR = os.path.join(OUTPUT_DIR, 'kpi-serve')
+DASHBOARD_SRC = os.path.join(OUTPUT_DIR, 'KPI_DASHBOARD.html')
 ORCHESTRATE = os.path.join(SCRIPT_DIR, 'orchestrate.py')
 ICO_PATH = os.path.join(SCRIPT_DIR, 'kpi_dashboard.ico')
 NGROK_URL = 'uneffused-hoyt-unpunctually.ngrok-free.dev'
@@ -191,7 +198,7 @@ def start_http():
     os.makedirs(SERVE_DIR, exist_ok=True)
     handler = partial(QuietHandler, directory=SERVE_DIR)
     try:
-        http_server = HTTPServer(('0.0.0.0', HTTP_PORT), handler)
+        http_server = HTTPServer(('127.0.0.1', HTTP_PORT), handler)
         t = threading.Thread(target=http_server.serve_forever, daemon=True)
         t.start()
         time.sleep(1)
@@ -217,7 +224,8 @@ def start_ngrok():
         return
     try:
         ngrok_proc = subprocess.Popen(
-            ['ngrok', 'http', f'--url={NGROK_URL}', str(HTTP_PORT)],
+            ['ngrok', 'http', f'--url={NGROK_URL}',
+             '--basic-auth=kpi:raccoons2026', str(HTTP_PORT)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             creationflags=subprocess.CREATE_NO_WINDOW
         )

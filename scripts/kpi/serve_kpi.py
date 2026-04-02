@@ -22,7 +22,9 @@ from datetime import datetime
 PORT = int(sys.argv[sys.argv.index('--port') + 1]) if '--port' in sys.argv else 8787
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(SCRIPT_DIR, '..', '..')
-DASHBOARD_PATH = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from team_config import OUTPUT_DIR
+DASHBOARD_PATH = os.path.join(OUTPUT_DIR, 'KPI_DASHBOARD.html')
 PYTHON = sys.executable
 
 

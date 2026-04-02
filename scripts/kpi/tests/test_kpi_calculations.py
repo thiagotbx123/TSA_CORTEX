@@ -1,9 +1,9 @@
 """Tests for KPI pipeline calculations.
 
 Covers functions from:
-  - kpi/merge_opossum_data.py: calc_perf, date_to_week, week_range, extract_customer,
+  - kpi/merge_opossum_data.py: date_to_week, week_range, extract_customer,
                                extract_history_fields
-  - kpi/normalize_data.py: calc_perf_with_history
+  - kpi/normalize_data.py: calc_perf (single authority), calc_perf_with_history
 
 Strategy: merge_opossum_data.py and normalize_data.py both execute module-level I/O
 on import. We patch builtins.open and related calls so the modules can be imported
@@ -67,7 +67,8 @@ _merge = _load_merge_module()
 _norm = _load_normalize_module()
 
 # Pull functions out of the loaded modules
-calc_perf = _merge.calc_perf
+# A30-003: calc_perf is now ONLY in normalize (single authority)
+calc_perf = _norm.calc_perf
 date_to_week = _merge.date_to_week
 week_range = _merge.week_range
 extract_customer = _merge.extract_customer
@@ -116,6 +117,16 @@ class TestCalcPerf(unittest.TestCase):
     def test_done_none_eta(self):
         result = calc_perf('Done', None, '2026-03-18')
         self.assertEqual(result, 'No ETA')
+
+    # ── Not Started (Backlog/Todo/Triage without ETA) ────────────────────────
+
+    def test_backlog_no_eta_is_not_started(self):
+        result = calc_perf('Backlog', '', '')
+        self.assertEqual(result, 'Not Started')
+
+    def test_triage_no_eta_is_not_started(self):
+        result = calc_perf('Triage', '', '')
+        self.assertEqual(result, 'Not Started')
 
     # ── Canceled ──────────────────────────────────────────────────────────────
 

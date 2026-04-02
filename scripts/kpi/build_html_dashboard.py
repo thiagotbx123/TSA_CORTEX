@@ -29,9 +29,9 @@ SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
 
 # Import team config for KPI_IDS injection
-from team_config import PERSON_MAP_BY_ID
+from team_config import PERSON_MAP_BY_ID, OUTPUT_DIR
 KPI_IDS_JSON = json.dumps(list(PERSON_MAP_BY_ID.keys()))
-OUTPUT = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
+OUTPUT = os.path.join(OUTPUT_DIR, 'KPI_DASHBOARD.html')
 
 # L2: Validate JSON before processing
 try:
@@ -58,6 +58,13 @@ timeline_json_safe = timeline_json.replace('</script>', '<\\/script>').replace('
 
 # M11: Record build timestamp for staleness detection
 build_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+# A37-002: Use API cache file mtime as "last refresh" indicator instead of build date
+_kpi_cache = os.path.join(SCRIPT_DIR, '..', '_kpi_all_members.json')
+if os.path.exists(_kpi_cache):
+    _cache_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(_kpi_cache))
+    api_refresh_date = _cache_mtime.strftime('%Y-%m-%d %H:%M')
+else:
+    api_refresh_date = 'unknown'
 # Find the most recent dateAdd in data for staleness comparison (only past/present dates)
 data_dates = [r.get('dateAdd', '') for r in data_raw
               if r.get('dateAdd', '') and len(r.get('dateAdd', '')) >= 10 and r['dateAdd'][:10] <= build_date[:10]]
@@ -540,6 +547,7 @@ const RAW = __DATA__;
 const TIMELINE = __TIMELINE__;
 const BUILD_DATE = '__DATE__';
 const LATEST_DATA = '__LATEST_DATA__';
+const API_REFRESH = '__API_REFRESH__';
 
 /* ── Helpers ─────────────────────────────────────────── */
 function parseWeek(w){const m=w.match(/(\d{2})-(\d{2})\s+W\.(\d+)/);return m?[+m[1],+m[2],+m[3]]:[99,99,99]}
@@ -2815,7 +2823,7 @@ init();
 </html>"""
 
 # Inject data and date
-html = HTML.replace('__DATA__', data_json_safe).replace('__TIMELINE__', timeline_json_safe).replace('__KPI_IDS__', KPI_IDS_JSON).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('${BUILD_DATE}', build_date)
+html = HTML.replace('__DATA__', data_json_safe).replace('__TIMELINE__', timeline_json_safe).replace('__KPI_IDS__', KPI_IDS_JSON).replace('__DATE__', build_date).replace('__LATEST_DATA__', latest_data_date).replace('__API_REFRESH__', api_refresh_date).replace('${BUILD_DATE}', build_date)
 
 # C3: Atomic write
 tmp_path = OUTPUT + '.tmp'

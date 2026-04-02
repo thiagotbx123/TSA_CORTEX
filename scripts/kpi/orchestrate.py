@@ -122,7 +122,9 @@ def main():
     print(f"  Finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     if all_ok:
-        dashboard_path = os.path.join(os.path.expanduser('~'), 'Downloads', 'KPI_DASHBOARD.html')
+        sys.path.insert(0, SCRIPT_DIR)
+        from team_config import OUTPUT_DIR
+        dashboard_path = os.path.join(OUTPUT_DIR, 'KPI_DASHBOARD.html')
         print(f"\n  Dashboard: {dashboard_path}")
 
     sys.exit(0 if all_ok else 1)

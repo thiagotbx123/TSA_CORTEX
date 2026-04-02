@@ -14,6 +14,10 @@ from collections import Counter
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
 
+from team_config import (CUSTOMER_MAP, REAL_CUSTOMERS, NOT_REAL_CLIENTS, FORCE_EXTERNAL,
+                         PERF_ON_TIME, PERF_LATE, PERF_ON_TRACK, PERF_NO_ETA, PERF_NA,
+                         PERF_BLOCKED, PERF_ON_HOLD, PERF_NOT_STARTED, PERF_NO_DELIVERY)
+
 # L2: Validate JSON before processing
 try:
     with open(DATA_PATH, 'r', encoding='utf-8') as f:
@@ -36,35 +40,7 @@ REQUIRED = {
     'weekByStart': '', 'weekRangeByStart': '',
 }
 
-# M6: Unified customer mapping — Staircase is the correct name (Gabi's reference)
-CUSTOMER_MAP = {
-    'qbo': 'QuickBooks', 'quickbooks': 'QuickBooks',
-    'intuit quickbooks': 'QuickBooks', 'intuit': 'QuickBooks',
-    'intuit ies tco/keystone construction': 'QuickBooks',
-    'qbo-wfs': 'WFS',
-    'gong': 'Gong',
-    'gem': 'Gem',
-    'mailchimp': 'Mailchimp',
-    'people.ai': 'People.ai',
-    'siteimprove': 'Siteimprove',
-    'brevo': 'Brevo',
-    'archer': 'Archer',
-    'tropic': 'Tropic',
-    'apollo': 'Apollo',
-    'callrail': 'CallRail',
-    'hockeystack': 'HockeyStack',
-    'wfs': 'WFS',
-    'staircase': 'Staircase',
-    'coda': 'Coda',
-    'general': 'General',
-    'outreach': 'Outreach',
-    'gainsight': 'Staircase',  # M6: Gainsight IS Staircase
-    'tbx': 'TBX',
-    'tabs': 'Tabs',
-    'curbwaste': 'CurbWaste',
-    'zuper': 'Zuper', '[zuper] integration': 'Zuper',
-    'bill': 'Bill',
-}
+## CUSTOMER_MAP, NOT_REAL_CLIENTS, FORCE_EXTERNAL imported from team_config
 
 # Month maps (Portuguese + English + typos)
 MONTH_MAP = {
@@ -79,23 +55,7 @@ INVALID_DATES = {'tbd', 'n/a', '-', 'na', 'none', ''}
 # M8: Blocked By Customer status normalization
 BBC_VARIANTS = {'B.B.C.', 'B.B.C', 'BBC', 'bbc', 'b.b.c.', 'b.b.c'}
 
-# Not real clients — Internal contexts
-NOT_REAL_CLIENTS = {
-    'Waki', 'TBX', 'Routine', 'General', 'Coda', 'All',
-    'Internal', "Internal \u2013 Sam's Board Meeting",
-    '[Internal] TSA Operations', '[Internal] TSA Shared Repo', '[TSA] Diego Internal',
-    'DE Team', 'Worklog', 'TSA', 'Bug',
-    'Demo Scripts', 'Surface Editor', 'Sandbox UX', 'Sandbox Improvements',
-    'Sandbox Preview', 'Legacy Sandbox Preview', 'Tracking Events',
-    'Bulk Invite', 'Email Notifications', 'Basic Admin Permissions',
-    'Deals UX Modernization', 'Self-Serve Demo Environments Provisioning',
-    'UX for Partner Account Provisioning', 'Presenter Mode', 'Shortcut URL',
-    'Project noFrame', 'HISTORY',
-    '[ChurnZero] Integration',
-}
-
-# Real clients that must be External
-FORCE_EXTERNAL = {'Tabs'}
+## NOT_REAL_CLIENTS and FORCE_EXTERNAL imported from team_config
 
 fixes = {'fields_added': 0, 'urls_constructed': 0, 'source_tagged': 0, 'weeks_fixed': 0}
 
@@ -109,50 +69,39 @@ def infer_year(month, context_date=None):
 
 
 def calc_perf(status, eta, delivery):
-    """D.LIE7: Calculate performance label from current data (legacy fallback)."""
+    """D.LIE7: Calculate performance label from current data (single authority)."""
     if status == 'Canceled':
-        return 'N/A'
-    # D.LIE10: B.B.C. (Blocked By Customer) should not be penalized
-    if status == 'B.B.C':
-        return 'Blocked'
-    # A32: Paused / On Hold tasks are not active — treat as On Hold (not Late)
+        return PERF_NA
+    if status in ('B.B.C', 'Blocked'):
+        return PERF_BLOCKED
     if status in ('Paused', 'On Hold'):
-        return 'On Hold'
+        return PERF_ON_HOLD
     if not eta:
-        # D.LIE17: Not-started tickets without ETA = N/A (not actionable yet)
-        # Only flag "No ETA" for active/completed work
         if status in ('Backlog', 'Todo', 'Triage'):
-            return 'Not Started'
-        return 'No ETA'
+            return PERF_NOT_STARTED
+        return PERF_NO_ETA
     if status == 'Done':
         if not delivery:
-            return 'No Delivery Date'
+            return PERF_NO_DELIVERY
         try:
             d_eta = datetime.strptime(eta[:10], '%Y-%m-%d')
             d_del = datetime.strptime(delivery[:10], '%Y-%m-%d')
-            diff = (d_del - d_eta).days
-            if diff <= 0:
-                return 'On Time'
-            else:
-                return 'Late'
+            return PERF_ON_TIME if (d_del - d_eta).days <= 0 else PERF_LATE
         except ValueError:
-            return 'N/A'
+            return PERF_NA
     else:
         try:
             d_eta = datetime.strptime(eta[:10], '%Y-%m-%d').date()
-            if d_eta < datetime.now().date():
-                return 'Late'
-            else:
-                return 'On Track'
+            return PERF_LATE if d_eta < datetime.now().date() else PERF_ON_TRACK
         except ValueError:
-            return 'N/A'
+            return PERF_NA
 
 
 def calc_perf_with_history(record):
     """Activity-based perf calculation using Linear issue history.
 
     Uses deliveryDate (first In Review/Done) instead of completedAt,
-    and finalEta (current dueDate) for comparison. Falls back to
+    and originalEta (first ETA committed) for comparison. Falls back to
     legacy calc_perf when history fields are missing.
     """
     status = record.get('status', '')
@@ -160,63 +109,44 @@ def calc_perf_with_history(record):
     delivery_date = record.get('deliveryDate', '')
     in_review_date = record.get('inReviewDate', '')
 
-    # Preserve special statuses
     if status == 'Canceled':
-        return 'N/A'
-    if status == 'B.B.C':
-        return 'Blocked'
-    # A32: Paused / On Hold tasks are not active — treat as On Hold (not Late)
+        return PERF_NA
+    if status in ('B.B.C', 'Blocked'):
+        return PERF_BLOCKED
     if status in ('Paused', 'On Hold'):
-        return 'On Hold'
+        return PERF_ON_HOLD
     if not final_eta:
         if status in ('Backlog', 'Todo', 'Triage'):
-            return 'Not Started'
-        return 'No ETA'
+            return PERF_NOT_STARTED
+        return PERF_NO_ETA
 
     today = datetime.now().date()
 
     try:
         d_eta = datetime.strptime(final_eta[:10], '%Y-%m-%d').date()
     except ValueError:
-        return 'N/A'
+        return PERF_NA
 
-    # Case 1: Has a deliveryDate (first In Review or Done transition)
     if delivery_date:
         try:
             d_del = datetime.strptime(delivery_date[:10], '%Y-%m-%d').date()
-            if d_del <= d_eta:
-                return 'On Time'
-            else:
-                return 'Late'
+            return PERF_ON_TIME if d_del <= d_eta else PERF_LATE
         except ValueError:
             pass
 
-    # Case 2: No deliveryDate, but is In Review — check when it moved there
-    if not delivery_date and status == 'In Progress' and in_review_date:
-        # status mapped to In Progress but actually In Review in Linear
-        pass
     if not delivery_date and in_review_date:
         try:
             d_review = datetime.strptime(in_review_date[:10], '%Y-%m-%d').date()
             if today > d_eta:
-                # Past ETA — was the In Review move on time?
-                if d_review <= d_eta:
-                    return 'On Time'
-                else:
-                    return 'Late'
+                return PERF_ON_TIME if d_review <= d_eta else PERF_LATE
             else:
-                return 'On Track'
+                return PERF_ON_TRACK
         except ValueError:
             pass
 
-    # Case 3: No deliveryDate AND no In Review — open ticket
     if not delivery_date and not in_review_date:
-        if d_eta < today:
-            return 'Late'
-        else:
-            return 'On Track'
+        return PERF_LATE if d_eta < today else PERF_ON_TRACK
 
-    # Fallback to legacy
     return calc_perf(status, final_eta, record.get('delivery', ''))
 
 
@@ -379,9 +309,9 @@ for r in data:
         fixes['bbc_normalized'] += 1
 
     # M3: Canceled tasks should have perf=N/A regardless of previous value
-    if r.get('status') == 'Canceled' and r.get('perf') not in ('N/A', ''):
+    if r.get('status') == 'Canceled' and r.get('perf') not in (PERF_NA, ''):
         old_perf = r['perf']
-        r['perf'] = 'N/A'
+        r['perf'] = PERF_NA
         fixes.setdefault('canceled_perf_fixed', 0)
         fixes['canceled_perf_fixed'] += 1
 
@@ -420,10 +350,7 @@ for r in data:
             is_admin_close = True
 
     if is_admin_close:
-        if r.get('eta'):
-            new_perf = 'On Time'
-        else:
-            new_perf = 'N/A'
+        new_perf = PERF_ON_TIME if r.get('eta') else PERF_NA
         fixes.setdefault('admin_close_fixed', 0)
         fixes['admin_close_fixed'] += 1
     elif r.get('source') == 'linear' and (r.get('deliveryDate') or r.get('inReviewDate')):

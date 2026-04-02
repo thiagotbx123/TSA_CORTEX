@@ -368,7 +368,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="audit-section" style="margin-top:0">
     <div class="audit-header collapse-toggle">
       <span class="toggle">&#9660;</span>
-      <h3><span class="dot" style="background:var(--dim);position:relative;top:0"></span>Implementation Reliability <span style="font-size:.6em;background:var(--gray-l);color:var(--dim);padding:2px 8px;border-radius:4px;font-weight:700">NOT ACTIVE</span><span class="info-btn" onmouseenter="showTip(event,'<b>Implementation Reliability — NOT ACTIVE</b><br><span class=tip-label>Formula</span>: Done without Rework / Total Done<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>Rework</span>: Flagged via rework:implementation label in Linear<br><br><b style=color:#fbbf24>Status: No rework labels have been applied yet.</b><br>This metric will become active once the team starts using the rework:implementation label on Linear tickets that required rework after delivery.')" onmouseleave="hideTip()" onclick="event.stopPropagation()">?</span></h3>
+      <h3><span class="dot" style="background:var(--green);position:relative;top:0"></span>Implementation Reliability <span class="info-btn" onmouseenter="showTip(event,'<b>Implementation Reliability</b><br><span class=tip-label>Formula</span>: Done without Rework / Total Done<br><span class=tip-label>Target</span>: &gt;90%<br><span class=tip-label>Rework</span>: Flagged via rework:implementation label in Linear')" onmouseleave="hideTip()" onclick="event.stopPropagation()">?</span></h3>
     </div>
     <div class="audit-body">
       <div class="trend-wrap" id="trend-reliability"></div>
@@ -908,8 +908,8 @@ function renderKPIStrip(){
   const v=calcVelocity(data);
   const r=calcReliability(data);
 
-  /* C1: Check if rework labels are actually in use */
-  const hasReworkData=data.some(x=>x.rework==='yes');
+  /* C1: Check if rework labels are actually in use (check RAW to include future weeks) */
+  const hasReworkData=RAW.some(x=>x.rework==='yes');
 
   /* Activity KPI */
   const act=calcActivity(data);
@@ -1176,6 +1176,10 @@ function renderCustomerKPI(){
     if(!r.week||!isCoreWeek(r.week))return false;
     if(state.person!=='ALL'&&r.tsa!==state.person)return false;
     if(!r.customer)return false;
+    if(state.month!=='ALL'){
+      const[y,m]=parseWeek(r.week);
+      if(monthLabel(y,m)!==state.month)return false;
+    }
     if(isAll)return true;
     if(isInt)return r.category==='Internal'&&INTERNAL_CONTEXTS.has(r.customer);
     return r.category==='External';
@@ -1225,7 +1229,8 @@ function getAuditRows(){
   if(fCustomer!=='ALL')data=data.filter(r=>(r.customer||'')===(fCustomer==='(empty)'?'':fCustomer));
   return data.map((r,i)=>{
     const start=r.startedAt||r.dateAdd;const dur=(r.delivery&&start)?daysBetween(start,r.delivery):null;
-    return [i+1, r.tsa||'—', r.week||'—', r.ticketId||'—', r.focus||'—', r.status||'—', r.category||'—', r.demandType||'—', r.customer||'—', r.dateAdd||'—', r.eta||'—', r.delivery||'—', r.perf||'—', r.rework==='yes'?'YES':'—', dur!==null&&dur>=0?dur+'d':'—', r.source||'—', r.ticketUrl||'', r.milestone||'—', r.parentId||'—'];
+    const origEta=r.originalEta||'—';const finalEta=r.eta||'—';const etaChg=r.etaChanges||0;
+    return [i+1, r.tsa||'—', r.week||'—', r.ticketId||'—', r.focus||'—', r.status||'—', r.category||'—', r.demandType||'—', r.customer||'—', r.dateAdd||'—', origEta, finalEta, etaChg>0?etaChg+'x':'—', r.delivery||'—', r.perf||'—', r.rework==='yes'?'YES':'—', dur!==null&&dur>=0?dur+'d':'—', r.source||'—', r.ticketUrl||'', r.milestone||'—', r.parentId||'—'];
   });
 }
 function populateAuditFilters(){
@@ -1254,7 +1259,7 @@ function populateAuditFilters(){
   selC.value=curC;
 }
 
-const AUDIT_COLS=['#','Person','Week','Ticket','Focus/Task','Status','Category','Demand Type','Customer','Date Added','ETA','Delivery','Performance','Rework','Duration','Source','Ticket URL','Milestone','Parent'];
+const AUDIT_COLS=['#','Person','Week','Ticket','Focus/Task','Status','Category','Demand Type','Customer','Date Added','Original ETA','Final ETA','ETA Changes','Delivery','Performance','Rework','Duration','Source','Ticket URL','Milestone','Parent'];
 
 function perfClass(v){
   if(v==='On Time')return'perf-on-time';if(v==='Late')return'perf-late';if(v==='On Track')return'perf-on-track';if(v==='On Hold')return'perf-on-hold';
@@ -1265,7 +1270,7 @@ function perfClass(v){
 function renderAuditTable(){
   const rows=getAuditRows();
   rows.forEach((r,i)=>r[0]=i+1);
-  const hideCols=new Set([16]);
+  const hideCols=new Set([18]);
   rows.sort((a,b)=>{
     let va=a[auditSortCol],vb=b[auditSortCol];
     if(typeof va==='string'&&typeof vb==='string'){va=va.toLowerCase();vb=vb.toLowerCase()}
@@ -1286,8 +1291,8 @@ function renderAuditTable(){
     tbody+='<tr>';
     r.forEach((v,i)=>{
       if(hideCols.has(i))return;
-      const cls=i===12?' class="'+perfClass(v)+'"':(i===13&&v==='YES'?' class="rework-yes"':'');
-      if(i===3&&r[16]){tbody+=`<td><a href="${esc(r[16])}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">${esc(String(v))}</a></td>`}
+      const cls=i===14?' class="'+perfClass(v)+'"':(i===15&&v==='YES'?' class="rework-yes"':'');
+      if(i===3&&r[18]){tbody+=`<td><a href="${esc(r[18])}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">${esc(String(v))}</a></td>`}
       else{tbody+=`<td${cls}>${esc(String(v))}</td>`}
     });
     tbody+='</tr>';
@@ -1325,9 +1330,9 @@ function downloadXLSX(){
   rows.forEach((r,i)=>r[0]=i+1);
   const aoa=[AUDIT_COLS,...rows];
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:5},{wch:14},{wch:12},{wch:12},{wch:45},{wch:12},{wch:11},{wch:18},{wch:25},{wch:12},{wch:12},{wch:12},{wch:13},{wch:8},{wch:10},{wch:12},{wch:55},{wch:25},{wch:12}];
+  ws['!cols']=[{wch:5},{wch:14},{wch:12},{wch:12},{wch:45},{wch:12},{wch:11},{wch:18},{wch:25},{wch:12},{wch:12},{wch:12},{wch:10},{wch:12},{wch:13},{wch:8},{wch:10},{wch:12},{wch:55},{wch:25},{wch:12}];
   for(let r=1;r<=rows.length;r++){
-    const urlCol=16;const urlCell=XLSX.utils.encode_cell({r:r,c:urlCol});
+    const urlCol=18;const urlCell=XLSX.utils.encode_cell({r:r,c:urlCol});
     const ticketCell=XLSX.utils.encode_cell({r:r,c:3});
     if(ws[urlCell]&&ws[urlCell].v&&ws[urlCell].v.startsWith('http')){
       ws[urlCell].l={Target:ws[urlCell].v,Tooltip:'Open in Linear'};
@@ -2717,17 +2722,25 @@ function init(){
         {field:'Kickoff',val:r.kickoff,src:r.srcKickoff},
         {field:'Go-Live',val:r.goLive,src:r.srcGoLive}
       ];
+      if(r.milestones){
+        r.milestones.split(' | ').forEach(ms=>{
+          const mt=ms.match(/^([^:]+):\s*(.+)/);
+          if(mt)fields.push({field:'Milestone '+mt[1].trim(),val:'',src:mt[2].trim()});
+          else fields.push({field:'Milestone',val:'',src:ms});
+        });
+      }
       const rowCount=fields.filter(f=>f.val||f.src).length;
       let first=true;
       fields.forEach(f=>{
         if(!f.val&&!f.src)return;
         const zebra=i%2===0?'background:#fafbfc;':'';
+        const isMilestone=f.field.startsWith('Milestone');
         html+='<tr style="border-bottom:1px solid #f1f5f9;'+zebra+'">';
         if(first){
           html+='<td style="padding:4px 8px;font-weight:700;vertical-align:top" rowspan="'+rowCount+'">'+esc(r.customer)+'</td>';
           first=false;
         }
-        html+='<td style="padding:4px 8px;color:#64748b">'+f.field+'</td>';
+        html+='<td style="padding:4px 8px;color:'+(isMilestone?'#7c3aed':'#64748b')+';font-weight:'+(isMilestone?'600':'400')+'">'+f.field+'</td>';
         html+='<td style="padding:4px 8px;font-weight:600">'+(f.val||'—')+'</td>';
         html+='<td style="padding:4px 8px;color:#6b7280;max-width:500px">'+esc(f.src||'No source available')+'</td>';
         html+='</tr>';

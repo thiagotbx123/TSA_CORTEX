@@ -2,7 +2,7 @@ r"""
 TSA Waki KPI Dashboard — Final Version
 3 indicators with data integrity analysis.
 Uses fresh extraction from Google Sheets (_kpi_data_complete.json).
-Output: ~/Downloads/TSA_WAKI_KPI_DASHBOARD.xlsx
+Output: ~/Downloads/RACCOONS_KPI_DASHBOARD.xlsx
 """
 import sys
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -18,7 +18,7 @@ from openpyxl.utils import get_column_letter
 
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_kpi_data_complete.json')
-OUTPUT_PATH = os.path.join(os.path.expanduser('~'), 'Downloads', 'TSA_WAKI_KPI_DASHBOARD_v2.xlsx')
+OUTPUT_PATH = os.path.join(os.path.expanduser('~'), 'Downloads', 'RACCOONS_KPI_DASHBOARD_v2.xlsx')
 
 # ─── Targets ───
 T_ACCURACY = 0.90   # >90% within 1 week

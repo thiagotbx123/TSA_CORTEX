@@ -80,7 +80,7 @@ CUSTOMER_MAP = {
     'mparticle': 'mParticle',
     'monarch': 'Monarch',
     'de team': 'Internal',
-    'spike': None,
+    'spike': 'Internal',
 }
 
 PROJECT_TO_CUSTOMER = {
@@ -108,7 +108,7 @@ LABEL_TO_CUSTOMER = {
 REAL_CUSTOMERS = {
     'QuickBooks', 'Gong', 'Archer', 'Siteimprove', 'Mailchimp', 'Gem', 'Apollo',
     'Tropic', 'Brevo', 'Tabs', 'People.ai', 'CallRail', 'Gainsight', 'Staircase',
-    'WFS', 'Dixa', 'Assignar', 'Syncari', 'Onyx', 'CurbWaste', 'BILL', 'Bill',
+    'WFS', 'Dixa', 'Assignar', 'Syncari', 'Onyx', 'CurbWaste', 'Bill',
     'Zuper', 'HockeyStack', 'Outreach', 'mParticle', 'Monarch',
 }
 

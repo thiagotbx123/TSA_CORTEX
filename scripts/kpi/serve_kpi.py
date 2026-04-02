@@ -5,7 +5,7 @@ Usage:
   python scripts/kpi/serve_kpi.py --port 9000
 
 Endpoints:
-  GET /           → serves RACCOONS_KPI_DASHBOARD.html
+  GET /           → serves KPI_DASHBOARD.html
   POST /refresh   → runs full pipeline (refresh_linear_cache → merge → normalize → build) then returns updated HTML
 """
 import sys

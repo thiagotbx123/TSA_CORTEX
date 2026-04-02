@@ -591,12 +591,13 @@ function groupByMonth(weeks){
 }
 const MONTHS=groupByMonth(CORE_WEEKS);
 
-/* M11: Staleness indicator (inline next to Refresh button) */
+/* M11+A37: Staleness indicator — shows API cache mtime, not build date */
 (function(){
   const el=document.getElementById('refreshDate');
   const banner=document.getElementById('stalenessBanner');
   if(banner)banner.style.display='none';
-  if(el)el.textContent='Last update: '+BUILD_DATE;
+  const refreshLabel=API_REFRESH!=='unknown'?API_REFRESH:BUILD_DATE;
+  if(el)el.textContent='Data refreshed: '+refreshLabel+' | Built: '+BUILD_DATE;
 })();
 
 /* ── State — M12: default to ALL ──────────────────── */

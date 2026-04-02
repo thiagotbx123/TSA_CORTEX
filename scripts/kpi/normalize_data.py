@@ -14,7 +14,7 @@ from collections import Counter
 SCRIPT_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(SCRIPT_DIR, '..', '_dashboard_data.json')
 
-from team_config import (CUSTOMER_MAP, REAL_CUSTOMERS, NOT_REAL_CLIENTS, FORCE_EXTERNAL,
+from team_config import (CUSTOMER_MAP, NOT_REAL_CLIENTS, FORCE_EXTERNAL,
                          PERF_ON_TIME, PERF_LATE, PERF_ON_TRACK, PERF_NO_ETA, PERF_NA,
                          PERF_BLOCKED, PERF_ON_HOLD, PERF_NOT_STARTED, PERF_NO_DELIVERY)
 
@@ -68,18 +68,31 @@ def infer_year(month, context_date=None):
     return ref.year - 1
 
 
+_NON_CALC_STATUSES = {
+    'Canceled': PERF_NA,
+    'B.B.C': PERF_BLOCKED, 'Blocked': PERF_BLOCKED,
+    'Paused': PERF_ON_HOLD, 'On Hold': PERF_ON_HOLD,
+}
+_NOT_STARTED_STATUSES = {'Backlog', 'Todo', 'Triage'}
+
+
+def _status_gate(status, eta):
+    """Shared status gate for calc_perf and calc_perf_with_history.
+    Returns (label, True) if status short-circuits, else (None, False)."""
+    if status in _NON_CALC_STATUSES:
+        return _NON_CALC_STATUSES[status], True
+    if not eta:
+        if status in _NOT_STARTED_STATUSES:
+            return PERF_NOT_STARTED, True
+        return PERF_NO_ETA, True
+    return None, False
+
+
 def calc_perf(status, eta, delivery):
     """D.LIE7: Calculate performance label from current data (single authority)."""
-    if status == 'Canceled':
-        return PERF_NA
-    if status in ('B.B.C', 'Blocked'):
-        return PERF_BLOCKED
-    if status in ('Paused', 'On Hold'):
-        return PERF_ON_HOLD
-    if not eta:
-        if status in ('Backlog', 'Todo', 'Triage'):
-            return PERF_NOT_STARTED
-        return PERF_NO_ETA
+    gate, short = _status_gate(status, eta)
+    if short:
+        return gate
     if status == 'Done':
         if not delivery:
             return PERF_NO_DELIVERY
@@ -109,16 +122,9 @@ def calc_perf_with_history(record):
     delivery_date = record.get('deliveryDate', '')
     in_review_date = record.get('inReviewDate', '')
 
-    if status == 'Canceled':
-        return PERF_NA
-    if status in ('B.B.C', 'Blocked'):
-        return PERF_BLOCKED
-    if status in ('Paused', 'On Hold'):
-        return PERF_ON_HOLD
-    if not final_eta:
-        if status in ('Backlog', 'Todo', 'Triage'):
-            return PERF_NOT_STARTED
-        return PERF_NO_ETA
+    gate, short = _status_gate(status, final_eta)
+    if short:
+        return gate
 
     today = datetime.now().date()
 

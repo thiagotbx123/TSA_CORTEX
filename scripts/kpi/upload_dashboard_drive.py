@@ -69,7 +69,15 @@ for attempt in range(1, MAX_RETRIES + 1):
                 timeout=60,
             )
 
-        result = resp.json()
+        try:
+            result = resp.json()
+        except (ValueError, json.JSONDecodeError):
+            print(f"\nERROR (attempt {attempt}/{MAX_RETRIES}): HTTP {resp.status_code} non-JSON body")
+            if attempt == MAX_RETRIES:
+                sys.exit(1)
+            time.sleep(2 ** attempt)
+            continue
+
         if 'id' in result:
             print(f"\nDONE: https://drive.google.com/file/d/{result['id']}/view")
             break

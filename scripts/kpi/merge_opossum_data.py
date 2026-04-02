@@ -304,11 +304,11 @@ def _placeholder_perf(status):
     """A30-003: Lightweight placeholder — normalize_data.py is the single authority for perf calc.
     This only sets obvious non-calculated statuses; everything else gets '' for normalize to handle."""
     if status == 'Canceled':
-        return 'N/A'
+        return PERF_NA
     if status in ('B.B.C', 'Blocked'):
-        return 'Blocked'
+        return PERF_BLOCKED
     if status in ('Paused', 'On Hold'):
-        return 'On Hold'
+        return PERF_ON_HOLD
     return ''
 
 
@@ -362,7 +362,8 @@ def _compute_last_touch(hist_fields, comments):
 
 # ── Convert Linear issues to dashboard records ──
 from team_config import (PERSON_MAP, PERSON_MAP_BY_ID, CUSTOMER_MAP,
-                         PROJECT_TO_CUSTOMER, LABEL_TO_CUSTOMER, REAL_CUSTOMERS)
+                         PROJECT_TO_CUSTOMER, LABEL_TO_CUSTOMER, REAL_CUSTOMERS,
+                         PERF_NA, PERF_BLOCKED, PERF_ON_HOLD)
 LINEAR_TSA_NAMES = set(PERSON_MAP.values())
 
 # D.LIE19: Identify parent tickets (have subtasks) — exclude from KPI

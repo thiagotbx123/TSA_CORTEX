@@ -8,7 +8,8 @@ import os
 import io
 
 # pythonw has no stdout/stderr — redirect to log file before anything else
-_LOG_DIR = os.path.join(os.path.expanduser('~'), 'Downloads', 'kpi-serve')
+# N04: Must resolve before team_config import; uses same base as OUTPUT_DIR
+_LOG_DIR = os.path.join(os.environ.get('KPI_OUTPUT_DIR', os.path.join(os.path.expanduser('~'), 'Downloads')), 'kpi-serve')
 _LOG_PATH = os.path.join(_LOG_DIR, 'kpi_tray.log')
 try:
     os.makedirs(_LOG_DIR, exist_ok=True)
@@ -17,19 +18,22 @@ except Exception:
 
 def _safe_stream():
     """Ensure stdout/stderr are writable — pythonw sets them to None.
-    Uses log rotation: 5MB max, 3 backups."""
-    from logging.handlers import RotatingFileHandler
+    Uses RotatingFileHandler: 5MB max, 3 backups."""
     import logging
+    from logging.handlers import RotatingFileHandler
     for attr in ('stdout', 'stderr'):
         stream = getattr(sys, attr, None)
         if stream is None:
             try:
                 handler = RotatingFileHandler(
                     _LOG_PATH, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8')
-                f = open(_LOG_PATH, 'a', encoding='utf-8')
+                handler.doRollover()
+                setattr(sys, attr, handler.stream)
             except Exception:
-                f = io.StringIO()
-            setattr(sys, attr, f)
+                try:
+                    setattr(sys, attr, open(_LOG_PATH, 'a', encoding='utf-8'))
+                except Exception:
+                    setattr(sys, attr, io.StringIO())
         else:
             try:
                 stream.reconfigure(encoding='utf-8', errors='replace')
@@ -79,9 +83,10 @@ SERVE_DIR = os.path.join(OUTPUT_DIR, 'kpi-serve')
 DASHBOARD_SRC = os.path.join(OUTPUT_DIR, 'KPI_DASHBOARD.html')
 ORCHESTRATE = os.path.join(SCRIPT_DIR, 'orchestrate.py')
 ICO_PATH = os.path.join(SCRIPT_DIR, 'kpi_dashboard.ico')
-NGROK_URL = 'uneffused-hoyt-unpunctually.ngrok-free.dev'
+NGROK_URL = os.environ.get('NGROK_URL', 'uneffused-hoyt-unpunctually.ngrok-free.dev')
+NGROK_AUTH = os.environ.get('NGROK_BASIC_AUTH', 'kpi:raccoons2026')
 PUBLIC_URL = f'https://{NGROK_URL}/KPI_DASHBOARD.html'
-HTTP_PORT = 8080
+HTTP_PORT = int(os.environ.get('KPI_HTTP_PORT', '8080'))
 HEALTH_INTERVAL = 30  # seconds between health checks
 
 # ─── State ───
@@ -225,7 +230,7 @@ def start_ngrok():
     try:
         ngrok_proc = subprocess.Popen(
             ['ngrok', 'http', f'--url={NGROK_URL}',
-             '--basic-auth=kpi:raccoons2026', str(HTTP_PORT)],
+             f'--basic-auth={NGROK_AUTH}', str(HTTP_PORT)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             creationflags=subprocess.CREATE_NO_WINDOW
         )

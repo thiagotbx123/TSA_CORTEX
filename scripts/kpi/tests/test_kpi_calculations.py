@@ -296,10 +296,9 @@ class TestExtractCustomer(unittest.TestCase):
         result = extract_customer('No brackets here')
         self.assertIn(result, ('', None))
 
-    def test_spike_returns_empty_string(self):
-        # [Spike] maps to None in cust_map → returns ''
+    def test_spike_maps_to_internal(self):
         result = extract_customer('[Spike] Internal thing')
-        self.assertEqual(result, '')
+        self.assertEqual(result, 'Internal')
 
     def test_archer_bracket(self):
         result = extract_customer('[Archer] Implementation')

@@ -249,6 +249,39 @@ def stop_ngrok():
     status['ngrok'] = False
 
 
+# ─── Daily auto-refresh scheduler ───
+AUTO_REFRESH_HOUR = 9
+AUTO_REFRESH_MINUTE = 0
+
+def auto_refresh_loop():
+    """Run full refresh + rebuild daily at AUTO_REFRESH_HOUR:AUTO_REFRESH_MINUTE on weekdays."""
+    last_run_date = None
+    while True:
+        now = time.localtime()
+        today = (now.tm_year, now.tm_mon, now.tm_mday)
+        is_weekday = now.tm_wday < 5  # Mon-Fri
+        past_trigger = (now.tm_hour > AUTO_REFRESH_HOUR or
+                        (now.tm_hour == AUTO_REFRESH_HOUR and now.tm_min >= AUTO_REFRESH_MINUTE))
+
+        if is_weekday and past_trigger and last_run_date != today:
+            last_run_date = today
+            print(f'[auto-refresh] Triggered at {time.strftime("%H:%M")}')
+            if tray_icon:
+                tray_icon.icon = make_icon('yellow')
+                tray_icon.title = 'KPI Dashboard  |  Auto-refreshing...'
+            ok = run_pipeline(full_refresh=True)
+            if tray_icon:
+                status['http'] = check_http()
+                status['ngrok'] = check_ngrok()
+                tray_icon.icon = make_icon(get_status_color())
+                tray_icon.title = get_status_text() + (f'  |  Last: {status["last_build"]}' if status.get('last_build') else '')
+            result = 'OK' if ok else 'FAILED'
+            print(f'[auto-refresh] {result} at {time.strftime("%H:%M")}')
+            _notify('KPI Auto-Refresh', f'Daily refresh {result} at {time.strftime("%H:%M")}')
+
+        time.sleep(30)
+
+
 # ─── Health monitor ───
 def health_loop():
     while True:
@@ -268,6 +301,24 @@ def health_loop():
             tray_icon.title = get_status_text()
 
 
+# ─── Windows notifications ───
+def _notify(title, msg):
+    """Show a Windows toast notification (non-blocking, best-effort)."""
+    try:
+        from subprocess import Popen
+        ps = f'''
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType=WindowsRuntime] > $null
+$t = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+$t.GetElementsByTagName("text")[0].AppendChild($t.CreateTextNode("{title}")) > $null
+$t.GetElementsByTagName("text")[1].AppendChild($t.CreateTextNode("{msg}")) > $null
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("KPI Dashboard").Show([Windows.UI.Notifications.ToastNotification]::new($t))
+'''
+        Popen(['powershell', '-WindowStyle', 'Hidden', '-Command', ps],
+              creationflags=subprocess.CREATE_NO_WINDOW)
+    except Exception:
+        pass
+
+
 # ─── Tray menu actions ───
 def on_open_dashboard(icon, item):
     os.startfile(PUBLIC_URL)
@@ -277,34 +328,36 @@ def on_open_local(icon, item):
     os.startfile(f'http://localhost:{HTTP_PORT}/KPI_DASHBOARD.html')
 
 
-def on_refresh(icon, item):
-    """Quick rebuild from cached data (<1s)."""
-    def _refresh():
-        icon.icon = make_icon('yellow')
-        icon.title = 'KPI Dashboard  |  Rebuilding...'
-        run_pipeline(full_refresh=False)
-        status['http'] = check_http()
-        status['ngrok'] = check_ngrok()
-        icon.icon = make_icon(get_status_color())
-        icon.title = get_status_text()
-    threading.Thread(target=_refresh, daemon=True).start()
+def _run_with_feedback(icon, full_refresh):
+    """Shared pipeline runner with visual feedback and notification."""
+    mode = 'Full Refresh' if full_refresh else 'Quick Rebuild'
+    icon.icon = make_icon('yellow')
+    icon.title = f'KPI Dashboard  |  {mode}...'
+    ok = run_pipeline(full_refresh=full_refresh)
+    status['http'] = check_http()
+    status['ngrok'] = check_ngrok()
+    icon.icon = make_icon(get_status_color())
+    icon.title = get_status_text() + (f'  |  Last: {status["last_build"]}' if status.get('last_build') else '')
+    if ok:
+        _notify('KPI Dashboard', f'{mode} completed at {status.get("last_build", "?")}')
+    else:
+        _notify('KPI Dashboard', f'{mode} FAILED — check logs')
 
 
-def on_full_refresh(icon, item):
-    """Full refresh: fetch fresh data from Linear API (~15s)."""
-    def _refresh():
-        icon.icon = make_icon('yellow')
-        icon.title = 'KPI Dashboard  |  Fetching Linear data...'
-        run_pipeline(full_refresh=True)
-        status['http'] = check_http()
-        status['ngrok'] = check_ngrok()
-        icon.icon = make_icon(get_status_color())
-        icon.title = get_status_text()
-    threading.Thread(target=_refresh, daemon=True).start()
+def on_refresh_and_rebuild(icon, item):
+    """Full refresh from Linear API + rebuild dashboard."""
+    threading.Thread(target=_run_with_feedback, args=(icon, True), daemon=True).start()
 
 
-def on_status(icon, item):
-    pass  # status is shown in title on hover
+def on_quick_rebuild(icon, item):
+    """Rebuild from cached data (no API call, fast)."""
+    threading.Thread(target=_run_with_feedback, args=(icon, False), daemon=True).start()
+
+
+def _last_refresh_label(item):
+    """Dynamic label showing last refresh time."""
+    t = status.get('last_build')
+    return f'Last refresh: {t}' if t else 'Last refresh: —'
 
 
 def on_exit(icon, item):
@@ -321,9 +374,9 @@ def main():
     print('  KPI Dashboard — System Tray Server')
     print('=' * 50)
 
-    # 1. Run pipeline
-    print('\n[1/4] Running KPI pipeline...')
-    run_pipeline()
+    # 1. Run full pipeline (Linear API refresh + rebuild)
+    print('\n[1/4] Running full KPI pipeline (Linear API + rebuild)...')
+    run_pipeline(full_refresh=True)
 
     # 2. Start servers
     print('[2/4] Starting HTTP server + ngrok...')
@@ -347,9 +400,11 @@ def main():
         pystray.MenuItem('Open Dashboard', on_open_dashboard, default=True),
         pystray.MenuItem('Open Local', on_open_local),
         pystray.Menu.SEPARATOR,
-        pystray.MenuItem('Rebuild (cached)', on_refresh),
-        pystray.MenuItem('Full Refresh (Linear API)', on_full_refresh),
-        pystray.MenuItem(lambda item: get_status_text(), on_status, enabled=False),
+        pystray.MenuItem('Refresh & Rebuild (Linear API)', on_refresh_and_rebuild),
+        pystray.MenuItem('Quick Rebuild (cached data)', on_quick_rebuild),
+        pystray.Menu.SEPARATOR,
+        pystray.MenuItem(_last_refresh_label, None, enabled=False),
+        pystray.MenuItem(lambda item: get_status_text(), None, enabled=False),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem('Exit', on_exit),
     )
@@ -361,13 +416,15 @@ def main():
         menu=menu,
     )
 
-    # Start health monitor
+    # Start health monitor + daily auto-refresh
     threading.Thread(target=health_loop, daemon=True).start()
+    threading.Thread(target=auto_refresh_loop, daemon=True).start()
 
     h = 'OK' if status['http'] else 'FAIL'
     n = 'OK' if status['ngrok'] else 'FAIL'
     print(f'\n  HTTP: {h}  |  ngrok: {n}')
     print(f'  URL: {PUBLIC_URL}')
+    print(f'  Auto-refresh: weekdays at {AUTO_REFRESH_HOUR:02d}:{AUTO_REFRESH_MINUTE:02d}')
     print(f'\n  Tray icon active — right-click for options.')
     print('  Close from tray icon > Exit')
 

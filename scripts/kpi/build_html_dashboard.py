@@ -246,6 +246,17 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
 .scrum-card .sc-stale-collapse{color:#94a3b8;font-size:.82em;cursor:pointer;padding:2px 0 2px 8px;user-select:none}
 .scrum-card .sc-stale-collapse:hover{color:#64748b}
 .scrum-card .sc-copy-hint{text-align:center;padding:6px;font-size:.68em;color:var(--light);border-top:1px solid var(--gray-l)}
+.team-report{background:linear-gradient(135deg,#1e1b4b,#312e81);border:2px solid #6366f1;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.team-report .tr-header{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1)}
+.team-report .tr-title{color:#fff;font-weight:800;font-size:1em;display:flex;align-items:center;gap:8px}
+.team-report .tr-btn{background:#6366f1;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-weight:700;font-size:.82em;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.team-report .tr-btn:hover{background:#818cf8;transform:translateY(-1px)}
+.team-report .tr-btn.copied{background:#059669}
+.team-report .tr-body{padding:16px 20px;font-size:.8em;line-height:1.7;font-family:'Consolas','Menlo',monospace;white-space:pre-wrap;color:#c7d2fe;max-height:600px;overflow-y:auto}
+.team-report .tr-person-hdr{color:#a5b4fc;font-weight:800;font-size:1.05em;margin:12px 0 4px;padding:4px 0;border-bottom:1px solid rgba(165,180,252,.2)}
+.team-report .tr-person-hdr:first-child{margin-top:0}
+.team-report .tr-summary{padding:10px 20px;background:rgba(255,255,255,.05);border-top:1px solid rgba(255,255,255,.1);display:flex;gap:12px;flex-wrap:wrap;font-size:.75em;color:#a5b4fc}
+.team-report .tr-summary span{padding:2px 10px;border-radius:8px;font-weight:600}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* ── Gantt chart styles (gt- prefix) ───────────── */
 .gt-months{display:flex;position:sticky;top:0;z-index:21;background:var(--white);border-bottom:2px solid var(--border)}
@@ -365,7 +376,7 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="tab" data-tab="reliability">Implementation Reliability</div>
   <div class="tab" data-tab="velocity">Execution Time</div>
   <div class="tab" data-tab="activity">Team Activity</div>
-  <div class="tab" data-tab="scrum">Scrum Copy</div>
+  <div class="tab" data-tab="scrum">Scrum Panel</div>
   <div class="tab" data-tab="insights">Insights</div>
   <div class="tab" data-tab="gantt">Gantt</div>
   <div class="tab" data-tab="analytics">Analytics</div>
@@ -431,9 +442,10 @@ body{font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;backgroun
   <div class="audit-section" style="margin-top:0">
     <div class="audit-header collapse-toggle">
       <span class="toggle">&#9660;</span>
-      <h3><span class="dot" style="background:#8b5cf6;position:relative;top:0"></span>Scrum Copy<span style="font-size:.72em;color:var(--dim);font-weight:400;margin-left:8px">Click any card to copy to clipboard</span></h3>
+      <h3><span class="dot" style="background:#8b5cf6;position:relative;top:0"></span>Scrum Panel<span style="font-size:.72em;color:var(--dim);font-weight:400;margin-left:8px">Click any card to copy to clipboard</span></h3>
     </div>
     <div class="audit-body">
+      <div id="teamReport" style="padding:16px 20px"></div>
       <div id="scrumCards" style="padding:16px 20px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
     </div>
   </div>
@@ -693,6 +705,7 @@ const charts={};
 
 function getFiltered(){
   return RAW.filter(r=>{
+    if(r.source==='spreadsheet')return false;
     if(!r.week||!isCoreWeek(r.week))return false;
     if(state.person!=='ALL'&&r.tsa!==state.person)return false;
     if(state.category!=='ALL'&&r.category!==state.category)return false;
@@ -1219,12 +1232,12 @@ function renderMemberCards(){
     const orgMeasured=orgOt+orgLt;
     const orgAccPct=orgMeasured>0?Math.round(orgOt/orgMeasured*100):null;
 
-    /* D.LIE12: ETA Coverage — only active statuses need ETA */
+    /* D.LIE12: ETA Coverage — real-time snapshot from RAW (not week-filtered) */
     const ACTIVE_STATUSES=['In Progress','In Review','Production QA','Blocked','Refinement','Ready to Deploy','B.B.C'];
-    const activeTickets=pr.filter(r=>ACTIVE_STATUSES.includes(r.status));
+    const allPersonRaw=RAW.filter(r=>r.source!=='spreadsheet'&&r.tsa===p);
+    const activeTickets=allPersonRaw.filter(r=>ACTIVE_STATUSES.includes(r.status));
     const activeWithEta=activeTickets.filter(r=>r.eta&&r.eta.length>=10).length;
     const activeTotal=activeTickets.length;
-    const withEta=activeWithEta;
     const etaCov=activeTotal>0?Math.round(activeWithEta/activeTotal*100):100;
 
     const recent=pr.filter(r=>{const lw=CORE_WEEKS.slice(-2);return lw.includes(r.week)}).length;
@@ -2189,11 +2202,9 @@ function renderScrumCards(){
       sortTasks(activeCusts[cust]).forEach(t=>{
         const name=cleanName(t.focus,cust);
         const age=ageLabel(t);
-        const rw=t.rework==='yes'?':recycle: [REWORK] ':'';
-        const nr=needsResponse(t)?':warning: needs response ':'';
         const drift=etaDriftSlack(t);
         const tid=t.ticketId?t.ticketId+' ':'';
-        text+=`  :black_small_square: ${nr}${rw}[${t.status}${age}] ${tid}${name} ETA:${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}${drift}\n`;
+        text+=`  :black_small_square: [${t.status}${age}] ${tid}${name} ETA:${fmtD(t.eta)} ${slackEmoji(taskSignal(t))}${drift}\n`;
       });
     });
     if(pausedList.length>0){
@@ -2336,6 +2347,99 @@ function renderScrumCards(){
       <div class="sc-copy-hint">Click to copy Slack-ready text</div>
     </div>
   `).join('');
+
+  /* ── Team Report (integrated view) ──────────────── */
+  const trEl=document.getElementById('teamReport');
+  const trCards=cards;
+  if(trEl&&trCards.length>1){
+    const totActive=trCards.reduce((s,c)=>s+c.active,0);
+    const totDone=trCards.reduce((s,c)=>s+c.done,0);
+    const totGreen=trCards.reduce((s,c)=>s+c.green,0);
+    const totYellow=trCards.reduce((s,c)=>s+c.yellow,0);
+    const totRed=trCards.reduce((s,c)=>s+c.red,0);
+    const totOverdue=trCards.reduce((s,c)=>s+c.overdue,0);
+    const totTbd=trCards.reduce((s,c)=>s+c.tbd,0);
+    const totNR=trCards.reduce((s,c)=>s+c.needsResponseCount,0);
+    const totRework=trCards.reduce((s,c)=>s+c.reworkCount,0);
+    const totPaused=trCards.reduce((s,c)=>s+c.pausedCount,0);
+
+    /* ── KPI calculations for Slack report ── */
+    const trPersons=new Set(trCards.map(c=>c.person));
+    const kpiRows=RAW.filter(r=>trPersons.has(r.tsa));
+    const pctR=(n,d)=>d>0?Math.round(n/d*100):null;
+    const trendEmoji=v=>v>5?':chart_with_upwards_trend:':v<-5?':chart_with_downwards_trend:':':arrow_right:';
+
+    const allOt=kpiRows.filter(r=>r.perf==='On Time').length;
+    const allLt=kpiRows.filter(r=>r.perf==='Late').length;
+    const allMeas=allOt+allLt;
+    const allAcc=pctR(allOt,allMeas);
+    const oOt=kpiRows.filter(r=>r.perf==='On Time'&&r.retroactiveEta!=='yes').length;
+    const oLt=kpiRows.filter(r=>r.perf==='Late'&&r.retroactiveEta!=='yes').length;
+    const oMeas=oOt+oLt;
+    const oAcc=pctR(oOt,oMeas);
+    const gapPct=(allAcc!==null&&oAcc!==null)?allAcc-oAcc:0;
+
+    let slk=`:bar_chart: *TSA Team Report \u2014 Raccoons*\n:calendar: ${todayStr}\n\n`;
+    slk+=`:dart: *Overall*\nAccuracy: ${allAcc!==null?allAcc+'%':'\u2014'} (${allOt}/${allMeas}) | Organic: ${oAcc!==null?oAcc+'%':'\u2014'} (${oOt}/${oMeas}) | Gap: +${gapPct}%\n\n`;
+
+    slk+=`:busts_in_silhouette: *Per Person*\n`;
+    const perPerson=[...trPersons].sort();
+    perPerson.forEach(p=>{
+      const pr=kpiRows.filter(r=>r.tsa===p);
+      const pot=pr.filter(r=>r.perf==='On Time').length;
+      const plt=pr.filter(r=>r.perf==='Late').length;
+      const pm=pot+plt;
+      const pacc=pctR(pot,pm);
+      const poOt=pr.filter(r=>r.perf==='On Time'&&r.retroactiveEta!=='yes').length;
+      const poLt=pr.filter(r=>r.perf==='Late'&&r.retroactiveEta!=='yes').length;
+      const pom=poOt+poLt;
+      const poAcc=pctR(poOt,pom);
+      const pg=(pacc!==null&&poAcc!==null)?pacc-poAcc:0;
+      slk+=`${p} \u2014 ${pacc!==null?pacc+'%':'\u2014'} | organic ${poAcc!==null?poAcc+'%':'\u2014'} | +${pg}%\n`;
+    });
+
+    const lateTickets=kpiRows.filter(r=>r.perf==='Late').sort((a,b)=>(a.tsa||'').localeCompare(b.tsa||''));
+    if(lateTickets.length>0){
+      slk+=`\n:rotating_light: *Late Tickets (${lateTickets.length})*\n`;
+      lateTickets.forEach(t=>{
+        const tid=t.ticketId?t.ticketId+' ':'';
+        const name=(t.focus||'').slice(0,60);
+        slk+=`:red_circle: ${tid}${name} \u2014 ${t.tsa} (ETA: ${fmtD(t.eta)})\n`;
+      });
+    }
+
+    slk+=`\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n`;
+    trCards.forEach(c=>{
+      slk+=`:bust_in_silhouette: *${c.person}*\n`;
+      slk+=c.text.split('\n').slice(1).join('\n')+'\n';
+    });
+    slk+=`\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n:traffic_light: *Legend*\n`;
+    slk+=`:large_green_circle: On track\n`;
+    slk+=`:large_yellow_circle: At risk (past ETA)\n`;
+    slk+=`:red_circle: Blocked\n`;
+    slk+=`:recycle: Rework\n`;
+    slk+=`:white_circle: Overdue (not started)\n`;
+    slk+=`:pause_button: Paused\n`;
+    window._teamReportSlack=slk;
+
+    let previewHtml='';
+    trCards.forEach(c=>{
+      previewHtml+=`<div class="tr-person-hdr">${esc(c.person)}</div>`;
+      previewHtml+=`<div style="padding-left:4px">${c.html}</div>`;
+    });
+
+    trEl.innerHTML=`
+      <div class="team-report" id="teamReportCard" onclick="copyTeamReport(event)" style="cursor:pointer">
+        <div class="tr-header">
+          <div class="tr-title">\ud83d\udcca Team Report \u2014 Raccoons</div>
+          <button class="tr-btn" id="trCopyBtn" onclick="copyTeamReport(event)">\ud83d\udccb Copy All for Slack</button>
+        </div>
+        <div class="tr-body" id="trPreviewBody">${previewHtml}</div>
+        <div style="text-align:center;padding:6px;font-size:.68em;color:rgba(255,255,255,.4);border-top:1px solid rgba(255,255,255,.08)">Click anywhere to copy Slack-ready text</div>
+      </div>`;
+  } else if(trEl){
+    trEl.innerHTML='';
+  }
 }
 
 function scFilterCard(badge,filterTag){
@@ -2377,12 +2481,37 @@ function scFilterCard(badge,filterTag){
 
 function copyScrumCard(el){
   const text=el.dataset.scrum.replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&#96;/g,'`');
-  navigator.clipboard.writeText(text).then(()=>{
+  function onOk(){
     el.classList.add('copied');
     const hint=el.querySelector('.sc-copy-hint');
     if(hint)hint.textContent='Copied!';
     setTimeout(()=>{el.classList.remove('copied');if(hint)hint.textContent='Click to copy Slack-ready text'},1500);
-  });
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(onOk).catch(()=>fallbackCopy(text,onOk));
+  } else { fallbackCopy(text,onOk); }
+}
+
+function copyTeamReport(evt){
+  if(evt)evt.stopPropagation();
+  const text=window._teamReportSlack||'';
+  if(!text)return;
+  function onOk(){
+    const btn=document.getElementById('trCopyBtn');
+    if(btn){btn.classList.add('copied');btn.textContent='\u2705 Copied!';setTimeout(()=>{btn.classList.remove('copied');btn.textContent='\ud83d\udccb Copy All for Slack'},1800);}
+    const card=document.getElementById('teamReportCard');
+    if(card){card.style.borderColor='#059669';setTimeout(()=>{card.style.borderColor='#6366f1'},1800);}
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(onOk).catch(()=>fallbackCopy(text,onOk));
+  } else { fallbackCopy(text,onOk); }
+}
+function fallbackCopy(text,cb){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:0;opacity:0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');if(cb)cb()}catch(e){alert('Copy failed — please select and Ctrl+C manually')}
+  document.body.removeChild(ta);
 }
 
 function renderReworkLog(){
@@ -2773,32 +2902,7 @@ function copyWeeklyDigest(){
   navigator.clipboard.writeText(md).then(()=>anShowPreview(md));
 }
 
-function copyTeamReport(){
-  const sw=CORE_WEEKS.slice().sort(weekSort);
-  const lw=sw[sw.length-1];
-  const cat=state.category;
-  const all=RAW.filter(r=>(cat==='ALL'||r.category===cat));
-  const core=all.filter(r=>r.week&&isCoreWeek(r.week));
-  const tAcc=calcAccuracy(core);
-  let md='# Team KPI Report — '+fmtWeekPretty(lw||'')+'\n\n';
-  md+='## Overall\n- **Accuracy:** '+fmtPct(tAcc.val,tAcc.den)+' ('+tAcc.num+'/'+tAcc.den+')\n';
-  md+='- **Organic:** '+fmtPct(tAcc.orgVal,tAcc.orgDen)+' ('+tAcc.orgNum+'/'+tAcc.orgDen+')\n';
-  const gap=(tAcc.val!==null&&tAcc.orgVal!==null)?tAcc.val-tAcc.orgVal:null;
-  if(gap!==null)md+='- **Inflation Gap:** '+(gap>0?'+':'')+(gap*100).toFixed(0)+'%\n';
-  md+='\n## Per-Person Accuracy\n| Person | Total | Organic | Gap | Trend |\n|--------|-------|---------|-----|-------|\n';
-  const tWeeks=sw.slice(-8);
-  PEOPLE_ALL.forEach(p=>{
-    const pa=calcAccuracy(core.filter(r=>r.tsa===p));
-    const g=(pa.val!==null&&pa.orgVal!==null)?pa.val-pa.orgVal:null;
-    const pts=[];tWeeks.forEach((w,i)=>{const a=calcAccuracy(all.filter(r=>r.tsa===p&&r.week===w));if(a.val!==null&&a.den>=1)pts.push({x:i,y:a.val})});
-    let trend='stable';
-    if(pts.length>=3){const n=pts.length,sx=pts.reduce((a,v)=>a+v.x,0),sy=pts.reduce((a,v)=>a+v.y,0),sxy=pts.reduce((a,v)=>a+v.x*v.y,0),sxx=pts.reduce((a,v)=>a+v.x*v.x,0),dn=n*sxx-sx*sx;if(dn!==0){const sl=(n*sxy-sx*sy)/dn;if(sl>0.05)trend='improving';else if(sl<-0.05)trend='declining'}}
-    md+='| '+p+' | '+fmtPct(pa.val,pa.den)+' | '+fmtPct(pa.orgVal,pa.orgDen)+' | '+(g!==null?(g>0?'+':'')+(g*100).toFixed(0)+'%':'—')+' | '+trend+' |\n';
-  });
-  const late=all.filter(r=>r.perf==='Late'&&r.status!=='Done'&&r.eta);
-  if(late.length>0){md+='\n## Late Tickets ('+late.length+')\n';late.forEach(r=>{md+='- **'+r.ticketId+'**: '+(r.focus||'')+' — '+r.tsa+' (ETA: '+r.eta+')\n'})}
-  navigator.clipboard.writeText(md).then(()=>anShowPreview(md));
-}
+/* old copyTeamReport (markdown) removed — replaced by Slack version above */
 
 function copyLateTickets(){
   const todayStr=new Date().toISOString().slice(0,10);

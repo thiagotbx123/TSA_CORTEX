@@ -3,11 +3,14 @@
 ## Sobre o Projeto
 
 **WAKI KPI Dashboard** e o sistema de metricas de performance do time TSA (Technical Solutions Architects) do TestBox.
-Mede 3 KPIs para 7 membros do time (2 squads: Raccoons + Opossum) usando dados do Linear API + Google Sheets (backlog historico congelado).
+Mede 3 KPIs para 5 membros ativos do time Raccoons usando dados do Linear API + Google Sheets (backlog historico congelado).
+Thais e Yasmim foram REMOVIDAS do KPI (decisao 2026-04-09).
 
 **Owner:** Thiago Rodrigues (TSA Lead)
 **Stakeholder:** Waki (Manager)
-**Versao atual:** v3 (audit-hardened, 20 auditores simulados)
+**Versao atual:** v3.2 (audit-hardened + UX fixes, 2026-04-13)
+
+**IMPORTANTE — Leia `.claude/memory.md` PRIMEIRO para contexto atualizado.**
 
 ---
 
@@ -52,7 +55,8 @@ C:/Users/adm_r/Tools/TSA_CORTEX/scripts/kpi/
 ├── build_waki_dashboard.py             # Alternativa XLSX (openpyxl)
 ├── upload_dashboard_drive.py           # Step 5: Upload Google Drive (opcional)
 ├── team_config.py                      # SINGLE SOURCE OF TRUTH dos membros
-├── serve_kpi.py                        # HTTP server local (porta 8787)
+├── serve_kpi.py                        # HTTP server local standalone (porta 8787)
+├── kpi_dashboard.ico                   # Icone customizado do desktop shortcut
 ├── kpi_tray.py                         # System tray icon + ngrok tunnel
 ├── kpi_publish.bat                     # Shortcut Windows
 ├── requirements.txt                    # requests>=2.28, openpyxl>=3.1

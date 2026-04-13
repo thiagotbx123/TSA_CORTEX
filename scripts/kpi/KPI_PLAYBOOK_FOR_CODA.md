@@ -1,6 +1,6 @@
 # TSA KPI Playbook — Complete Guide
 
-> Version 2.0 | Last updated: 2026-04-09 | Dashboard: v3 (audit-hardened) | Author: Thiago Rodrigues
+> Version 3.0 | Last updated: 2026-04-13 | Dashboard: v3.2 (audit-hardened + UX fixes) | Author: Thiago Rodrigues
 
 > This document is the single source of truth for understanding, operating, and interpreting the three TSA KPIs. It is designed for the Coda Solutions Central and covers strategic, operational, and executive perspectives. Every person on the team — from individual contributor to leadership — should be able to read this document and understand exactly how their daily work translates into measurable outcomes.
 
@@ -15,10 +15,11 @@ Customer Onboarding (Implementation Velocity) answers the question: "How fast do
 Implementation Reliability answers the question: "Do we deliver it right the first time?" Rework is expensive. When a task that was marked as Done gets reopened because something was missed or broken, it costs the team time and erodes trust. This KPI measures the percentage of completed work that stays completed without being reopened.
 
 - Team: Raccoons (5 members — Thiago, Carlos, Alexandra, Diego, Gabi)
-- Data source: Linear (source of truth for all current data)
-- Historical backlog: Google Sheets (frozen, not actively updated)
-- Dashboard: Self-contained HTML file, auto-refreshed daily at 09:00 via system tray
-- Dashboard URL: Published via ngrok and shared with stakeholders
+- Data source: Linear (sole source of truth for all KPI calculations)
+- Historical backlog: Google Sheets (frozen archive — excluded from all KPI calculations)
+- Dashboard: Self-contained HTML file (~990KB), auto-refreshed daily at 09:00 via system tray
+- Dashboard URL: Published via ngrok with basic auth (kpi:raccoons2026) and shared with stakeholders
+- System tray: Desktop icon provides "Refresh & Rebuild (Linear API)" for full pipeline and "Quick Rebuild (cached data)" for instant rebuilds, with Windows toast notifications on completion
 
 ## KPI 1 — ETA ACCURACY
 
@@ -188,7 +189,7 @@ From a leadership perspective, Reliability at or above 90 percent means the team
 
 ### Current Status
 
-IMPORTANT: KPI 3 is currently marked as NOT ACTIVE on the dashboard. This is because the rework detection mechanism is still maturing. The system can detect rework through two methods (history-based and label-based), but the team has not yet fully adopted the rework labeling convention in Linear. The metric is being tracked passively but is not yet used for performance evaluation.
+IMPORTANT: KPI 3 is currently marked as NOT ACTIVE on the dashboard. This is because the rework labeling convention is still being adopted by the team. The metric is being tracked passively but is not yet used for performance evaluation. Once consistent use of the "rework:implementation" label is confirmed across the team, KPI 3 will be activated.
 
 ### Target (when activated)
 
@@ -203,32 +204,30 @@ IMPORTANT: KPI 3 is currently marked as NOT ACTIVE on the dashboard. This is bec
 Implementation Reliability = (Done without Rework) / (Total Done) × 100
 ```
 
-A ticket is counted as "Done with Rework" if either condition is true.
+A ticket is counted as "Done with Rework" if it has the label "rework:implementation" applied in Linear. This is the sole trigger for rework classification.
 
-- History-based detection: The ticket's Linear history shows a transition from Done to In Progress (or Done to Todo, or Done to Backlog). This means the ticket was completed, then reopened for additional work.
-- Label-based detection: The ticket has the label "rework:implementation" applied in Linear.
+IMPORTANT: Prior versions of the system also used automatic history-based detection (flagging tickets that transitioned from Done back to In Progress/Todo/Backlog). This was removed because it produced false positives — for example, a TSA accidentally marking a ticket as Done and reverting it within minutes would be incorrectly flagged as rework. The current system requires explicit, intentional labeling. The history-based transition data is still collected internally for diagnostic purposes but does NOT affect the rework KPI calculation.
 
 ### What Counts as Rework
 
-Rework is specifically defined as a ticket that transitions from a completed state (Done) back to an active state (In Progress, Todo, Backlog). This is a deliberate and narrow definition.
+Rework is defined exclusively by the presence of the "rework:implementation" label on the ticket. This label should be applied when a ticket that was genuinely completed needs to be reopened because something was missed, broken, or incomplete.
 
 The following are NOT rework.
 
-- Reassignment during In Review: When person A finishes implementation and reassigns to person B for review, this is normal workflow, not rework. The system explicitly handles this case.
+- Accidental status changes: Marking a ticket as Done and quickly reverting it (e.g., within minutes) is a human error, not rework. Do NOT apply the rework label in this case.
+- Reassignment during In Review: When person A finishes implementation and reassigns to person B for review, this is normal workflow, not rework.
 - Status changes within active states: Moving from In Progress to Todo and back is task management, not rework.
 - Cancellation after completion: Moving from Done to Canceled is a decision, not rework.
 
 ### Linear Ticket Requirements for KPI 3
 
-- Status transitions: The system reads the full history of status changes. Moving a ticket from Done back to In Progress triggers rework detection automatically.
-- Label "rework:implementation" (optional): Applying this label explicitly marks a ticket as rework. This is the preferred method once the team adopts it because it is intentional and unambiguous.
+- Label "rework:implementation" (REQUIRED): This is the sole trigger for marking a ticket as rework. Apply this label when a genuinely completed ticket needs to be reopened due to defects or incomplete work. Without this label, a ticket will NOT be counted as rework regardless of its status history.
 - Acceptance criteria: While not tracked by the system, clear acceptance criteria on tickets reduce rework by ensuring both the implementor and reviewer agree on what "done" means before work begins.
 
 ### Operational Checklist for KPI 3
 
 - Before moving to Done: Verify the work meets acceptance criteria. Test thoroughly. A ticket should only reach Done when you are confident it will stay Done.
-- When rework is needed: Move the ticket back to In Progress. Do not create a new ticket for the same work — the system needs to see the Done to In Progress transition on the same ticket to track rework accurately.
-- Apply the label: When you identify rework, add the "rework:implementation" label. This makes rework visible and intentional rather than something that has to be detected algorithmically.
+- When rework is needed: Move the ticket back to In Progress AND apply the "rework:implementation" label. Do not create a new ticket for the same work. The label is what triggers the rework classification — without it, the reopened ticket will not be counted as rework.
 - Review what caused rework: After fixing the issue, note what was missed. This information helps the team improve review processes.
 
 ### How Reliability Appears on the Dashboard
@@ -257,7 +256,7 @@ When a TSA creates or is assigned a ticket in Linear, the following fields are s
 When a TSA begins working on the ticket.
 
 - Move status to In Progress: This sets the startedAt timestamp in Linear, which is the start of the velocity clock for KPI 2.
-- The ticket is now visible as "active" on the dashboard. It appears in the member's active count and in the Scrum Copy tab for standup reports.
+- The ticket is now visible as "active" on the dashboard. It appears in the member's active count and in the Scrum Panel tab for standup reports.
 - If the ticket has a dueDate, it is now being tracked for on-time delivery (KPI 1). If the current date passes the dueDate while the ticket is still In Progress, it becomes Late.
 
 ### Phase 3 — Delivery
@@ -279,17 +278,19 @@ During review.
 
 If the ticket needs to be reopened.
 
-- Move from Done back to In Progress: The system detects this transition in the ticket's history and flags reworkDetected. The ticket will count against KPI 3 (Reliability) when that KPI is activated.
+- Move from Done back to In Progress AND apply the "rework:implementation" label: The label is what triggers the rework classification. Without it, reopening a ticket does not count as rework. This was changed from the previous behavior (which detected rework automatically from status transitions) to eliminate false positives from accidental status changes.
 - When the fix is complete, move back to In Review and then Done: The system uses the last Done date (not the first) when rework is detected, ensuring the final delivery is what gets measured.
 
 ### Phase 6 — Data Pipeline
 
-The KPI system processes tickets through a four-step automated pipeline that runs daily at 09:00.
+The KPI system processes tickets through a four-step automated pipeline. It runs daily at 09:00 (weekdays) via auto-refresh, and can be triggered manually via the system tray icon at any time.
 
-- Step 1 — Refresh Linear Cache: Fetches all issues for the five KPI team members from the Linear GraphQL API. Queries by both assignee and creator to catch reassigned tickets. Saves to a unified JSON cache.
-- Step 2 — Merge Data: Combines the Linear cache with the frozen Sheets backlog. Deduplicates tickets. Applies ownership logic (original assignee retains ownership when reassigned during review). Extracts history-based fields (deliveryDate, originalEta, rework detection, reviewer delay).
+- Step 1 — Refresh Linear Cache: Fetches all issues for the five KPI team members from the Linear GraphQL API. Queries by both assignee and creator to catch reassigned tickets. Saves to a unified JSON cache (~1177 issues across all teams).
+- Step 2 — Merge Data: Combines the Linear cache with the frozen Sheets backlog (backlog is preserved for historical reference but excluded from KPI calculations). Deduplicates tickets. Applies ownership logic (original assignee retains ownership when reassigned during review). Extracts history-based fields (deliveryDate, originalEta, reviewer delay). Rework detection is label-based only (checks for "rework:implementation" label).
 - Step 3 — Normalize: Fixes data quality issues (date formats, customer name normalization, category classification). Recalculates all performance labels using the activity-based formula. Detects and handles admin-closed tickets.
-- Step 4 — Build Dashboard: Generates the self-contained HTML dashboard with all charts, tables, and interactive filters.
+- Step 4 — Build Dashboard: Generates the self-contained HTML dashboard (~990KB) with all charts, tables, and interactive filters. Copies to serve directory for immediate availability via local HTTP and ngrok.
+
+The system tray provides two manual options: "Refresh & Rebuild (Linear API)" runs the full 4-step pipeline including fresh data from the API (~30s), while "Quick Rebuild (cached data)" skips Step 1 and rebuilds from the existing cache (<1s). Both send a Windows toast notification on completion.
 
 ## DATA INTEGRITY RULES
 
@@ -319,9 +320,13 @@ Parent tickets that have subtasks are excluded from all KPIs. The parent is a co
 
 Tickets with status B.B.C (or variants: B.B.C., BBC, bbc, Blocked) are excluded from the on-time/late calculation. The delay is outside the TSA's control. IMPORTANT: this is a STATUS-level check, not a label-level check. In the current Linear workflow, the practical equivalent is the Paused status, which also gets excluded (as "On Hold").
 
-### Rework vs Reassignment (D.LIE20, D.LIE21)
+### Rework Detection (D.LIE20, D.LIE21)
 
-Rework is strictly defined as a status transition from Done to In Progress (or Done to Todo, or Done to Backlog). Reassignment at In Review is normal workflow — implementor hands off to reviewer. The system explicitly distinguishes these two patterns. A reassignment where fromAssigneeId differs from toAssigneeId after the In Review date is flagged as reassignedInReview (normal), not rework.
+Rework is detected exclusively through the "rework:implementation" label in Linear. The previous automatic detection (based on Done → In Progress status transitions) was removed due to false positives — accidental status changes (e.g., marking Done and reverting within minutes) were incorrectly classified as rework.
+
+The history-based transition data (Done → In Progress/Todo/Backlog) is still collected for diagnostic/audit purposes and is available in the data as `reworkDetected`, but it does NOT set the `rework` field or affect any KPI calculation.
+
+Reassignment at In Review remains normal workflow — implementor hands off to reviewer. A reassignment where fromAssigneeId differs from toAssigneeId after the In Review date is flagged as reassignedInReview (normal), not rework.
 
 ### Sheets Deduplication (D.LIE22)
 
@@ -333,7 +338,9 @@ If a ticket's dueDate exactly matches its deliveryDate and there is only one ETA
 
 ### ETA Coverage (D.LIE12)
 
-Each member card on the dashboard shows ETA Coverage — the percentage of their tickets that have a dueDate set. Low coverage means the KPI 1 calculation is based on a small sample and may not be statistically reliable. The team target is greater than 80 percent ETA coverage.
+Each member card on the dashboard shows ETA Coverage — the percentage of their ACTIVE tickets (In Progress, In Review, Production QA, Blocked, Refinement, Ready to Deploy, B.B.C) that have a dueDate set. This is a real-time snapshot of the person's current active workload, not a historical metric filtered by week. Low coverage means the TSA has active work without committed ETAs, which reduces KPI 1 visibility. The team target is greater than 80 percent ETA coverage.
+
+IMPORTANT: ETA Coverage is calculated from ALL active Linear tickets for the person, regardless of which week or month filter is selected on the dashboard. It excludes spreadsheet data and uses the raw dataset. If a TSA adds ETAs to their tickets in Linear, the change will appear on the dashboard after the next refresh (daily at 09:00 or manual via tray icon).
 
 ## STATUS FLOW AND KPI IMPACT
 
@@ -352,7 +359,7 @@ Triage ──→ Backlog ──→ Todo ──→ In Progress ──→ In Revie
   │           │          │
   └───────────┴──────────┘─→ No ETA + these statuses = "Not Started" (excluded)
 
-Done ──→ In Progress (reopened) = REWORK DETECTED (KPI 3)
+Done ──→ In Progress (reopened) + label "rework:implementation" = REWORK (KPI 3)
 Done ──→ In Review ──→ Done (re-review) = normal, not rework
 Done ──→ Canceled = N/A (decision, not rework)
 In Review ──→ In Progress (review rejection) = NOT rework, deliveryDate unchanged
@@ -438,9 +445,9 @@ Log of rework events. Currently marked NOT ACTIVE but data is being collected. W
 
 Volume of tasks per person per week. This is not a KPI but provides context. A person with high volume and high accuracy is performing well. A person with high volume and low accuracy may be overloaded.
 
-### Scrum Copy Tab
+### Scrum Panel Tab
 
-Pre-formatted standup text organized by customer, with copy-to-clipboard functionality. This tab is for daily operations and does not directly relate to KPIs, but it reflects the current workload that feeds into KPI calculations.
+Pre-formatted standup text organized by customer, with copy-to-clipboard functionality. This tab shows ALL tickets (both Internal and External) for each TSA from Linear — it is intentionally unfiltered by category so that the full workload is visible for standup purposes. The Scrum Panel is for daily operations and does not directly affect KPI calculations, but it reflects the complete workload that feeds into them.
 
 ### Insights Tab
 
@@ -469,7 +476,7 @@ Timeline visualization showing actual vs projected delivery for implementation p
 | Warning threshold | 80-89% | 29-42 days | 85-89% |
 | Fail threshold | Below 80% | Above 42 days | Below 85% |
 | Status | ACTIVE | ACTIVE | NOT ACTIVE |
-| Key Linear field | dueDate | startedAt, status transitions | Status transitions (Done→InProgress), label rework:implementation |
+| Key Linear field | dueDate | startedAt, status transitions | Label rework:implementation (sole trigger) |
 | Excluded | No ETA, Canceled, B.B.C (status), Paused, Parent tickets, Not Started, Admin-Closed | No startedAt, No deliveryDate, Canceled, Parent tickets | Canceled, Parent tickets |
 | Dashboard view | Heatmap, Member Cards, KPI Strip | Execution Time Chart, KPI Strip | Reliability Tab, KPI Strip |
 
@@ -483,7 +490,7 @@ Timeline visualization showing actual vs projected delivery for implementation p
 - On Track: A ticket currently in progress whose ETA has not yet passed.
 - On Hold: Performance label for tickets in Paused or On Hold status. Excluded from KPI calculations.
 - B.B.C (Blocked By Customer): A status value (not a label) indicating the ticket is waiting on customer action. Excluded from the on-time/late calculation. Detected via the status field with variants: B.B.C, B.B.C., BBC, bbc, Blocked.
-- Rework: A ticket that transitioned from Done back to In Progress, Todo, or Backlog. Indicates the work was incomplete or defective. Can also be explicitly marked with the label "rework:implementation".
+- Rework: A ticket explicitly marked with the "rework:implementation" label in Linear, indicating the work was incomplete or defective and needed to be reopened. Previous versions also used automatic history-based detection (Done → In Progress transitions), but this was removed due to false positives from accidental status changes.
 - ETA Coverage: The percentage of a person's tickets that have a dueDate set. Higher coverage means more reliable KPI 1 calculations. Team target: greater than 80 percent.
 - Retroactive ETA: A dueDate that was set after delivery, typically matching the delivery date exactly with at most 1 ETA change in history. Flagged as potentially gaming the metric. The dashboard uses this flag to compute Organic Accuracy (excluding these tickets) in the Insights tab.
 - Organic Accuracy: ETA Accuracy calculated excluding tickets flagged as retroactiveEta. Shown in the Insights tab alongside total accuracy to reveal ETA inflation. The gap between Total and Organic accuracy is the inflation percentage.
@@ -492,7 +499,7 @@ Timeline visualization showing actual vs projected delivery for implementation p
 - Velocity: The number of calendar days between startedAt and deliveryDate for a completed ticket. Uses calendar days, not business days.
 - Reviewer Delay: The number of days between In Review and Done. Not a KPI, but tracked as a quality signal. Displayed on the dashboard.
 - Pipeline: The automated four-step process (Refresh, Merge, Normalize, Build) that transforms Linear data into the KPI dashboard. Runs daily at 09:00 on weekdays.
-- NOT ACTIVE: A KPI status indicating the metric is being tracked passively but not yet used for performance evaluation. Currently applies to KPI 3 (Reliability) until the team fully adopts rework labeling in Linear.
+- NOT ACTIVE: A KPI status indicating the metric is being tracked passively but not yet used for performance evaluation. Currently applies to KPI 3 (Reliability) until consistent use of the rework:implementation label is confirmed across the team.
 - State ID: Internal Linear identifier for workflow statuses. Each team has unique state IDs for the same status names. The system maps IDs to names using a hardcoded table.
 
 ## KNOWN LIMITATIONS
@@ -501,14 +508,14 @@ Timeline visualization showing actual vs projected delivery for implementation p
 
 - Cross-team tickets: If a KPI member is assigned a ticket on a team other than Raccoons (e.g., a shared or company-wide team), the ticket IS fetched and tracked. However, the state IDs for that team may not be recognized, meaning delivery dates and rework detection may not work correctly. The system prints a warning for unknown state IDs during processing.
 - Calendar days: Velocity (KPI 2) is measured in calendar days, not business days. A ticket started on Friday and delivered on Monday shows 3 days, even though only 1 business day elapsed. Weekends and holidays are not excluded.
-- Rework label adoption: KPI 3 relies on either history-based detection (Done to In Progress transition) or the "rework:implementation" label. If the team reopens tickets by creating new tickets instead of reopening the original, rework is not detected.
+- Rework label adoption: KPI 3 relies exclusively on the "rework:implementation" label. Automatic history-based detection (Done → In Progress) was removed to eliminate false positives. If the team does not apply the label when reopening tickets, rework will not be detected. Similarly, if rework is addressed by creating a new ticket instead of reopening the original, it will not be tracked.
 - ETA coverage variability: Some members may have low ETA coverage (few tickets with dueDate), making their KPI 1 percentage statistically unreliable. There is no minimum threshold enforced.
-- Spreadsheet backlog: Historical data from Google Sheets is frozen and not updated. Tickets that existed only in Sheets and were never migrated to Linear may have less precise data (no activity history, no state transitions).
+- Spreadsheet backlog: Historical data from Google Sheets is frozen and completely excluded from all KPI calculations. It is retained in the dataset for historical reference only (128 records). All KPI metrics, heatmaps, member cards, and charts use exclusively Linear data. The Scrum Panel also filters to Linear-only data.
 - Reviewer delay is tracked but NOT a KPI: The time between In Review and Done is measured and displayed but does not factor into any KPI calculation.
 
 ## OPEN QUESTIONS
 
-- When will KPI 3 (Implementation Reliability) be activated? The team needs to adopt the rework:implementation label convention in Linear before this KPI can be used for performance evaluation.
+- When will KPI 3 (Implementation Reliability) be activated? The rework:implementation label is now the sole detection method. KPI 3 will be activated once consistent labeling is confirmed across the team. Currently, 5 tickets have this label (1 Carlos, 4 Diego) — adoption is growing.
 - Should ETA Coverage have a minimum threshold for KPI 1 to be considered valid? For example, if a person has only 4 tickets with dueDate out of 50, their accuracy percentage may not be meaningful.
 - Should retroactive ETAs be excluded from KPI 1 entirely, or just flagged? Currently they are flagged but still counted as On Time.
 - Should velocity exclude weekends and holidays? Currently it uses calendar days, which means a ticket started on Friday and delivered on Monday shows as 3 days even though only 1 business day elapsed.

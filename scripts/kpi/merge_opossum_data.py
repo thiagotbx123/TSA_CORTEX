@@ -1,8 +1,7 @@
-"""Merge Linear data (Opossum + Raccoons) for ALL KPI team members into _dashboard_data.json.
+"""Merge Linear data for ALL KPI team members into _dashboard_data.json.
 
 Sources:
-  - _opossum_raw.json: Opossum team issues (Thais + Yasmim)
-  - _raccoons_kpi.json: Raccoons team issues for all KPI members (Thiago, Carlos, Alexandra, Diego, Gabi + Thais cross-team)
+  - _kpi_all_members.json: Unified cache of all KPI member issues from Linear API
   - Spreadsheet data stays as historical backlog (not replaced for members now in Linear)
 
 Usage: python kpi/merge_opossum_data.py
@@ -477,12 +476,11 @@ for iss in issues:
     pm = iss.get('projectMilestone')
     milestone = pm.get('name', '') if pm else ''
 
-    # Detect rework: via label OR via history (Done → In Progress)
+    # Detect rework: ONLY via label (D.LIE20 history kept for diagnostics only)
     raw_labels = iss.get('labels', [])
     label_names = [l.lower() if isinstance(l, str) else (l.get('name', '').lower() if isinstance(l, dict) else '') for l in raw_labels]
     has_rework_label = 'rework:implementation' in label_names
-    has_rework_history = hist_fields.get('reworkDetected', False)
-    has_rework = 'yes' if (has_rework_label or has_rework_history) else ''
+    has_rework = 'yes' if has_rework_label else ''
 
     # Construct URL from ID if missing
     if ticket_id and not ticket_url:

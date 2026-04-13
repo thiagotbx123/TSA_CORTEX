@@ -700,7 +700,7 @@ const MONTHS=groupByMonth(CORE_WEEKS);
 })();
 
 /* ── State — M12: default to ALL ──────────────────── */
-let state={person:'ALL',category:'External',month:'ALL'};
+let state={person:'ALL',category:'ALL',month:'ALL'};
 const charts={};
 
 function getFiltered(){

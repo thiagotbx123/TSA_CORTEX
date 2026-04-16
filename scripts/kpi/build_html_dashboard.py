@@ -716,6 +716,19 @@ function getFiltered(){
     return true;
   });
 }
+function getKPIFiltered(){
+  return RAW.filter(r=>{
+    if(r.source==='spreadsheet')return false;
+    if(r.category!=='External')return false;
+    if(!r.week||!isCoreWeek(r.week))return false;
+    if(state.person!=='ALL'&&r.tsa!==state.person)return false;
+    if(state.month!=='ALL'){
+      const[y,m]=parseWeek(r.week);
+      if(monthLabel(y,m)!==state.month)return false;
+    }
+    return true;
+  });
+}
 function getPeople(){
   if(state.person!=='ALL')return[state.person];
   return PEOPLE_ALL;
@@ -825,7 +838,7 @@ let tipCounter=0;
 /* ── Build heatmap grid ─────────────────────────────── */
 function buildGrid(tableId, calcFn, fmtFn, heatFn, tipFn){
   const table=document.getElementById(tableId);
-  const data=getFiltered();
+  const data=getKPIFiltered();
   const people=getPeople();
   const months=MONTHS;
 
@@ -1012,7 +1025,7 @@ function tipReliability(person,week,calc,rows){
 
 /* ── KPI Summary Strip ──────────────────────────────── */
 function renderKPIStrip(){
-  const data=getFiltered();
+  const data=getKPIFiltered();
   const a=calcAccuracy(data);
   const v=calcVelocity(data);
   const r=calcReliability(data);
@@ -1048,7 +1061,7 @@ function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}
 function renderTrend(containerId, calcFn, fmtLabel, color, targetVal, targetLabel, isInverse, barMode){
   const el=document.getElementById(containerId);
   if(typeof Chart==='undefined'){el.innerHTML='<p style="padding:20px;color:var(--dim)">Chart.js not loaded. Charts unavailable.</p>';return}
-  const data=getFiltered();
+  const data=getKPIFiltered();
 
   const teamVals=[];
   /* M7: bar data depends on tab context */
@@ -1208,7 +1221,7 @@ function tipActivity(person,week,calc,rows){
 
 /* ── Member cards — H2 aligned, H14 sample size, D.LIE12 ETA coverage ── */
 function renderMemberCards(){
-  const data=getFiltered();
+  const data=getKPIFiltered();
   const people=getPeople();
   const el=document.getElementById('memberCards');
 
@@ -2515,7 +2528,7 @@ function fallbackCopy(text,cb){
 }
 
 function renderReworkLog(){
-  const data=getFiltered();
+  const data=getKPIFiltered();
   const reworkItems=data.filter(r=>r.rework==='yes');
   const el=document.getElementById('reworkLog');
   if(reworkItems.length===0){

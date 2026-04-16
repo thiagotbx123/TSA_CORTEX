@@ -5,9 +5,9 @@
 
 ## Estado Atual
 
-**Versao:** v3.2 (audit-hardened + UX improvements + audit engine verified)
-**Ultima Atualizacao:** 2026-04-13
-**Ultima Sessao:** 2026-04-13 (sessao longa, ~6h, muitas mudancas criticas)
+**Versao:** v3.3 (KPI External-only gate fix)
+**Ultima Atualizacao:** 2026-04-16
+**Ultima Sessao:** 2026-04-16 (fix critico: Internal tickets contaminando KPIs)
 **Status:** Pipeline funcional, dashboard HTML + XLSX, 5 membros ativos, 3 KPIs
 **Membros ativos:** CARLOS, DIEGO, GABI, ALEXANDRA, THIAGO
 **Membros REMOVIDOS:** Thais e Yasmim (excluidas do KPI por decisao do Thiago, 2026-04-09)
@@ -52,9 +52,27 @@ Exit
 ### URLs e Portas
 - **HTTP local:** `http://localhost:8080/KPI_DASHBOARD.html`
 - **ngrok publico:** `https://uneffused-hoyt-unpunctually.ngrok-free.dev/KPI_DASHBOARD.html`
-- **Auth ngrok:** `kpi:raccoons2026` (basic auth)
+- **Auth ngrok:** REMOVIDO (2026-04-16) — acesso publico sem login
 - **Serve dir:** `~/Downloads/kpi-serve/` (HTML copiado aqui apos cada build)
 - **Auto-refresh:** weekdays 09:00 (full refresh com API)
+
+---
+
+## MUDANCAS CRITICAS DA SESSAO 2026-04-16
+
+### 1. KPI GATE FIX: getKPIFiltered() — EXTERNAL-ONLY PARA KPIs (BUG CRITICO)
+- **Arquivo:** `build_html_dashboard.py`, linhas 719-730
+- **Problema:** Sessao 2026-04-13 mudou default segment de 'External' para 'ALL' (finding F37-1). Isso foi correto para a Audit Data Table, mas tinha efeito colateral: Internal tickets passaram a contaminar os KPIs (member cards, heatmaps, accuracy, charts, rework log) porque `getFiltered()` era a UNICA gate function servindo DOIS propositos diferentes.
+- **Descoberto por:** Thiago, ao filtrar Diego por Late e ver 2 tickets Internal (RAC-717 "Tabs" e RAC-715 "Brevo") impactando o Accuracy. Esses sao sub-tasks de RAC-698 (sprint board do Diego) — corretamente Internal.
+- **Fix:** Nova funcao `getKPIFiltered()` que forca `category==='External'` sempre. Aplicada em 5 call sites:
+  - `renderMemberCards()` — accuracy, on time, late counts
+  - `buildGrid()` — heatmaps (ETA Accuracy, Team Activity)
+  - `renderKPIStrip()` — KPI summary strip
+  - `renderTrend()` — trend charts (execution time)
+  - `renderReworkLog()` — rework/reliability log
+- **Nao alterado:** Audit Data Table continua com `getFiltered()` (respeita segment selector)
+- **Impacto Diego:** Accuracy 79% → 81%, Late 14 → 12, Total 107 → 98
+- **Root cause:** Arquitetura de gate unica (`getFiltered`) servindo KPIs + audit table sem separacao de responsabilidades
 
 ---
 
@@ -121,7 +139,7 @@ Exit
 ### Findings PENDENTES (nao criticos, documentar para futuro)
 | ID | Sev | Descricao | Acao sugerida |
 |----|-----|-----------|---------------|
-| F-A07-01 | CRITICAL | ngrok credentials hardcoded como fallback default | Mover para .env only |
+| ~~F-A07-01~~ | ~~CRITICAL~~ | ~~ngrok credentials hardcoded~~ | RESOLVIDO 2026-04-16: basic-auth removido |
 | F-A07-02 | CRITICAL | ngrok URL hardcoded no source | Mover para .env only |
 | F-A07-03 | HIGH | Python path hardcoded no .bat | Usar `py -3` launcher |
 | F-A07-04 | HIGH | 17 Linear state IDs hardcoded | Mover para team_config.py |
@@ -174,8 +192,9 @@ Exit
 9. **Cache staleness** — ETAs adicionadas no Linear so aparecem apos refresh
 10. **Coda PUT replace** apaga conteudo manual — usar version history para recuperar
 11. **pythonw.exe** engole erros silenciosamente — testar com `python.exe` para debug
-12. **Default segment e 'ALL'** — NUNCA mudar de volta para 'External'
+12. **Default segment e 'ALL'** — mas KPIs usam `getKPIFiltered()` que forca External-only
 13. **Zero tolerancia On Time** — delivery <= dueDate (sem buffer de dias)
+14. **getKPIFiltered() vs getFiltered()** — KPIs (cards, heatmaps, strip, charts, rework) usam getKPIFiltered(). Audit table usa getFiltered(). NUNCA usar getFiltered() para KPIs.
 14. **ngrok credentials** hardcoded como fallback — mover para .env (pendente)
 
 ---
@@ -183,7 +202,7 @@ Exit
 ## Pendencias
 
 - [ ] Ativar KPI 3 quando rework labels estiverem em uso generalizado no Linear
-- [ ] Mover ngrok credentials para .env only (sem fallback hardcoded)
+- [x] ~~Mover ngrok credentials para .env only~~ → REMOVIDO basic-auth completamente (2026-04-16)
 - [ ] Criar pipeline_runs.jsonl para logging persistente
 - [ ] Mapear os 59 state IDs desconhecidos de outros times (cosmetic)
 - [ ] Considerar refresh mais frequente (a cada 4h?) ou webhook do Linear
@@ -193,6 +212,13 @@ Exit
 ---
 
 ## Historico de Versoes
+
+### v3.3 — KPI External-Only Gate (2026-04-16)
+- **getKPIFiltered()**: Nova gate function que forca External-only para todos os KPIs
+- Aplicada em 5 call sites: memberCards, buildGrid, KPIStrip, renderTrend, reworkLog
+- Audit Data Table mantida com getFiltered() (respeita segment selector)
+- Root cause: F37-1 (default ALL) era correto para audit table mas contaminava KPIs
+- Impacto Diego: Accuracy 79%->81%, Late 14->12 (removidos RAC-717 Tabs + RAC-715 Brevo)
 
 ### v3.2 — UX + Data Fixes + Audit (2026-04-09 → 2026-04-13)
 - **Rework detection: label-only** (merge_opossum_data.py, eliminados false positives)
@@ -231,6 +257,7 @@ Exit
 
 ## Sessoes
 
+- **2026-04-16:** KPI External-only gate fix (getKPIFiltered). Internal tickets contaminavam KPIs desde F37-1. Pipeline funnel analysis completo.
 - **2026-04-13 (sessao longa):** Rework label-only fix, default segment ALL fix, AUDIT_ENGINE 9-perspective, Coda playbook v3.0, deep memory consolidation
 - 2026-04-13 (inicio): Fix desktop icon, ETA Coverage, tray UX improvements
 - 2026-04-09: Spreadsheet exclusion, Scrum Panel rename, RAC-732 investigation, Coda playbook
